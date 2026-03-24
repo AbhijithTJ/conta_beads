@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../colors/colors.dart';
 import '../screens/home_page/counting_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -13,17 +14,6 @@ class _LoginScreenState extends State<LoginScreen> {
   late TextEditingController _passwordController;
   bool _obscurePassword = true;
   bool _isLoading = false;
-
-  // Matching color constants from CountingScreen
-  static const Color _goldPrimary = Color(0xFFD4A843);
-  static const Color _goldLight = Color(0xFFF0C96A);
-  static const Color _goldDark = Color(0xFFB8902E);
-  static const Color _skyTop = Color(0xFFDCEEFB);
-  static const Color _skyBottom = Color(0xFFB8D9F5);
-  static const Color _skyMid = Color(0xFFC8E3F8);
-  static const Color _textPrimary = Color(0xFF1A3A5C);
-  static const Color _textSecondary = Color(0xFF4A6FA5);
-  static const Color _cardWhite = Color(0xFFF5FAFF);
 
   @override
   void initState() {
@@ -85,7 +75,7 @@ class _LoginScreenState extends State<LoginScreen> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [_skyTop, _skyMid, _skyBottom],
+            colors: [AppColors.skyTop, AppColors.skyMid, AppColors.skyBottom],
             stops: [0.0, 0.5, 1.0],
           ),
         ),
@@ -106,7 +96,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     fontSize: 13,
                     letterSpacing: 3.0,
                     fontWeight: FontWeight.w500,
-                    color: _textSecondary.withOpacity(0.8),
+                    color: AppColors.textSecondary.withOpacity(0.8),
                   ),
                 ),
 
@@ -115,11 +105,11 @@ class _LoginScreenState extends State<LoginScreen> {
                 // ── Login Card ──
                 Container(
                   decoration: BoxDecoration(
-                    color: _cardWhite,
+                    color: AppColors.cardWhite,
                     borderRadius: BorderRadius.circular(24),
                     boxShadow: [
                       BoxShadow(
-                        color: _goldPrimary.withOpacity(0.15),
+                        color: AppColors.goldPrimary.withOpacity(0.15),
                         blurRadius: 32,
                         spreadRadius: 2,
                         offset: const Offset(0, 8),
@@ -132,7 +122,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ],
                     border: Border.all(
-                      color: _goldPrimary.withOpacity(0.2),
+                      color: AppColors.goldPrimary.withOpacity(0.2),
                       width: 1.5,
                     ),
                   ),
@@ -145,7 +135,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.w800,
-                          color: _textPrimary,
+                          color: AppColors.textPrimary,
                           letterSpacing: 0.5,
                         ),
                       ),
@@ -154,7 +144,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         'Sign in to continue',
                         style: TextStyle(
                           fontSize: 13,
-                          color: _textSecondary.withOpacity(0.8),
+                          color: AppColors.textSecondary.withOpacity(0.8),
                           fontWeight: FontWeight.w400,
                         ),
                       ),
@@ -204,11 +194,11 @@ class _LoginScreenState extends State<LoginScreen> {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             gradient: const RadialGradient(
-              colors: [Color(0xFFFFF8E7), Color(0xFFF5E8C0)],
+              colors: [AppColors.haloLight, AppColors.haloDark],
             ),
             boxShadow: [
               BoxShadow(
-                color: _goldPrimary.withOpacity(0.35),
+                color: AppColors.goldPrimary.withOpacity(0.35),
                 blurRadius: 18,
                 spreadRadius: 2,
               ),
@@ -216,14 +206,14 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
           child: const Icon(
             Icons.add,
-            color: _goldPrimary,
+            color: AppColors.goldPrimary,
             size: 36,
           ),
         ),
         const SizedBox(height: 14),
         ShaderMask(
           shaderCallback: (bounds) => const LinearGradient(
-            colors: [_goldDark, _goldPrimary, _goldLight],
+            colors: [AppColors.goldDark, AppColors.goldPrimary, AppColors.goldLight],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ).createShader(bounds),
@@ -257,7 +247,7 @@ class _LoginScreenState extends State<LoginScreen> {
           style: const TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w700,
-            color: _textPrimary,
+            color: AppColors.textPrimary,
             letterSpacing: 0.5,
           ),
         ),
@@ -266,23 +256,23 @@ class _LoginScreenState extends State<LoginScreen> {
           controller: controller,
           obscureText: isPassword ? _obscurePassword : false,
           style: const TextStyle(
-            color: _textPrimary,
+            color: AppColors.textPrimary,
             fontWeight: FontWeight.w500,
             fontSize: 15,
           ),
           decoration: InputDecoration(
             hintText: hint,
             hintStyle: TextStyle(
-              color: _textSecondary.withOpacity(0.4),
+              color: AppColors.textSecondary.withOpacity(0.4),
               fontWeight: FontWeight.w400,
             ),
-            prefixIcon: Icon(icon, color: _textSecondary, size: 20),
+            prefixIcon: Icon(icon, color: AppColors.textSecondary, size: 20),
             suffixIcon: isPassword
                 ? GestureDetector(
                     onTap: () => setState(() => _obscurePassword = !_obscurePassword),
                     child: Icon(
                       _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-                      color: _textSecondary,
+                      color: AppColors.textSecondary,
                       size: 20,
                     ),
                   )
@@ -292,15 +282,15 @@ class _LoginScreenState extends State<LoginScreen> {
             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide: BorderSide(color: _goldPrimary.withOpacity(0.2)),
+              borderSide: BorderSide(color: AppColors.goldPrimary.withOpacity(0.2)),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide: BorderSide(color: _goldPrimary.withOpacity(0.2)),
+              borderSide: BorderSide(color: AppColors.goldPrimary.withOpacity(0.2)),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(color: _goldPrimary, width: 1.5),
+              borderSide: const BorderSide(color: AppColors.goldPrimary, width: 1.5),
             ),
           ),
         ),
@@ -316,9 +306,9 @@ class _LoginScreenState extends State<LoginScreen> {
         height: 56,
         decoration: BoxDecoration(
           gradient: _isLoading
-              ? LinearGradient(colors: [_goldPrimary.withOpacity(0.5), _goldDark.withOpacity(0.5)])
+              ? LinearGradient(colors: [AppColors.goldPrimary.withOpacity(0.5), AppColors.goldDark.withOpacity(0.5)])
               : const LinearGradient(
-                  colors: [Color(0xFFE8A020), Color(0xFFD4780A)],
+                  colors: [AppColors.goldAccent, AppColors.goldAccentDark],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
@@ -327,7 +317,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ? []
               : [
                   BoxShadow(
-                    color: const Color(0xFFE8A020).withOpacity(0.45),
+                    color: AppColors.goldAccent.withOpacity(0.45),
                     blurRadius: 14,
                     offset: const Offset(0, 5),
                   ),
@@ -368,3 +358,4 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 }
+

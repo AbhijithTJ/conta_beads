@@ -1,18 +1,14 @@
 import 'package:flutter/material.dart';
+import '../colors/colors.dart';
 
 class LogoutAlertDialog extends StatelessWidget {
   const LogoutAlertDialog({super.key});
-
-  static const Color _goldPrimary = Color(0xFFD4A843);
-  static const Color _textPrimary = Color(0xFF1A3A5C);
-  static const Color _textSecondary = Color(0xFF4A6FA5);
-  static const Color _cardWhite = Color(0xFFF5FAFF);
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      backgroundColor: _cardWhite,
+      backgroundColor: AppColors.cardWhite,
       contentPadding: const EdgeInsets.fromLTRB(28, 28, 28, 20),
       titlePadding: EdgeInsets.zero,
       title: Container(
@@ -36,7 +32,7 @@ class LogoutAlertDialog extends StatelessWidget {
             const Text(
               'Log Out',
               style: TextStyle(
-                color: _textPrimary,
+                color: AppColors.textPrimary,
                 fontWeight: FontWeight.w800,
                 fontSize: 20,
               ),
@@ -47,7 +43,7 @@ class LogoutAlertDialog extends StatelessWidget {
       content: const Text(
         'Please confirm your current count is saved, otherwise your data will be lost.\n\nAre you sure you want to log out?',
         style: TextStyle(
-          color: _textSecondary,
+          color: AppColors.textSecondary,
           fontSize: 14,
           height: 1.5,
         ),
@@ -64,7 +60,7 @@ class LogoutAlertDialog extends StatelessWidget {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                       side: BorderSide(
-                        color: _textSecondary.withOpacity(0.25),
+                        color: AppColors.textSecondary.withOpacity(0.25),
                       ),
                     ),
                   ),
@@ -72,7 +68,7 @@ class LogoutAlertDialog extends StatelessWidget {
                   child: const Text(
                     'Cancel',
                     style: TextStyle(
-                      color: _textSecondary,
+                      color: AppColors.textSecondary,
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
                     ),
@@ -108,3 +104,4 @@ class LogoutAlertDialog extends StatelessWidget {
     );
   }
 }
+
