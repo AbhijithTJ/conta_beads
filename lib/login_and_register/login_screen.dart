@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'counting_screen.dart';
+import '../screens/home_page/counting_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});

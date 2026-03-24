@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'login_screen.dart';
-import '../widgets/logout_alert_dialog.dart';
+import '../../dialog_box/logout_alert_dialog.dart';
+import '../../login_and_register/login_screen.dart';
+
 
 void main() {
   runApp(const ContaBeadsApp());

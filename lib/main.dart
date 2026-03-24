@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'screens/login_screen.dart';
-import 'screens/counting_screen.dart';
+import 'login_and_register/login_screen.dart';
+import 'screens/home_page/counting_screen.dart';
 
 void main() {
   runApp(const MyApp());
