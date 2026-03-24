@@ -88,9 +88,51 @@ class _CountingScreenState extends State<CountingScreen>
   }
 
   void _decrement() {
+    if (_count == 0) return;
+
     HapticFeedback.lightImpact();
-    _decrementController.forward().then((_) => _decrementController.reverse());
-    if (_count > 0) setState(() => _count--);
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        backgroundColor: AppColors.cardWhite,
+        title: const Text(
+          'Decrease Count',
+          style: TextStyle(
+            color: AppColors.textPrimary,
+            fontWeight: FontWeight.w700,
+            fontSize: 20,
+          ),
+        ),
+        content: const Text(
+          'Are you sure you want to go back (decrease) the count?',
+          style: TextStyle(color: AppColors.textSecondary, fontSize: 15),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel',
+                style: TextStyle(color: AppColors.textSecondary, fontSize: 15)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.greyButton,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+            ),
+            onPressed: () {
+              Navigator.pop(ctx);
+              _decrementController
+                  .forward()
+                  .then((_) => _decrementController.reverse());
+              setState(() => _count--);
+            },
+            child: const Text('Go Back', style: TextStyle(fontSize: 15)),
+          ),
+        ],
+      ),
+    );
   }
 
   void _reset() {
