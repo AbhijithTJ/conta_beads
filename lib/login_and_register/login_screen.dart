@@ -60,7 +60,9 @@ class _LoginScreenState extends State<LoginScreen> {
     Future.delayed(const Duration(milliseconds: 800), () {
       if (mounted) {
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const CountingScreen()),
+          MaterialPageRoute(
+            builder: (_) => CountingScreen(userEmail: email),
+          ),
         );
       }
     });

@@ -70,7 +70,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
     Future.delayed(const Duration(milliseconds: 1200), () {
       if (mounted) {
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const CountingScreen()),
+          MaterialPageRoute(
+            builder: (_) => CountingScreen(userEmail: email),
+          ),
         );
       }
     });

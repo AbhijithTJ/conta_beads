@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import '../../colors/colors.dart';
 import '../../dialog_box/logout_alert_dialog.dart';
 import '../../login_and_register/login_screen.dart';
+import '../profile/profile_screen.dart';
 
 
 void main() {
@@ -21,13 +22,14 @@ class ContaBeadsApp extends StatelessWidget {
         fontFamily: 'Georgia',
         useMaterial3: true,
       ),
-      home: const CountingScreen(),
+      home: const CountingScreen(userEmail: 'guest@example.com'),
     );
   }
 }
 
 class CountingScreen extends StatefulWidget {
-  const CountingScreen({super.key});
+  final String userEmail;
+  const CountingScreen({super.key, required this.userEmail});
 
   @override
   State<CountingScreen> createState() => _CountingScreenState();
@@ -241,7 +243,12 @@ class _CountingScreenState extends State<CountingScreen>
                 padding: const EdgeInsets.symmetric(horizontal: 28.0),
                 child: Column(
                   children: [
-                    const SizedBox(height: 36),
+                    const SizedBox(height: 12),
+                    
+                    // User Profile Section
+                    _buildProfileEntry(),
+                    
+                    const SizedBox(height: 12),
                     _buildHeader(),
                     const SizedBox(height: 10),
                     Text(
@@ -293,6 +300,56 @@ class _CountingScreenState extends State<CountingScreen>
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProfileEntry() {
+    return GestureDetector(
+      onTap: () => Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => ProfileScreen(userEmail: widget.userEmail)),
+      ),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.4),
+          borderRadius: BorderRadius.circular(30),
+          border: Border.all(color: Colors.white.withOpacity(0.5)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.02),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(4),
+              decoration: const BoxDecoration(
+                color: AppColors.goldPrimary,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.person_rounded, size: 14, color: Colors.white),
+            ),
+            const SizedBox(width: 10),
+            Flexible(
+              child: Text(
+                widget.userEmail,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  color: AppColors.textPrimary,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            const Icon(Icons.arrow_forward_ios_rounded, size: 12, color: AppColors.textSecondary),
+          ],
         ),
       ),
     );
