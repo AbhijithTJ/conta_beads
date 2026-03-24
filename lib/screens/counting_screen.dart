@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'login_screen.dart';
+import '../widgets/logout_alert_dialog.dart';
 
 void main() {
   runApp(const ContaBeadsApp());
@@ -152,6 +153,20 @@ class _CountingScreenState extends State<CountingScreen>
     );
   }
 
+  Future<void> _logout() async {
+    HapticFeedback.lightImpact();
+    final confirmed = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const LogoutAlertDialog(),
+    );
+    if (confirmed == true && mounted) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+      );
+    }
+  }
+
   void _save() {
     HapticFeedback.selectionClick();
     ScaffoldMessenger.of(context).showSnackBar(
@@ -181,8 +196,6 @@ class _CountingScreenState extends State<CountingScreen>
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-
     return Scaffold(
       body: Container(
         width: double.infinity,
@@ -196,46 +209,64 @@ class _CountingScreenState extends State<CountingScreen>
           ),
         ),
         child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 28.0),
-            child: Column(
-              children: [
-                const SizedBox(height: 36),
+          child: Stack(
+            children: [
+              // ── Main content ──
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 28.0),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 36),
+                    _buildHeader(),
+                    const SizedBox(height: 10),
+                    Text(
+                      'Prayer Counter',
+                      style: TextStyle(
+                        fontSize: 13,
+                        letterSpacing: 3.0,
+                        fontWeight: FontWeight.w500,
+                        color: _textSecondary.withOpacity(0.8),
+                      ),
+                    ),
+                    const SizedBox(height: 44),
+                    _buildCountCard(),
+                    const SizedBox(height: 48),
+                    _buildCountButtons(),
+                    const Spacer(),
+                    _buildBottomActions(),
+                    const SizedBox(height: 32),
+                  ],
+                ),
+              ),
 
-                // ── Header ──
-                _buildHeader(),
-
-                const SizedBox(height: 10),
-
-                // ── Subtitle ──
-                Text(
-                  'Prayer Counter',
-                  style: TextStyle(
-                    fontSize: 13,
-                    letterSpacing: 3.0,
-                    fontWeight: FontWeight.w500,
-                    color: _textSecondary.withOpacity(0.8),
+              // ── Logout button pinned top-right ──
+              Positioned(
+                top: 12,
+                right: 16,
+                child: GestureDetector(
+                  onTap: _logout,
+                  child: Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.6),
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: _textSecondary.withOpacity(0.15),
+                          blurRadius: 8,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: const Icon(
+                      Icons.logout_rounded,
+                      color: _textSecondary,
+                      size: 22,
+                    ),
                   ),
                 ),
-
-                const SizedBox(height: 44),
-
-                // ── Count Card ──
-                _buildCountCard(),
-
-                const SizedBox(height: 48),
-
-                // ── +/- Buttons ──
-                _buildCountButtons(),
-
-                const Spacer(),
-
-                // ── Bottom Actions ──
-                _buildBottomActions(),
-
-                const SizedBox(height: 32),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
