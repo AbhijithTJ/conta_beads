@@ -35,7 +35,7 @@ class CountingScreen extends StatefulWidget {
 
 class _CountingScreenState extends State<CountingScreen>
     with TickerProviderStateMixin {
-  int _count = 150;
+  int _count = 0;
   late AnimationController _pulseController;
   late AnimationController _incrementController;
   late AnimationController _decrementController;
