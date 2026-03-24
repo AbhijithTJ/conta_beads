@@ -34,7 +34,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final email = _emailController.text.trim();
     final password = _passwordController.text;
 
-    if (email != 'admin@example.com' || password != '1234') {
+    if (email != 'admin@gmail.com' || password != '1234') {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Row(
