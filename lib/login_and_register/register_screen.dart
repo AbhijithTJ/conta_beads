@@ -1,69 +1,100 @@
 import 'package:flutter/material.dart';
+import 'package:intl_phone_field/intl_phone_field.dart';
 import '../colors/colors.dart';
 import '../screens/home_page/counting_screen.dart';
-import 'register_screen.dart';
+import 'login_screen.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class RegisterScreen extends StatefulWidget {
+  const RegisterScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _RegisterScreenState extends State<RegisterScreen> {
   late TextEditingController _emailController;
+  late TextEditingController _phoneController;
   late TextEditingController _passwordController;
+  late TextEditingController _confirmPasswordController;
+  
+  String _completePhoneNumber = "";
   bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
   bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
     _emailController = TextEditingController();
+    _phoneController = TextEditingController();
     _passwordController = TextEditingController();
+    _confirmPasswordController = TextEditingController();
   }
 
   @override
   void dispose() {
     _emailController.dispose();
+    _phoneController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
-  void _handleLogin() {
+  void _handleRegister() {
     final email = _emailController.text.trim();
+    final phone = _phoneController.text.trim();
     final password = _passwordController.text;
+    final confirmPassword = _confirmPasswordController.text;
 
-    if (email != 'admin@example.com' || password != '1234') {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Row(
-            children: [
-              Icon(Icons.error_outline, color: Colors.white, size: 20),
-              SizedBox(width: 10),
-              Text(
-                'Invalid email or password',
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
-              ),
-            ],
-          ),
-          backgroundColor: Colors.redAccent,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-          margin: const EdgeInsets.all(16),
-        ),
-      );
+    if (email.isEmpty || phone.isEmpty || password.isEmpty) {
+      _showError('Please fill in all fields');
       return;
     }
 
+    if (!email.contains('@')) {
+      _showError('Please enter a valid email');
+      return;
+    }
+
+    if (password != confirmPassword) {
+      _showError('Passwords do not match');
+      return;
+    }
+
+    // You can now use _completePhoneNumber which includes country code (e.g., +919876543210)
+    print("Registering with: $email and $_completePhoneNumber");
+
     setState(() => _isLoading = true);
-    Future.delayed(const Duration(milliseconds: 800), () {
+    
+    // Simulate registration
+    Future.delayed(const Duration(milliseconds: 1200), () {
       if (mounted) {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (_) => const CountingScreen()),
         );
       }
     });
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.error_outline, color: Colors.white, size: 20),
+            const SizedBox(width: 10),
+            Text(
+              message,
+              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+            ),
+          ],
+        ),
+        backgroundColor: Colors.redAccent,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        margin: const EdgeInsets.all(16),
+      ),
+    );
   }
 
   @override
@@ -85,9 +116,9 @@ class _LoginScreenState extends State<LoginScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 28.0),
             child: Column(
               children: [
-                const SizedBox(height: 56),
+                const SizedBox(height: 40),
 
-                // ── Header (mirrors CountingScreen header) ──
+                // ── Header ──
                 _buildHeader(),
 
                 const SizedBox(height: 10),
@@ -101,9 +132,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
 
-                const SizedBox(height: 52),
+                const SizedBox(height: 40),
 
-                // ── Login Card ──
+                // ── Register Card ──
                 Container(
                   decoration: BoxDecoration(
                     color: AppColors.cardWhite,
@@ -132,7 +163,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Welcome Back',
+                        'Create Account',
                         style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.w800,
@@ -142,7 +173,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Sign in to continue',
+                        'Join the Conta Beads community',
                         style: TextStyle(
                           fontSize: 13,
                           color: AppColors.textSecondary.withOpacity(0.8),
@@ -151,7 +182,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       const SizedBox(height: 28),
 
-                      // Email field
                       _buildInputField(
                         controller: _emailController,
                         label: 'Email',
@@ -160,39 +190,107 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       const SizedBox(height: 20),
 
-                      // Password field
+                      // Professional Phone Field
+                      const Text(
+                        'Phone Number',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textPrimary,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      IntlPhoneField(
+                        controller: _phoneController,
+                        initialCountryCode: 'IN', // Change to your preferred default
+                        onChanged: (phone) {
+                          _completePhoneNumber = phone.completeNumber;
+                        },
+                        style: const TextStyle(
+                          color: AppColors.textPrimary,
+                          fontWeight: FontWeight.w500,
+                          fontSize: 15,
+                        ),
+                        dropdownIconPosition: IconPosition.trailing,
+                        dropdownIcon: const Icon(Icons.arrow_drop_down, color: AppColors.goldDark, size: 20),
+                        decoration: InputDecoration(
+                          hintText: 'Enter phone number',
+                          hintStyle: TextStyle(
+                            color: AppColors.textSecondary.withOpacity(0.4),
+                            fontWeight: FontWeight.w400,
+                          ),
+                          filled: true,
+                          fillColor: Colors.white,
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            borderSide: BorderSide(color: AppColors.goldPrimary.withOpacity(0.2)),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            borderSide: BorderSide(color: AppColors.goldPrimary.withOpacity(0.2)),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            borderSide: const BorderSide(color: AppColors.goldPrimary, width: 1.5),
+                          ),
+                        ),
+                        // Style the country code text
+                        dropdownTextStyle: const TextStyle(
+                          color: AppColors.textPrimary,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 15,
+                        ),
+                        // Language for accessibility
+                        languageCode: "en",
+                      ),
+                      const SizedBox(height: 12), // Adjusted spacing for the built-in validation message space
+
                       _buildInputField(
                         controller: _passwordController,
                         label: 'Password',
-                        hint: 'Enter your password',
+                        hint: 'Create a password',
                         icon: Icons.lock_outline_rounded,
                         isPassword: true,
+                        isObscured: _obscurePassword,
+                        onToggle: () => setState(() => _obscurePassword = !_obscurePassword),
+                      ),
+                      const SizedBox(height: 20),
+
+                      _buildInputField(
+                        controller: _confirmPasswordController,
+                        label: 'Confirm Password',
+                        hint: 'Repeat your password',
+                        icon: Icons.lock_reset_rounded,
+                        isPassword: true,
+                        isObscured: _obscureConfirmPassword,
+                        onToggle: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
                       ),
 
                       const SizedBox(height: 32),
 
-                      // Login button
-                      _buildLoginButton(),
+                      _buildRegisterButton(),
                     ],
                   ),
                 ),
 
                 const SizedBox(height: 24),
 
-                // ── Register Link ──
+                // ── Login Link ──
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      "Don't have an account? ",
+                      'Already have an account? ',
                       style: TextStyle(color: AppColors.textSecondary.withOpacity(0.8)),
                     ),
                     GestureDetector(
                       onTap: () => Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(builder: (_) => const RegisterScreen()),
+                        MaterialPageRoute(builder: (_) => const LoginScreen()),
                       ),
                       child: const Text(
-                        'Register',
+                        'Login',
                         style: TextStyle(
                           color: AppColors.goldDark,
                           fontWeight: FontWeight.w700,
@@ -264,6 +362,8 @@ class _LoginScreenState extends State<LoginScreen> {
     required String hint,
     required IconData icon,
     bool isPassword = false,
+    bool isObscured = false,
+    VoidCallback? onToggle,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -280,7 +380,7 @@ class _LoginScreenState extends State<LoginScreen> {
         const SizedBox(height: 8),
         TextField(
           controller: controller,
-          obscureText: isPassword ? _obscurePassword : false,
+          obscureText: isObscured,
           style: const TextStyle(
             color: AppColors.textPrimary,
             fontWeight: FontWeight.w500,
@@ -295,9 +395,9 @@ class _LoginScreenState extends State<LoginScreen> {
             prefixIcon: Icon(icon, color: AppColors.textSecondary, size: 20),
             suffixIcon: isPassword
                 ? GestureDetector(
-                    onTap: () => setState(() => _obscurePassword = !_obscurePassword),
+                    onTap: onToggle,
                     child: Icon(
-                      _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                      isObscured ? Icons.visibility_off_outlined : Icons.visibility_outlined,
                       color: AppColors.textSecondary,
                       size: 20,
                     ),
@@ -324,9 +424,9 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _buildLoginButton() {
+  Widget _buildRegisterButton() {
     return GestureDetector(
-      onTap: _isLoading ? null : _handleLogin,
+      onTap: _isLoading ? null : _handleRegister,
       child: Container(
         width: double.infinity,
         height: 56,
@@ -366,10 +466,10 @@ class _LoginScreenState extends State<LoginScreen> {
               : const Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.login_rounded, color: Colors.white, size: 20),
+                    Icon(Icons.person_add_alt_1_rounded, color: Colors.white, size: 20),
                     SizedBox(width: 8),
                     Text(
-                      'Login',
+                      'Register',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 16,
@@ -384,4 +484,3 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 }
-
