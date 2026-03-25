@@ -182,8 +182,6 @@ class ProfileScreen extends StatelessWidget {
       children: [
         _buildSettingsItem(Icons.history_rounded, 'Counting History'),
         const SizedBox(height: 12),
-        _buildSettingsItem(Icons.notifications_none_rounded, 'Notifications'),
-        const SizedBox(height: 12),
         _buildSettingsItem(Icons.security_rounded, 'Account Security'),
         const SizedBox(height: 12),
         _buildSettingsItem(Icons.help_outline_rounded, 'Help & Support'),

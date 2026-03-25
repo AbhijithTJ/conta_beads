@@ -38,6 +38,7 @@ class CountingScreen extends StatefulWidget {
 class _CountingScreenState extends State<CountingScreen>
     with TickerProviderStateMixin {
   int _count = 0;
+  final TextEditingController _noteController = TextEditingController();
   late AnimationController _pulseController;
   late AnimationController _incrementController;
   late AnimationController _decrementController;
@@ -80,6 +81,7 @@ class _CountingScreenState extends State<CountingScreen>
     _pulseController.dispose();
     _incrementController.dispose();
     _decrementController.dispose();
+    _noteController.dispose();
     super.dispose();
   }
 
@@ -196,18 +198,25 @@ class _CountingScreenState extends State<CountingScreen>
 
   void _save() {
     HapticFeedback.selectionClick();
+    final noteText = _noteController.text.trim();
+    final successMsg = noteText.isEmpty 
+        ? 'Count $_count saved successfully!' 
+        : 'Count $_count for "$noteText" saved!';
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Row(
           children: [
             const Icon(Icons.check_circle, color: Colors.white, size: 20),
             const SizedBox(width: 10),
-            Text(
-              'Count $_count saved successfully!',
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w600,
-                fontSize: 14,
+            Expanded(
+              child: Text(
+                successMsg,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                ),
               ),
             ),
           ],
@@ -224,6 +233,7 @@ class _CountingScreenState extends State<CountingScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       body: Container(
         width: double.infinity,
         height: double.infinity,
@@ -239,7 +249,8 @@ class _CountingScreenState extends State<CountingScreen>
           child: Stack(
             children: [
               // ── Main content ──
-              Padding(
+              SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
                 padding: const EdgeInsets.symmetric(horizontal: 28.0),
                 child: Column(
                   children: [
@@ -260,11 +271,13 @@ class _CountingScreenState extends State<CountingScreen>
                         color: AppColors.textSecondary.withOpacity(0.8),
                       ),
                     ),
-                    const SizedBox(height: 44),
+                    const SizedBox(height: 32),
                     _buildCountCard(),
-                    const SizedBox(height: 48),
+                    const SizedBox(height: 32),
                     _buildCountButtons(),
-                    const Spacer(),
+                    const SizedBox(height: 32),
+                    _buildNoteInput(),
+                    const SizedBox(height: 48),
                     _buildBottomActions(),
                     const SizedBox(height: 32),
                   ],
@@ -300,6 +313,42 @@ class _CountingScreenState extends State<CountingScreen>
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNoteInput() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.5),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white.withOpacity(0.6), width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: TextField(
+        controller: _noteController,
+        style: const TextStyle(
+          color: AppColors.textPrimary,
+          fontSize: 15,
+          fontWeight: FontWeight.w600,
+        ),
+        decoration: InputDecoration(
+          hintText: 'Add a prayer label or note...',
+          hintStyle: TextStyle(
+            color: AppColors.textSecondary.withOpacity(0.5),
+            fontSize: 14,
+            fontWeight: FontWeight.w400,
+          ),
+          prefixIcon: const Icon(Icons.edit_note_rounded, color: AppColors.goldPrimary, size: 24),
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         ),
       ),
     );
