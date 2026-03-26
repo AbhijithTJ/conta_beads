@@ -139,49 +139,6 @@ class _CountingScreenState extends State<CountingScreen>
     );
   }
 
-  void _reset() {
-    HapticFeedback.mediumImpact();
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        backgroundColor: AppColors.cardWhite,
-        title: const Text(
-          'Reset Count',
-          style: TextStyle(
-            color: AppColors.textPrimary,
-            fontWeight: FontWeight.w700,
-            fontSize: 20,
-          ),
-        ),
-        content: const Text(
-          'Are you sure you want to reset the count to zero?',
-          style: TextStyle(color: AppColors.textSecondary, fontSize: 15),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel',
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 15)),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.goldPrimary,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
-            ),
-            onPressed: () {
-              Navigator.pop(ctx);
-              setState(() => _count = 0);
-            },
-            child: const Text('Reset', style: TextStyle(fontSize: 15)),
-          ),
-        ],
-      ),
-    );
-  }
-
   Future<void> _logout() async {
     HapticFeedback.lightImpact();
     final confirmed = await showDialog<bool>(
@@ -228,6 +185,15 @@ class _CountingScreenState extends State<CountingScreen>
         duration: const Duration(seconds: 2),
       ),
     );
+
+    // Clear note text only after saving
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (mounted) {
+        setState(() {
+          _noteController.clear();
+        });
+      }
+    });
   }
 
   @override
@@ -407,30 +373,36 @@ class _CountingScreenState extends State<CountingScreen>
   Widget _buildHeader() {
     return Column(
       children: [
-        // Golden cross icon with halo
         Container(
-          width: 64,
-          height: 64,
+          width: 80,
+          height: 80,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            gradient: const RadialGradient(
-              colors: [AppColors.haloLight, AppColors.haloDark],
-            ),
             boxShadow: [
               BoxShadow(
                 color: AppColors.goldPrimary.withOpacity(0.35),
-                blurRadius: 18,
-                spreadRadius: 2,
+                blurRadius: 24,
+                spreadRadius: 3,
+              ),
+              BoxShadow(
+                color: Colors.white.withOpacity(0.6),
+                blurRadius: 12,
+                spreadRadius: -2,
               ),
             ],
+            border: Border.all(
+              color: AppColors.goldPrimary.withOpacity(0.2),
+              width: 2,
+            ),
           ),
-          child: const Icon(
-            Icons.add, // Using '+' as cross proxy; replace with custom SVG if available
-            color: AppColors.goldPrimary,
-            size: 36,
+          child: ClipOval(
+            child: Image.asset(
+              'assets/splash/splash.png',
+              fit: BoxFit.cover,
+            ),
           ),
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: 16),
         ShaderMask(
           shaderCallback: (bounds) => const LinearGradient(
             colors: [AppColors.goldDark, AppColors.goldPrimary, AppColors.goldLight],
@@ -565,96 +537,46 @@ class _CountingScreenState extends State<CountingScreen>
   }
 
   Widget _buildBottomActions() {
-    return Row(
-      children: [
-        // Reset
-        Expanded(
-          child: GestureDetector(
-            onTap: _reset,
-            child: Container(
-              height: 56,
-              decoration: BoxDecoration(
-                color: AppColors.resetGrey,
-                borderRadius: BorderRadius.circular(18),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.resetGreyDark.withOpacity(0.5),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-                border: Border.all(
-                  color: Colors.white.withOpacity(0.8),
-                  width: 1.5,
-                ),
-              ),
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.refresh_rounded, color: AppColors.textSecondary, size: 20),
-                  SizedBox(width: 8),
-                  Text(
-                    'Reset',
-                    style: TextStyle(
-                      color: AppColors.textSecondary,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                ],
-              ),
+    return GestureDetector(
+      onTap: _save,
+      child: Container(
+        height: 56,
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [AppColors.saveGold, AppColors.goldAccentDark],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.saveGold.withOpacity(0.45),
+              blurRadius: 14,
+              offset: const Offset(0, 5),
             ),
+          ],
+          border: Border.all(
+            color: Colors.white.withOpacity(0.3),
+            width: 1.5,
           ),
         ),
-
-        const SizedBox(width: 16),
-
-        // Save
-        Expanded(
-          child: GestureDetector(
-            onTap: _save,
-            child: Container(
-              height: 56,
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [AppColors.saveGold, AppColors.goldAccentDark],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(18),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.saveGold.withOpacity(0.45),
-                    blurRadius: 14,
-                    offset: const Offset(0, 5),
-                  ),
-                ],
-                border: Border.all(
-                  color: Colors.white.withOpacity(0.3),
-                  width: 1.5,
-                ),
-              ),
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.bookmark_rounded, color: Colors.white, size: 20),
-                  SizedBox(width: 8),
-                  Text(
-                    'Save',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                ],
+        child: const Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.bookmark_rounded, color: Colors.white, size: 20),
+            SizedBox(width: 8),
+            Text(
+              'Save',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.5,
               ),
             ),
-          ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }

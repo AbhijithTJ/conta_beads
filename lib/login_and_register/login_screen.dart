@@ -217,28 +217,35 @@ class _LoginScreenState extends State<LoginScreen> {
     return Column(
       children: [
         Container(
-          width: 64,
-          height: 64,
+          width: 80,
+          height: 80,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            gradient: const RadialGradient(
-              colors: [AppColors.haloLight, AppColors.haloDark],
-            ),
             boxShadow: [
               BoxShadow(
                 color: AppColors.goldPrimary.withOpacity(0.35),
-                blurRadius: 18,
-                spreadRadius: 2,
+                blurRadius: 24,
+                spreadRadius: 3,
+              ),
+              BoxShadow(
+                color: Colors.white.withOpacity(0.6),
+                blurRadius: 12,
+                spreadRadius: -2,
               ),
             ],
+            border: Border.all(
+              color: AppColors.goldPrimary.withOpacity(0.2),
+              width: 2,
+            ),
           ),
-          child: const Icon(
-            Icons.add,
-            color: AppColors.goldPrimary,
-            size: 36,
+          child: ClipOval(
+            child: Image.asset(
+              'assets/splash/splash.png',
+              fit: BoxFit.cover,
+            ),
           ),
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: 16),
         ShaderMask(
           shaderCallback: (bounds) => const LinearGradient(
             colors: [AppColors.goldDark, AppColors.goldPrimary, AppColors.goldLight],
