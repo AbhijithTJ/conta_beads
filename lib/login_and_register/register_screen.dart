@@ -175,7 +175,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Join the Conta Beads community',
+                        'Join the Rosary Bank community',
                         style: TextStyle(
                           fontSize: 13,
                           color: AppColors.textSecondary.withOpacity(0.8),
@@ -344,7 +344,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             end: Alignment.bottomRight,
           ).createShader(bounds),
           child: const Text(
-            'Conta Beads',
+            'Rosary Bank',
             style: TextStyle(
               fontSize: 30,
               fontWeight: FontWeight.w800,

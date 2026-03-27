@@ -218,7 +218,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                           end: Alignment.bottomRight,
                         ).createShader(bounds),
                         child: const Text(
-                          'Conta Beads',
+                          'Rosary Bank',
                           style: TextStyle(
                             fontSize: 44,
                             fontFamily: 'Georgia',

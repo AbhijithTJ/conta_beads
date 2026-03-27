@@ -253,7 +253,7 @@ class _LoginScreenState extends State<LoginScreen> {
             end: Alignment.bottomRight,
           ).createShader(bounds),
           child: const Text(
-            'Conta Beads',
+            'Rosary Bank',
             style: TextStyle(
               fontSize: 30,
               fontWeight: FontWeight.w800,

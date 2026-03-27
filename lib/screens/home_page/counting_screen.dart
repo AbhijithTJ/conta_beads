@@ -16,7 +16,7 @@ class ContaBeadsApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Conta Beads',
+      title: 'Rosary Bank',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         fontFamily: 'Georgia',
@@ -410,7 +410,7 @@ class _CountingScreenState extends State<CountingScreen>
             end: Alignment.bottomRight,
           ).createShader(bounds),
           child: const Text(
-            'Conta Beads',
+            'Rosary Bank',
             style: TextStyle(
               fontSize: 30,
               fontWeight: FontWeight.w800,
