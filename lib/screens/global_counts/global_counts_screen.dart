@@ -195,6 +195,8 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen> {
             ),
           ),
           const SizedBox(height: 24),
+          _buildPositionCard(),
+          const SizedBox(height: 16),
           _buildProgressCard(),
         ],
       ),
@@ -237,6 +239,69 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildPositionCard() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: AppColors.greenButton.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: AppColors.greenButton.withOpacity(0.4),
+          width: 2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.greenButton.withOpacity(0.2),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(
+            Icons.star_rounded,
+            color: AppColors.greenButton,
+            size: 20,
+          ),
+          const SizedBox(width: 8),
+          const Text(
+            'Your current position is',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            decoration: BoxDecoration(
+              color: AppColors.greenButton,
+              borderRadius: BorderRadius.circular(8),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.greenButton.withOpacity(0.3),
+                  blurRadius: 6,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: const Text(
+              '#1',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w800,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
