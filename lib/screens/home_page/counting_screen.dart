@@ -187,10 +187,11 @@ class _CountingScreenState extends State<CountingScreen>
       ),
     );
 
-    // Clear note text only after saving
+    // Reset count and clear note text after saving
     Future.delayed(const Duration(milliseconds: 500), () {
       if (mounted) {
         setState(() {
+          _count = 0;
           _noteController.clear();
         });
       }

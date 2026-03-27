@@ -332,18 +332,24 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isUser ? AppColors.goldPrimary.withOpacity(0.15) : Colors.white.withOpacity(0.5),
+        color: isUser ? AppColors.greenButton.withOpacity(0.2) : Colors.white.withOpacity(0.5),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isUser ? AppColors.goldPrimary.withOpacity(0.4) : AppColors.goldPrimary.withOpacity(0.2),
-          width: isUser ? 2 : 1.5,
+          color: isUser ? AppColors.greenButton.withOpacity(0.6) : AppColors.goldPrimary.withOpacity(0.2),
+          width: isUser ? 3 : 1.5,
         ),
         boxShadow: isUser
             ? [
                 BoxShadow(
-                  color: AppColors.goldPrimary.withOpacity(0.2),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
+                  color: AppColors.greenButton.withOpacity(0.35),
+                  blurRadius: 16,
+                  spreadRadius: 2,
+                  offset: const Offset(0, 6),
+                ),
+                BoxShadow(
+                  color: AppColors.greenButton.withOpacity(0.15),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
                 ),
               ]
             : [
@@ -394,25 +400,38 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen> {
                       name,
                       style: TextStyle(
                         fontSize: 14,
-                        fontWeight: FontWeight.w700,
+                        fontWeight: isUser ? FontWeight.w800 : FontWeight.w700,
                         color: AppColors.textPrimary,
                       ),
                     ),
                     if (isUser)
                       Container(
                         margin: const EdgeInsets.only(left: 8),
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
                         decoration: BoxDecoration(
-                          color: AppColors.goldPrimary,
+                          color: AppColors.greenButton,
                           borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.greenButton.withOpacity(0.4),
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
                         ),
-                        child: const Text(
-                          'You',
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
-                          ),
+                        child: const Row(
+                          children: [
+                            Icon(Icons.star_rounded, color: Colors.white, size: 12),
+                            SizedBox(width: 4),
+                            Text(
+                              'You',
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w800,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                   ],
@@ -434,8 +453,8 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen> {
             count.toString(),
             style: TextStyle(
               fontSize: 18,
-              fontWeight: FontWeight.w900,
-              color: _getRankColor(rank),
+              fontWeight: isUser ? FontWeight.w900 : FontWeight.w800,
+              color: isUser ? AppColors.greenButton : _getRankColor(rank),
             ),
           ),
         ],
