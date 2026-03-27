@@ -4,6 +4,7 @@ import '../../colors/colors.dart';
 import '../../dialog_box/logout_alert_dialog.dart';
 import '../../login_and_register/login_screen.dart';
 import '../profile/profile_screen.dart';
+import '../global_counts/global_counts_screen.dart';
 
 
 void main() {
@@ -241,6 +242,8 @@ class _CountingScreenState extends State<CountingScreen>
                     _buildCountCard(),
                     const SizedBox(height: 32),
                     _buildCountButtons(),
+                    const SizedBox(height: 32),
+                    _buildGlobalCountsButton(),
                     const SizedBox(height: 32),
                     _buildNoteInput(),
                     const SizedBox(height: 48),
@@ -573,6 +576,83 @@ class _CountingScreenState extends State<CountingScreen>
                 fontWeight: FontWeight.w700,
                 letterSpacing: 0.5,
               ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGlobalCountsButton() {
+    return GestureDetector(
+      onTap: () => Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => GlobalCountsScreen(
+            personalCount: 0,
+            globalCount: 0,
+          ),
+        ),
+      ),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.5),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: AppColors.greenButton.withOpacity(0.3),
+            width: 1.5,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.greenButton.withOpacity(0.15),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.greenButton.withOpacity(0.2),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.public_rounded,
+                color: AppColors.greenButton,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Global Count',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'See your current position & community stats',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.textSecondary.withOpacity(0.7),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(
+              Icons.arrow_forward_ios_rounded,
+              color: AppColors.greenButton,
+              size: 16,
             ),
           ],
         ),
