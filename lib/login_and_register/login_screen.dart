@@ -94,10 +94,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 const SizedBox(height: 10),
                 Text(
-                  'Prayer Counter',
+                  'Pick up right where you left off',
                   style: TextStyle(
                     fontSize: 13,
-                    letterSpacing: 3.0,
+                    letterSpacing: 0.5,
                     fontWeight: FontWeight.w500,
                     color: AppColors.textSecondary.withOpacity(0.8),
                   ),

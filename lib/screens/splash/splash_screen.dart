@@ -232,10 +232,10 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                       
                       // Tagline
                       Text(
-                        'PRAY · COUNT · REJOICE',
+                        'Every bead of the rosary counts.',
                         style: TextStyle(
-                          fontSize: 12,
-                          letterSpacing: 3.0,
+                          fontSize: 14,
+                          letterSpacing: 0.5,
                           fontWeight: FontWeight.w600,
                           color: AppColors.textSecondary.withOpacity(0.8),
                           fontFamily: 'Georgia',

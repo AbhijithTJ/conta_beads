@@ -231,10 +231,10 @@ class _CountingScreenState extends State<CountingScreen>
                     _buildHeader(),
                     const SizedBox(height: 10),
                     Text(
-                      'Prayer Counter',
+                      'Pick up right where you left off',
                       style: TextStyle(
                         fontSize: 13,
-                        letterSpacing: 3.0,
+                        letterSpacing: 0.5,
                         fontWeight: FontWeight.w500,
                         color: AppColors.textSecondary.withOpacity(0.8),
                       ),
@@ -310,7 +310,7 @@ class _CountingScreenState extends State<CountingScreen>
           fontWeight: FontWeight.w600,
         ),
         decoration: InputDecoration(
-          hintText: 'Add a prayer label or note...',
+          hintText: 'Add your intentions...',
           hintStyle: TextStyle(
             color: AppColors.textSecondary.withOpacity(0.5),
             fontSize: 14,
@@ -487,7 +487,7 @@ class _CountingScreenState extends State<CountingScreen>
             ),
             const SizedBox(height: 8),
             Text(
-              'beads counted',
+              'rosary counted',
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
