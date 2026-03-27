@@ -101,208 +101,247 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [AppColors.skyTop, AppColors.skyMid, AppColors.skyBottom],
-            stops: [0.0, 0.5, 1.0],
+    return WillPopScope(
+      onWillPop: () async {
+        // Prevent back navigation - return false to disable back button
+        return false;
+      },
+      child: Scaffold(
+        body: Container(
+          width: double.infinity,
+          height: double.infinity,
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [AppColors.skyTop, AppColors.skyMid, AppColors.skyBottom],
+              stops: [0.0, 0.5, 1.0],
+            ),
           ),
-        ),
-        child: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 28.0),
-            child: Column(
+          child: SafeArea(
+            child: Stack(
               children: [
-                const SizedBox(height: 40),
-
-                // ── Header ──
-                _buildHeader(),
-
-                const SizedBox(height: 10),
-                Text(
-                  'Prayer Counter',
-                  style: TextStyle(
-                    fontSize: 13,
-                    letterSpacing: 3.0,
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.textSecondary.withOpacity(0.8),
-                  ),
-                ),
-
-                const SizedBox(height: 40),
-
-                // ── Register Card ──
-                Container(
-                  decoration: BoxDecoration(
-                    color: AppColors.cardWhite,
-                    borderRadius: BorderRadius.circular(24),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.goldPrimary.withOpacity(0.15),
-                        blurRadius: 32,
-                        spreadRadius: 2,
-                        offset: const Offset(0, 8),
-                      ),
-                      BoxShadow(
-                        color: Colors.white.withOpacity(0.9),
-                        blurRadius: 12,
-                        spreadRadius: -2,
-                        offset: const Offset(-3, -3),
-                      ),
-                    ],
-                    border: Border.all(
-                      color: AppColors.goldPrimary.withOpacity(0.2),
-                      width: 1.5,
-                    ),
-                  ),
-                  padding: const EdgeInsets.all(28),
+                SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 28.0),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      const SizedBox(height: 40),
+
+                      // ── Header ──
+                      _buildHeader(),
+
+                      const SizedBox(height: 10),
                       Text(
-                        'Create Account',
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.textPrimary,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Join the Rosary Bank community',
+                        'Prayer Counter',
                         style: TextStyle(
                           fontSize: 13,
-                          color: AppColors.textSecondary.withOpacity(0.8),
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                      const SizedBox(height: 28),
-
-                      _buildInputField(
-                        controller: _emailController,
-                        label: 'Email',
-                        hint: 'Enter your email',
-                        icon: Icons.email_outlined,
-                      ),
-                      const SizedBox(height: 20),
-
-                      // Professional Phone Field
-                      const Text(
-                        'Phone Number',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.textPrimary,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      IntlPhoneField(
-                        controller: _phoneController,
-                        initialCountryCode: 'IN', // Change to your preferred default
-                        onChanged: (phone) {
-                          _completePhoneNumber = phone.completeNumber;
-                        },
-                        style: const TextStyle(
-                          color: AppColors.textPrimary,
+                          letterSpacing: 3.0,
                           fontWeight: FontWeight.w500,
-                          fontSize: 15,
+                          color: AppColors.textSecondary.withOpacity(0.8),
                         ),
-                        dropdownIconPosition: IconPosition.trailing,
-                        dropdownIcon: const Icon(Icons.arrow_drop_down, color: AppColors.goldDark, size: 20),
-                        decoration: InputDecoration(
-                          hintText: 'Enter phone number',
-                          hintStyle: TextStyle(
-                            color: AppColors.textSecondary.withOpacity(0.4),
-                            fontWeight: FontWeight.w400,
-                          ),
-                          filled: true,
-                          fillColor: Colors.white,
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(14),
-                            borderSide: BorderSide(color: AppColors.goldPrimary.withOpacity(0.2)),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(14),
-                            borderSide: BorderSide(color: AppColors.goldPrimary.withOpacity(0.2)),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(14),
-                            borderSide: const BorderSide(color: AppColors.goldPrimary, width: 1.5),
-                          ),
-                        ),
-                        // Style the country code text
-                        dropdownTextStyle: const TextStyle(
-                          color: AppColors.textPrimary,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 15,
-                        ),
-                        // Language for accessibility
-                        languageCode: "en",
-                      ),
-                      const SizedBox(height: 12), // Adjusted spacing for the built-in validation message space
-
-                      _buildInputField(
-                        controller: _passwordController,
-                        label: 'Password',
-                        hint: 'Create a password',
-                        icon: Icons.lock_outline_rounded,
-                        isPassword: true,
-                        isObscured: _obscurePassword,
-                        onToggle: () => setState(() => _obscurePassword = !_obscurePassword),
-                      ),
-                      const SizedBox(height: 20),
-
-                      _buildInputField(
-                        controller: _confirmPasswordController,
-                        label: 'Confirm Password',
-                        hint: 'Repeat your password',
-                        icon: Icons.lock_reset_rounded,
-                        isPassword: true,
-                        isObscured: _obscureConfirmPassword,
-                        onToggle: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
                       ),
 
-                      const SizedBox(height: 32),
+                      const SizedBox(height: 40),
 
-                      _buildRegisterButton(),
+                      // ── Register Card ──
+                      Container(
+                        decoration: BoxDecoration(
+                          color: AppColors.cardWhite,
+                          borderRadius: BorderRadius.circular(24),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.goldPrimary.withOpacity(0.15),
+                              blurRadius: 32,
+                              spreadRadius: 2,
+                              offset: const Offset(0, 8),
+                            ),
+                            BoxShadow(
+                              color: Colors.white.withOpacity(0.9),
+                              blurRadius: 12,
+                              spreadRadius: -2,
+                              offset: const Offset(-3, -3),
+                            ),
+                          ],
+                          border: Border.all(
+                            color: AppColors.goldPrimary.withOpacity(0.2),
+                            width: 1.5,
+                          ),
+                        ),
+                        padding: const EdgeInsets.all(28),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Create Account',
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.w800,
+                                color: AppColors.textPrimary,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Join the Rosary Bank community',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: AppColors.textSecondary.withOpacity(0.8),
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
+                            const SizedBox(height: 28),
+
+                            _buildInputField(
+                              controller: _emailController,
+                              label: 'Email',
+                              hint: 'Enter your email',
+                              icon: Icons.email_outlined,
+                            ),
+                            const SizedBox(height: 20),
+
+                            // Professional Phone Field
+                            const Text(
+                              'Phone Number',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.textPrimary,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            IntlPhoneField(
+                              controller: _phoneController,
+                              initialCountryCode: 'IN', // Change to your preferred default
+                              onChanged: (phone) {
+                                _completePhoneNumber = phone.completeNumber;
+                              },
+                              style: const TextStyle(
+                                color: AppColors.textPrimary,
+                                fontWeight: FontWeight.w500,
+                                fontSize: 15,
+                              ),
+                              dropdownIconPosition: IconPosition.trailing,
+                              dropdownIcon: const Icon(Icons.arrow_drop_down, color: AppColors.goldDark, size: 20),
+                              decoration: InputDecoration(
+                                hintText: 'Enter phone number',
+                                hintStyle: TextStyle(
+                                  color: AppColors.textSecondary.withOpacity(0.4),
+                                  fontWeight: FontWeight.w400,
+                                ),
+                                filled: true,
+                                fillColor: Colors.white,
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                  borderSide: BorderSide(color: AppColors.goldPrimary.withOpacity(0.2)),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                  borderSide: BorderSide(color: AppColors.goldPrimary.withOpacity(0.2)),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                  borderSide: const BorderSide(color: AppColors.goldPrimary, width: 1.5),
+                                ),
+                              ),
+                              // Style the country code text
+                              dropdownTextStyle: const TextStyle(
+                                color: AppColors.textPrimary,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 15,
+                              ),
+                              // Language for accessibility
+                              languageCode: "en",
+                            ),
+                            const SizedBox(height: 12), // Adjusted spacing for the built-in validation message space
+
+                            _buildInputField(
+                              controller: _passwordController,
+                              label: 'Password',
+                              hint: 'Create a password',
+                              icon: Icons.lock_outline_rounded,
+                              isPassword: true,
+                              isObscured: _obscurePassword,
+                              onToggle: () => setState(() => _obscurePassword = !_obscurePassword),
+                            ),
+                            const SizedBox(height: 20),
+
+                            _buildInputField(
+                              controller: _confirmPasswordController,
+                              label: 'Confirm Password',
+                              hint: 'Repeat your password',
+                              icon: Icons.lock_reset_rounded,
+                              isPassword: true,
+                              isObscured: _obscureConfirmPassword,
+                              onToggle: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
+                            ),
+
+                            const SizedBox(height: 32),
+
+                            _buildRegisterButton(),
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(height: 24),
+
+                      // ── Login Link ──
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Already have an account? ',
+                            style: TextStyle(color: AppColors.textSecondary.withOpacity(0.8)),
+                          ),
+                          GestureDetector(
+                            onTap: () => Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(builder: (_) => const LoginScreen()),
+                            ),
+                            child: const Text(
+                              'Login',
+                              style: TextStyle(
+                                color: AppColors.goldDark,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 40),
                     ],
                   ),
                 ),
-
-                const SizedBox(height: 24),
-
-                // ── Login Link ──
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Already have an account? ',
-                      style: TextStyle(color: AppColors.textSecondary.withOpacity(0.8)),
+                // Back button in top-left
+                Positioned(
+                  top: 12,
+                  left: 16,
+                  child: GestureDetector(
+                    onTap: () => Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(builder: (_) => const LoginScreen()),
                     ),
-                    GestureDetector(
-                      onTap: () => Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(builder: (_) => const LoginScreen()),
+                    child: Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.6),
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.textSecondary.withOpacity(0.15),
+                            blurRadius: 8,
+                            offset: const Offset(0, 3),
+                          ),
+                        ],
                       ),
-                      child: const Text(
-                        'Login',
-                        style: TextStyle(
-                          color: AppColors.goldDark,
-                          fontWeight: FontWeight.w700,
-                        ),
+                      child: const Icon(
+                        Icons.arrow_back_rounded,
+                        color: AppColors.textSecondary,
+                        size: 22,
                       ),
                     ),
-                  ],
+                  ),
                 ),
-
-                const SizedBox(height: 40),
               ],
             ),
           ),
