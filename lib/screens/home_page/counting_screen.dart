@@ -401,7 +401,7 @@ class _CountingScreenState extends State<CountingScreen>
           ),
           child: ClipOval(
             child: Image.asset(
-              'assets/splash/splash.png',
+              'assets/splash/splash_org.png',
               fit: BoxFit.cover,
             ),
           ),
@@ -546,22 +546,25 @@ class _CountingScreenState extends State<CountingScreen>
       child: Container(
         height: 56,
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [AppColors.saveGold, AppColors.goldAccentDark],
+          gradient: LinearGradient(
+            colors: [
+              AppColors.saveGold.withOpacity(0.75),
+              AppColors.goldAccentDark.withOpacity(0.75),
+            ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
           borderRadius: BorderRadius.circular(18),
           boxShadow: [
             BoxShadow(
-              color: AppColors.saveGold.withOpacity(0.45),
-              blurRadius: 14,
-              offset: const Offset(0, 5),
+              color: AppColors.saveGold.withOpacity(0.12),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
             ),
           ],
           border: Border.all(
-            color: Colors.white.withOpacity(0.3),
-            width: 1.5,
+            color: Colors.white.withOpacity(0.18),
+            width: 1,
           ),
         ),
         child: const Row(

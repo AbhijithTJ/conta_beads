@@ -244,7 +244,7 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
           child: ClipOval(
             child: Image.asset(
-              'assets/splash/splash.png',
+              'assets/splash/splash_org.png',
               fit: BoxFit.cover,
             ),
           ),
