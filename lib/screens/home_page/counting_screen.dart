@@ -640,7 +640,7 @@ class _CountingScreenState extends State<CountingScreen>
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'See your current position & community stats',
+                    'See your progress and the global count',
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w500,

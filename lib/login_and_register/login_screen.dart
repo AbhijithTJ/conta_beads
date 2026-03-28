@@ -94,7 +94,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 const SizedBox(height: 10),
                 Text(
-                  'Pick up right where you left off',
+                  'Every bead of the rosary counts.',
                   style: TextStyle(
                     fontSize: 13,
                     letterSpacing: 0.5,

@@ -126,7 +126,7 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen> {
         ),
         const SizedBox(height: 8),
         Text(
-          'Community Prayer Statistics',
+          'Prayer activity worldwide',
           style: TextStyle(
             fontSize: 13,
             letterSpacing: 1.5,
@@ -175,7 +175,7 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen> {
               ),
               _buildStatItem(
                 icon: Icons.public_rounded,
-                label: 'Community Total',
+                label: ' Global Total',
                 value: widget.globalCount.toString(),
                 color: AppColors.greenButton,
               ),
@@ -270,7 +270,7 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen> {
           ),
           const SizedBox(width: 8),
           const Text(
-            'Your current position is',
+            'You’re ranked',
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
@@ -365,7 +365,7 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen> {
         ),
         const SizedBox(width: 12),
         const Text(
-          'Leaderboard',
+          'Top Contributors',
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w800,
@@ -503,7 +503,7 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'beads counted',
+                  'beads prayed',
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w500,
