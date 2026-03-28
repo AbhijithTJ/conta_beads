@@ -74,12 +74,16 @@ class _LoginScreenState extends State<LoginScreen> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [AppColors.skyTop, AppColors.skyMid, AppColors.skyBottom],
-            stops: [0.0, 0.5, 1.0],
+            colors: [
+              AppColors.skyTop.withOpacity(0.05),
+              AppColors.skyMid.withOpacity(0.05),
+              AppColors.skyBottom.withOpacity(0.05),
+            ],
+            stops: const [0.0, 0.5, 1.0],
           ),
         ),
         child: SafeArea(
