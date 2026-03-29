@@ -1,10 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../colors/colors.dart';
+import '../../dialog_box/logout_alert_dialog.dart';
+import '../../login_and_register/login_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   final String userEmail;
 
-  const ProfileScreen({super.key, required this.userEmail});
+  const ProfileScreen({
+    super.key,
+    required this.userEmail,
+  });
+
+  Future<void> _logout(BuildContext context) async {
+    HapticFeedback.lightImpact();
+    final confirmed = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const LogoutAlertDialog(),
+    );
+    if (confirmed == true && context.mounted) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -13,10 +33,6 @@ class ProfileScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.textPrimary),
-          onPressed: () => Navigator.pop(context),
-        ),
         title: const Text(
           'Profile',
           style: TextStyle(
@@ -58,6 +74,11 @@ class ProfileScreen extends StatelessWidget {
                 _buildSettingsList(),
                 
                 const SizedBox(height: 40),
+                
+                // Logout Button
+                _buildLogoutButton(context),
+                
+                const SizedBox(height: 32),
               ],
             ),
           ),
@@ -213,6 +234,54 @@ class ProfileScreen extends StatelessWidget {
           const Spacer(),
           const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: AppColors.textSecondary),
         ],
+      ),
+    );
+  }
+
+  Widget _buildLogoutButton(BuildContext context) {
+    return GestureDetector(
+      onTap: () => _logout(context),
+      child: Container(
+        width: double.infinity,
+        height: 56,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Colors.red.withOpacity(0.8),
+              Colors.redAccent.withOpacity(0.8),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.red.withOpacity(0.3),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+          border: Border.all(
+            color: Colors.white.withOpacity(0.2),
+            width: 1,
+          ),
+        ),
+        child: const Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.logout_rounded, color: Colors.white, size: 22),
+            SizedBox(width: 12),
+            Text(
+              'Logout',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

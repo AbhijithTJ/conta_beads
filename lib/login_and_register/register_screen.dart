@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 import '../colors/colors.dart';
-import '../screens/home_page/counting_screen.dart';
+import '../screens/bottom_nav_wrapper.dart';
 import 'login_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -71,7 +71,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       if (mounted) {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
-            builder: (_) => CountingScreen(userEmail: email),
+            builder: (_) => BottomNavWrapper(userEmail: email),
           ),
         );
       }

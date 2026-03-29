@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../colors/colors.dart';
-import '../screens/home_page/counting_screen.dart';
+import '../screens/bottom_nav_wrapper.dart';
 import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -61,7 +61,7 @@ class _LoginScreenState extends State<LoginScreen> {
       if (mounted) {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
-            builder: (_) => CountingScreen(userEmail: email),
+            builder: (_) => BottomNavWrapper(userEmail: email),
           ),
         );
       }
