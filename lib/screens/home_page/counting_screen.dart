@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'dart:ui';
 import '../../colors/colors.dart';
 import '../global_counts/global_counts_screen.dart';
 
@@ -25,6 +26,23 @@ class _CountingScreenState extends State<CountingScreen>
   late Animation<double> _pulseAnimation;
   late Animation<double> _incrementScaleAnim;
   late Animation<double> _decrementScaleAnim;
+
+  final List<Map<String, String>> quotes = [
+    {
+      'text': 'Christ became obedient to the point of death, even death on a cross. Because of this, God greatly exalted him...',
+      'reference': 'Philippians 2:8-9',
+    },
+    {
+      'text': 'For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life.',
+      'reference': 'John 3:16',
+    },
+    {
+      'text': 'I have told you all this, so that you may have peace by being united with me. The world will make you suffer.',
+      'reference': 'John 16:33',
+    },
+  ];
+
+  int _currentQuoteIndex = 0;
 
   @override
   void initState() {
@@ -167,55 +185,164 @@ class _CountingScreenState extends State<CountingScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: true,
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: const BoxDecoration(
+      body: SafeArea(
+        child: Stack(
+          children: [
+            // ── Quotes Section (Top) with Image Background - Behind ──
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              height: MediaQuery.of(context).size.height * 0.38,
+              child: _buildQuotesSection(),
+            ),
+            // ── Scrollable Content ──
+            SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              child: Column(
+                children: [
+                  // Spacer to push counting section down - shows more of image
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.32,
+                  ),
+                  // ── Counting Section (Bottom) with Curved Top - On Top ──
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(40),
+                        topRight: Radius.circular(40),
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 20,
+                          offset: const Offset(0, -5),
+                        ),
+                      ],
+                    ),
+                    child: _buildCountingSection(),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQuotesSection() {
+    final quote = quotes[_currentQuoteIndex];
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        image: DecorationImage(
+          image: AssetImage('assets/demo/jesus.jpg'),
+          fit: BoxFit.cover,
+        ),
+      ),
+      child: Container(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [AppColors.skyTop, AppColors.skyMid, AppColors.skyBottom],
-            stops: [0.0, 0.5, 1.0],
-          ),
-        ),
-        child: SafeArea(
-          child: Stack(
-            children: [
-              // ── Main content ──
-              SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 28.0),
-                child: Column(
-                  children: [
-                    const SizedBox(height: 12),
-                    _buildHeader(),
-                    const SizedBox(height: 10),
-                    Text(
-                      'Pick up right where you left off',
-                      style: TextStyle(
-                        fontSize: 13,
-                        letterSpacing: 0.5,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.textSecondary.withOpacity(0.8),
-                      ),
-                    ),
-                    const SizedBox(height: 32),
-                    _buildCountCard(),
-                    const SizedBox(height: 32),
-                    _buildCountButtons(),
-                    const SizedBox(height: 32),
-                    _buildGlobalCountsButton(),
-                    const SizedBox(height: 32),
-                    _buildNoteInput(),
-                    const SizedBox(height: 48),
-                    _buildBottomActions(),
-                    const SizedBox(height: 32),
-                  ],
-                ),
-              ),
+            colors: [
+              Colors.black.withOpacity(0.1),
+              Colors.black.withOpacity(0.2),
             ],
           ),
         ),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(20),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                child: Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: Colors.white.withOpacity(0.2),
+                      width: 1.5,
+                    ),
+                  ),
+                  child: Column(
+                    children: [
+                      Text(
+                        quote['text']!,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                          height: 1.6,
+                          letterSpacing: 0.3,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        quote['reference']!,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.goldPrimary,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(
+                quotes.length,
+                (index) => GestureDetector(
+                  onTap: () => setState(() => _currentQuoteIndex = index),
+                  child: Container(
+                    width: 8,
+                    height: 8,
+                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: _currentQuoteIndex == index
+                          ? AppColors.goldPrimary
+                          : Colors.white.withOpacity(0.4),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCountingSection() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 28.0, vertical: 24.0),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _buildCountCard(),
+          const SizedBox(height: 32),
+          _buildCountButtons(),
+          const SizedBox(height: 32),
+          _buildGlobalCountsButton(),
+          const SizedBox(height: 32),
+          _buildNoteInput(),
+          const SizedBox(height: 32),
+          _buildBottomActions(),
+          const SizedBox(height: 32),
+        ],
       ),
     );
   }
@@ -253,60 +380,6 @@ class _CountingScreenState extends State<CountingScreen>
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         ),
       ),
-    );
-  }
-
-  Widget _buildHeader() {
-    return Column(
-      children: [
-        Container(
-          width: 80,
-          height: 80,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.goldPrimary.withOpacity(0.35),
-                blurRadius: 24,
-                spreadRadius: 3,
-              ),
-              BoxShadow(
-                color: Colors.white.withOpacity(0.6),
-                blurRadius: 12,
-                spreadRadius: -2,
-              ),
-            ],
-            border: Border.all(
-              color: AppColors.goldPrimary.withOpacity(0.2),
-              width: 2,
-            ),
-          ),
-          child: ClipOval(
-            child: Image.asset(
-              'assets/splash/splash_org.png',
-              fit: BoxFit.cover,
-            ),
-          ),
-        ),
-        const SizedBox(height: 16),
-        ShaderMask(
-          shaderCallback: (bounds) => const LinearGradient(
-            colors: [AppColors.goldDark, AppColors.goldPrimary, AppColors.goldLight],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ).createShader(bounds),
-          child: const Text(
-            'Rosary Bank',
-            style: TextStyle(
-              fontSize: 30,
-              fontWeight: FontWeight.w800,
-              color: Colors.white,
-              letterSpacing: 1.2,
-              height: 1.0,
-            ),
-          ),
-        ),
-      ],
     );
   }
 
