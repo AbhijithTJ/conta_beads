@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../colors/colors.dart';
-import '../home_page/counting_screen.dart';
 
 class GlobalCountsScreen extends StatefulWidget {
   final int personalCount;
@@ -18,23 +17,18 @@ class GlobalCountsScreen extends StatefulWidget {
 
 class _GlobalCountsScreenState extends State<GlobalCountsScreen> {
   late List<Map<String, dynamic>> communityData;
+  final int goalCount = 150000000;
+  final String quote = '"Every bead is a whisper of love to heaven."';
 
   @override
   void initState() {
     super.initState();
-    // Sample community data - will be replaced with database data
+    // Sample community data - today's offerings
     communityData = [
-      {'name': 'You', 'count': widget.personalCount, 'isUser': true},
-      {'name': 'Sarah', 'count': 1250, 'isUser': false},
-      {'name': 'Michael', 'count': 980, 'isUser': false},
-      {'name': 'Emma', 'count': 1540, 'isUser': false},
-      {'name': 'John', 'count': 875, 'isUser': false},
-      {'name': 'Lisa', 'count': 1120, 'isUser': false},
-      {'name': 'David', 'count': 945, 'isUser': false},
-      {'name': 'Rachel', 'count': 1380, 'isUser': false},
+      {'name': 'Emma', 'count': 56, 'isUser': false},
+      {'name': 'Rachel', 'count': 42, 'isUser': false},
+      {'name': 'James T.', 'count': 38, 'isUser': false},
     ];
-    // Sort by count descending
-    communityData.sort((a, b) => b['count'].compareTo(a['count']));
   }
 
   @override
@@ -44,61 +38,27 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen> {
         width: double.infinity,
         height: double.infinity,
         decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [AppColors.skyTop, AppColors.skyMid, AppColors.skyBottom],
-            stops: [0.0, 0.5, 1.0],
-          ),
+          color: Color(0xFFFAF7F2),
         ),
         child: SafeArea(
-          child: Stack(
-            children: [
-              SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                child: Column(
-                  children: [
-                    const SizedBox(height: 20),
-                    _buildHeader(),
-                    const SizedBox(height: 32),
-                    _buildGlobalStatsCard(),
-                    const SizedBox(height: 32),
-                    _buildLeaderboardTitle(),
-                    const SizedBox(height: 16),
-                    _buildLeaderboard(),
-                    const SizedBox(height: 40),
-                  ],
-                ),
-              ),
-              // Back button
-              Positioned(
-                top: 12,
-                left: 16,
-                child: GestureDetector(
-                  onTap: () => Navigator.pop(context),
-                  child: Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.6),
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.textSecondary.withOpacity(0.15),
-                          blurRadius: 8,
-                          offset: const Offset(0, 3),
-                        ),
-                      ],
-                    ),
-                    child: const Icon(
-                      Icons.arrow_back_rounded,
-                      color: AppColors.textSecondary,
-                      size: 22,
-                    ),
-                  ),
-                ),
-              ),
-            ],
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: 20.0),
+            child: Column(
+              children: [
+                const SizedBox(height: 16),
+                _buildHeader(),
+                const SizedBox(height: 24),
+                _buildGlobalCountCard(),
+                const SizedBox(height: 20),
+                _buildYourStatsCard(),
+                const SizedBox(height: 20),
+                _buildQuoteCard(),
+                const SizedBox(height: 24),
+                _buildTopOfferingsCard(),
+                const SizedBox(height: 40),
+              ],
+            ),
           ),
         ),
       ),
@@ -108,6 +68,16 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen> {
   Widget _buildHeader() {
     return Column(
       children: [
+        Text(
+          'Community Prayer Statistics',
+          style: TextStyle(
+            fontSize: 13,
+            letterSpacing: 1.0,
+            fontWeight: FontWeight.w500,
+            color: AppColors.textSecondary.withOpacity(0.7),
+          ),
+        ),
+        const SizedBox(height: 8),
         ShaderMask(
           shaderCallback: (bounds) => const LinearGradient(
             colors: [AppColors.goldDark, AppColors.goldPrimary, AppColors.goldLight],
@@ -115,319 +85,256 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen> {
             end: Alignment.bottomRight,
           ).createShader(bounds),
           child: const Text(
-            'Global Counts',
+            'Global Count',
             style: TextStyle(
-              fontSize: 32,
+              fontSize: 36,
               fontWeight: FontWeight.w800,
               color: Colors.white,
-              letterSpacing: 1.0,
+              letterSpacing: 0.5,
             ),
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'Prayer activity worldwide',
-          style: TextStyle(
-            fontSize: 13,
-            letterSpacing: 1.5,
-            fontWeight: FontWeight.w500,
-            color: AppColors.textSecondary.withOpacity(0.8),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildGlobalStatsCard() {
+  Widget _buildGlobalCountCard() {
+    double percentage = goalCount > 0 ? (widget.globalCount / goalCount) * 100 : 0;
+
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.6),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: AppColors.goldPrimary.withOpacity(0.3),
-          width: 2,
-        ),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: AppColors.goldPrimary.withOpacity(0.15),
-            blurRadius: 32,
-            spreadRadius: 2,
-            offset: const Offset(0, 8),
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
       child: Column(
         children: [
+          Text(
+            _formatNumber(widget.globalCount),
+            style: const TextStyle(
+              fontSize: 42,
+              fontWeight: FontWeight.w900,
+              color: AppColors.textPrimary,
+              letterSpacing: -1,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Rosaries Offered',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: AppColors.goldPrimary,
+            ),
+          ),
+          const SizedBox(height: 20),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildStatItem(
-                icon: Icons.person_rounded,
-                label: 'Your Total',
-                value: widget.personalCount.toString(),
-                color: AppColors.goldPrimary,
-              ),
-              Container(
-                width: 1.5,
-                height: 60,
-                color: AppColors.goldPrimary.withOpacity(0.2),
-              ),
-              _buildStatItem(
-                icon: Icons.public_rounded,
-                label: ' Global Total',
-                value: widget.globalCount.toString(),
-                color: AppColors.greenButton,
+              Text(
+                'Our Goal: ${_formatNumber(goalCount)} Rosaries',
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
+                ),
               ),
             ],
           ),
-          const SizedBox(height: 24),
-          Container(
-            height: 1.5,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Colors.transparent,
-                  AppColors.goldPrimary.withOpacity(0.3),
-                  Colors.transparent,
-                ],
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: LinearProgressIndicator(
+                    value: (percentage / 100).clamp(0.0, 1.0),
+                    minHeight: 12,
+                    backgroundColor: Color(0xFFE8D5B7),
+                    valueColor: AlwaysStoppedAnimation<Color>(AppColors.goldPrimary),
+                  ),
+                ),
               ),
+              const SizedBox(width: 12),
+              Text(
+                '${percentage.toStringAsFixed(1)}%',
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Together, we are building a river of prayer',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+              color: AppColors.textSecondary.withOpacity(0.8),
+              fontStyle: FontStyle.italic,
             ),
           ),
-          const SizedBox(height: 24),
-          _buildPositionCard(),
-          const SizedBox(height: 16),
-          _buildProgressCard(),
         ],
       ),
     );
   }
 
-  Widget _buildStatItem({
-    required IconData icon,
-    required String label,
-    required String value,
-    required Color color,
-  }) {
-    return Column(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: color.withOpacity(0.15),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(icon, color: color, size: 28),
-        ),
-        const SizedBox(height: 12),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 28,
-            fontWeight: FontWeight.w900,
-            color: color,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w600,
-            color: AppColors.textSecondary.withOpacity(0.7),
-            letterSpacing: 0.5,
-          ),
-        ),
-      ],
-    );
-  }
+  Widget _buildYourStatsCard() {
+    double percentage = widget.globalCount > 0
+        ? (widget.personalCount / widget.globalCount) * 100
+        : 0;
 
-  Widget _buildPositionCard() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppColors.greenButton.withOpacity(0.15),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: AppColors.greenButton.withOpacity(0.4),
-          width: 2,
-        ),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: AppColors.greenButton.withOpacity(0.2),
-            blurRadius: 8,
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 12,
             offset: const Offset(0, 2),
           ),
         ],
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Icon(
-            Icons.star_rounded,
-            color: AppColors.greenButton,
-            size: 20,
-          ),
-          const SizedBox(width: 8),
-          const Text(
-            'You’re ranked',
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
-            ),
-          ),
-          const SizedBox(width: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-            decoration: BoxDecoration(
-              color: AppColors.greenButton,
-              borderRadius: BorderRadius.circular(8),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.greenButton.withOpacity(0.3),
-                  blurRadius: 6,
-                  offset: const Offset(0, 2),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Your Total',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textSecondary.withOpacity(0.8),
                 ),
-              ],
-            ),
-            child: const Text(
-              '#1',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w800,
-                color: Colors.white,
               ),
-            ),
+              const SizedBox(height: 4),
+              Text(
+                widget.personalCount.toString(),
+                style: const TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.goldPrimary,
+                ),
+              ),
+            ],
+          ),
+          Container(
+            width: 1,
+            height: 50,
+            color: Color(0xFFE8D5B7),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                'Contribution',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textSecondary.withOpacity(0.8),
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                '${percentage.toStringAsFixed(2)}%',
+                style: const TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.greenButton,
+                ),
+              ),
+            ],
           ),
         ],
       ),
     );
   }
 
-  Widget _buildProgressCard() {
-    double percentage = widget.globalCount > 0
-        ? (widget.personalCount / widget.globalCount) * 100
-        : 0;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Your Contribution',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
-              ),
-            ),
-            Text(
-              '${percentage.toStringAsFixed(1)}%',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-                color: AppColors.goldPrimary,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: LinearProgressIndicator(
-            value: percentage / 100,
-            minHeight: 8,
-            backgroundColor: AppColors.goldPrimary.withOpacity(0.2),
-            valueColor: AlwaysStoppedAnimation<Color>(AppColors.goldPrimary),
+  Widget _buildQuoteCard() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 12,
+            offset: const Offset(0, 2),
           ),
+        ],
+      ),
+      child: Text(
+        quote,
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+          color: AppColors.textSecondary.withOpacity(0.8),
+          fontStyle: FontStyle.italic,
         ),
-      ],
-    );
-  }
-
-  Widget _buildLeaderboardTitle() {
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: AppColors.goldPrimary.withOpacity(0.2),
-            shape: BoxShape.circle,
-          ),
-          child: const Icon(
-            Icons.leaderboard_rounded,
-            color: AppColors.goldPrimary,
-            size: 20,
-          ),
-        ),
-        const SizedBox(width: 12),
-        const Text(
-          'Top Contributors',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w800,
-            color: AppColors.textPrimary,
-            letterSpacing: 0.5,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildLeaderboard() {
-    return Column(
-      children: List.generate(
-        communityData.length,
-        (index) => _buildLeaderboardItem(index),
       ),
     );
   }
 
-  Widget _buildLeaderboardItem(int index) {
+  Widget _buildTopOfferingsCard() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 12,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Top Offerings Today',
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 16),
+          ...List.generate(
+            communityData.length,
+            (index) => _buildOfferingItem(index),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildOfferingItem(int index) {
     final item = communityData[index];
-    final isUser = item['isUser'] as bool;
     final rank = index + 1;
     final name = item['name'] as String;
     final count = item['count'] as int;
+    final rankColor = _getRankColor(rank);
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: isUser ? AppColors.greenButton.withOpacity(0.2) : Colors.white.withOpacity(0.5),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: isUser ? AppColors.greenButton.withOpacity(0.6) : AppColors.goldPrimary.withOpacity(0.2),
-          width: isUser ? 3 : 1.5,
-        ),
-        boxShadow: isUser
-            ? [
-                BoxShadow(
-                  color: AppColors.greenButton.withOpacity(0.35),
-                  blurRadius: 16,
-                  spreadRadius: 2,
-                  offset: const Offset(0, 6),
-                ),
-                BoxShadow(
-                  color: AppColors.greenButton.withOpacity(0.15),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ]
-            : [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-      ),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         children: [
-          // Rank Badge
           Container(
             width: 40,
             height: 40,
@@ -436,7 +343,7 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen> {
               gradient: _getRankGradient(rank),
               boxShadow: [
                 BoxShadow(
-                  color: _getRankColor(rank).withOpacity(0.3),
+                  color: rankColor.withOpacity(0.3),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
@@ -453,57 +360,21 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen> {
               ),
             ),
           ),
-          const SizedBox(width: 16),
-          // Name and Badge
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Text(
-                      name,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: isUser ? FontWeight.w800 : FontWeight.w700,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    if (isUser)
-                      Container(
-                        margin: const EdgeInsets.only(left: 8),
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-                        decoration: BoxDecoration(
-                          color: AppColors.greenButton,
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColors.greenButton.withOpacity(0.4),
-                              blurRadius: 6,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: const Row(
-                          children: [
-                            Icon(Icons.star_rounded, color: Colors.white, size: 12),
-                            SizedBox(width: 4),
-                            Text(
-                              'You',
-                              style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w800,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                  ],
-                ),
-                const SizedBox(height: 4),
                 Text(
-                  'beads prayed',
+                  name,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                Text(
+                  'rosaries offered today',
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w500,
@@ -513,18 +384,26 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen> {
               ],
             ),
           ),
-          // Count
           Text(
             count.toString(),
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 18,
-              fontWeight: isUser ? FontWeight.w900 : FontWeight.w800,
-              color: isUser ? AppColors.greenButton : _getRankColor(rank),
+              fontWeight: FontWeight.w800,
+              color: AppColors.goldPrimary,
             ),
           ),
         ],
       ),
     );
+  }
+
+  String _formatNumber(int number) {
+    if (number >= 1000000) {
+      return '${(number / 1000000).toStringAsFixed(1)}M';
+    } else if (number >= 1000) {
+      return '${(number / 1000).toStringAsFixed(0)},${(number % 1000).toString().padLeft(3, '0')}';
+    }
+    return number.toString();
   }
 
   LinearGradient _getRankGradient(int rank) {
