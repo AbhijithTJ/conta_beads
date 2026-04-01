@@ -188,10 +188,6 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen> {
   }
 
   Widget _buildYourStatsCard() {
-    double percentage = widget.globalCount > 0
-        ? (widget.personalCount / widget.globalCount) * 100
-        : 0;
-
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -206,10 +202,10 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen> {
         ],
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text(
                 'Your Total',
@@ -226,33 +222,6 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen> {
                   fontSize: 28,
                   fontWeight: FontWeight.w800,
                   color: AppColors.goldPrimary,
-                ),
-              ),
-            ],
-          ),
-          Container(
-            width: 1,
-            height: 50,
-            color: Color(0xFFE8D5B7),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                'Contribution',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textSecondary.withOpacity(0.8),
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                '${percentage.toStringAsFixed(2)}%',
-                style: const TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.greenButton,
                 ),
               ),
             ],

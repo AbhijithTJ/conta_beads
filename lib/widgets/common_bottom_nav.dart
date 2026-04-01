@@ -29,9 +29,14 @@ class CommonBottomNav extends StatelessWidget {
           color: selectedIndex == 1 ? Colors.white : AppColors.textSecondary,
         ),
         Icon(
-          Icons.person_rounded,
+          Icons.group_rounded,
           size: 30,
           color: selectedIndex == 2 ? Colors.white : AppColors.textSecondary,
+        ),
+        Icon(
+          Icons.person_rounded,
+          size: 30,
+          color: selectedIndex == 3 ? Colors.white : AppColors.textSecondary,
         ),
       ],
       color: Colors.white,
