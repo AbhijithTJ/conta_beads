@@ -36,6 +36,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   intl_phone_field: ^3.2.0
   curved_navigation_bar: ^1.0.3
+  shared_preferences: ^2.2.2
 
 dev_dependencies:
   flutter_test:

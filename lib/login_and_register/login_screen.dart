@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../colors/colors.dart';
-import '../screens/bottom_nav_wrapper.dart';
+import '../screens/onboarding/onboarding_wrapper.dart';
 import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -59,10 +59,11 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _isLoading = true);
     Future.delayed(const Duration(milliseconds: 800), () {
       if (mounted) {
-        Navigator.of(context).pushReplacement(
+        Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
-            builder: (_) => BottomNavWrapper(userEmail: email),
+            builder: (_) => OnboardingWrapper(userEmail: email),
           ),
+          (route) => false,
         );
       }
     });
