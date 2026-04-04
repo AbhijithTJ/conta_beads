@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'dart:async';
 import 'dart:ui';
 import '../../colors/colors.dart';
 
@@ -26,26 +27,34 @@ class _CountingScreenState extends State<CountingScreen>
   late Animation<double> _incrementScaleAnim;
   late Animation<double> _decrementScaleAnim;
 
-  final List<Map<String, String>> quotes = [
+  // Combined image + quote slides
+  final List<Map<String, String>> _slides = [
     {
+      'image': 'assets/demo/jesus.jpg',
       'text': 'Christ became obedient to the point of death, even death on a cross. Because of this, God greatly exalted him...',
       'reference': 'Philippians 2:8-9',
     },
     {
+      'image': 'assets/demo/1.jpg',
       'text': 'For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life.',
       'reference': 'John 3:16',
     },
     {
+      'image': 'assets/demo/2.jpg',
       'text': 'I have told you all this, so that you may have peace by being united with me. The world will make you suffer.',
       'reference': 'John 16:33',
     },
   ];
 
-  int _currentQuoteIndex = 0;
+  final PageController _pageController = PageController();
+  int _currentSlideIndex = 0;
+  Timer? _autoSlideTimer;
 
   @override
   void initState() {
     super.initState();
+
+    _startAutoSlide();
 
     _pulseController = AnimationController(
       vsync: this,
@@ -75,11 +84,25 @@ class _CountingScreenState extends State<CountingScreen>
 
   @override
   void dispose() {
+    _autoSlideTimer?.cancel();
+    _pageController.dispose();
     _pulseController.dispose();
     _incrementController.dispose();
     _decrementController.dispose();
     _noteController.dispose();
     super.dispose();
+  }
+
+  void _startAutoSlide() {
+    _autoSlideTimer = Timer.periodic(const Duration(seconds: 4), (_) {
+      if (!mounted) return;
+      final next = (_currentSlideIndex + 1) % _slides.length;
+      _pageController.animateToPage(
+        next,
+        duration: const Duration(milliseconds: 600),
+        curve: Curves.easeInOut,
+      );
+    });
   }
 
   void _increment() {
@@ -184,8 +207,23 @@ class _CountingScreenState extends State<CountingScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: true,
-      body: SafeArea(
-        child: Stack(
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              AppColors.skyTop.withOpacity(0.05),
+              AppColors.skyMid.withOpacity(0.05),
+              AppColors.skyBottom.withOpacity(0.05),
+            ],
+            stops: const [0.0, 0.5, 1.0],
+          ),
+        ),
+        child: SafeArea(
+          child: Stack(
           children: [
             // ── Quotes Section (Top) with Image Background - Behind ──
             Positioned(
@@ -227,101 +265,118 @@ class _CountingScreenState extends State<CountingScreen>
             ),
           ],
         ),
+        ),
       ),
     );
   }
 
   Widget _buildQuotesSection() {
-    final quote = quotes[_currentQuoteIndex];
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        image: DecorationImage(
-          image: AssetImage('assets/demo/jesus.jpg'),
-          fit: BoxFit.cover,
-        ),
-      ),
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Colors.black.withOpacity(0.1),
-              Colors.black.withOpacity(0.2),
-            ],
-          ),
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(20),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                child: Container(
-                  padding: const EdgeInsets.all(24),
+    return Stack(
+      children: [
+        // Single PageView — image + quote move together
+        PageView.builder(
+          controller: _pageController,
+          itemCount: _slides.length,
+          onPageChanged: (index) => setState(() => _currentSlideIndex = index),
+          itemBuilder: (context, index) {
+            final slide = _slides[index];
+            return Stack(
+              fit: StackFit.expand,
+              children: [
+                Image.asset(slide['image']!, fit: BoxFit.cover),
+                // gradient overlay
+                Container(
                   decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: Colors.white.withOpacity(0.2),
-                      width: 1.5,
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.black.withOpacity(0.1),
+                        Colors.black.withOpacity(0.45),
+                      ],
                     ),
                   ),
+                ),
+                // Quote card
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                   child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(
-                        quote['text']!,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                          height: 1.6,
-                          letterSpacing: 0.3,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        quote['reference']!,
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.goldPrimary,
-                          letterSpacing: 0.5,
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(20),
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                          child: Container(
+                            padding: const EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: Colors.white.withOpacity(0.2),
+                                width: 1.5,
+                              ),
+                            ),
+                            child: Column(
+                              children: [
+                                Text(
+                                  slide['text']!,
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white,
+                                    height: 1.6,
+                                    letterSpacing: 0.3,
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                Text(
+                                  slide['reference']!,
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                    color: AppColors.goldPrimary,
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                       ),
                     ],
                   ),
                 ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(
-                quotes.length,
-                (index) => GestureDetector(
-                  onTap: () => setState(() => _currentQuoteIndex = index),
-                  child: Container(
-                    width: 8,
-                    height: 8,
-                    margin: const EdgeInsets.symmetric(horizontal: 4),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: _currentQuoteIndex == index
-                          ? AppColors.goldPrimary
-                          : Colors.white.withOpacity(0.4),
-                    ),
-                  ),
+              ],
+            );
+          },
+        ),
+        // Slide indicator dots
+        Positioned(
+          bottom: 12,
+          left: 0,
+          right: 0,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(
+              _slides.length,
+              (index) => AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                width: _currentSlideIndex == index ? 20 : 7,
+                height: 7,
+                margin: const EdgeInsets.symmetric(horizontal: 3),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(4),
+                  color: _currentSlideIndex == index
+                      ? Colors.white
+                      : Colors.white.withOpacity(0.4),
                 ),
               ),
             ),
-          ],
+          ),
         ),
-      ),
+      ],
     );
   }
 

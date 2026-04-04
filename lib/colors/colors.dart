@@ -33,4 +33,9 @@ class AppColors {
   static const Color greyDark = Color(0xFF6B8291);
   static const Color resetGrey = Color(0xFFDDE8F0);
   static const Color resetGreyDark = Color(0xFFC0D0DC);
+
+  // Intentions Screen - Rose/Pink Palette
+  static const Color rosaryButtonPrimary = Color(0xFFE8908A);
+  static const Color rosaryButtonDark = Color(0xFFD4706A);
+  static const Color prayerRequestsIcon = Color(0xFFE8A0A0);
 }
