@@ -24,10 +24,16 @@ class _CountingScreenState extends State<CountingScreen>
   late AnimationController _incrementController;
   late AnimationController _decrementController;
   late AnimationController _quoteController;
+  late AnimationController _ripple1Controller;
+  late AnimationController _ripple2Controller;
+  late AnimationController _ripple3Controller;
   late Animation<double> _pulseAnimation;
   late Animation<double> _incrementScaleAnim;
   late Animation<double> _decrementScaleAnim;
   late Animation<double> _quoteFadeAnim;
+  late Animation<double> _ripple1Anim;
+  late Animation<double> _ripple2Anim;
+  late Animation<double> _ripple3Anim;
 
   final List<Map<String, String>> _quotes = [
     {
@@ -93,6 +99,21 @@ class _CountingScreenState extends State<CountingScreen>
     );
     _quoteController.forward();
 
+    // ripple rings — each 900ms, staggered
+    _ripple1Controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 900));
+    _ripple2Controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 900));
+    _ripple3Controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 900));
+
+    _ripple1Anim = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _ripple1Controller, curve: Curves.easeOut),
+    );
+    _ripple2Anim = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _ripple2Controller, curve: Curves.easeOut),
+    );
+    _ripple3Anim = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _ripple3Controller, curve: Curves.easeOut),
+    );
+
     _quoteTimer = Timer.periodic(const Duration(seconds: 5), (_) {
       _nextQuote();
     });
@@ -115,6 +136,9 @@ class _CountingScreenState extends State<CountingScreen>
     _incrementController.dispose();
     _decrementController.dispose();
     _quoteController.dispose();
+    _ripple1Controller.dispose();
+    _ripple2Controller.dispose();
+    _ripple3Controller.dispose();
     _noteController.dispose();
     super.dispose();
   }
@@ -122,6 +146,10 @@ class _CountingScreenState extends State<CountingScreen>
   void _increment() {
     HapticFeedback.lightImpact();
     _incrementController.forward().then((_) => _incrementController.reverse());
+    // fire ripple rings staggered
+    _ripple1Controller.forward(from: 0);
+    Future.delayed(const Duration(milliseconds: 150), () { if (mounted) _ripple2Controller.forward(from: 0); });
+    Future.delayed(const Duration(milliseconds: 300), () { if (mounted) _ripple3Controller.forward(from: 0); });
     setState(() => _count++);
   }
 
@@ -371,55 +399,71 @@ class _CountingScreenState extends State<CountingScreen>
   }
 
   Widget _buildCountCard() {
-    return AnimatedBuilder(
-      animation: _pulseAnimation,
-      builder: (context, child) => Transform.scale(scale: _pulseAnimation.value, child: child),
-      child: Container(
-        width: 210,
-        height: 210,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: AppColors.cardWhite,
-          boxShadow: [
-            BoxShadow(color: AppColors.plumMid.withOpacity(0.18), blurRadius: 36, spreadRadius: 4, offset: const Offset(0, 8)),
-            BoxShadow(color: Colors.white.withOpacity(0.9), blurRadius: 16, spreadRadius: -4, offset: const Offset(-4, -4)),
-          ],
-          border: Border.all(color: AppColors.goldPrimary.withOpacity(0.35), width: 2.5),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              '$_count',
-              style: const TextStyle(
-                fontSize: 68,
-                fontWeight: FontWeight.w900,
-                color: AppColors.plumDeep,
-                height: 1.0,
-                letterSpacing: -2,
-              ),
-            ),
-            const SizedBox(height: 6),
-            Container(
-              width: 36,
-              height: 2,
+    return SizedBox(
+      width: 270,
+      height: 270,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          // ripple ring 1
+          _RippleRing(animation: _ripple1Anim, baseSize: 210),
+          // ripple ring 2
+          _RippleRing(animation: _ripple2Anim, baseSize: 210),
+          // ripple ring 3
+          _RippleRing(animation: _ripple3Anim, baseSize: 210),
+          // main orb
+          AnimatedBuilder(
+            animation: _pulseAnimation,
+            builder: (context, child) => Transform.scale(scale: _pulseAnimation.value, child: child),
+            child: Container(
+              width: 210,
+              height: 210,
               decoration: BoxDecoration(
-                gradient: const LinearGradient(colors: [AppColors.goldPrimary, AppColors.goldLight]),
-                borderRadius: BorderRadius.circular(2),
+                shape: BoxShape.circle,
+                color: AppColors.cardWhite,
+                boxShadow: [
+                  BoxShadow(color: AppColors.plumMid.withOpacity(0.18), blurRadius: 36, spreadRadius: 4, offset: const Offset(0, 8)),
+                  BoxShadow(color: Colors.white.withOpacity(0.9), blurRadius: 16, spreadRadius: -4, offset: const Offset(-4, -4)),
+                ],
+                border: Border.all(color: AppColors.goldPrimary.withOpacity(0.35), width: 2.5),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    '$_count',
+                    style: const TextStyle(
+                      fontSize: 68,
+                      fontWeight: FontWeight.w900,
+                      color: AppColors.plumDeep,
+                      height: 1.0,
+                      letterSpacing: -2,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Container(
+                    width: 36,
+                    height: 2,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(colors: [AppColors.goldPrimary, AppColors.goldLight]),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'rosary counted',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.textSecondary.withOpacity(0.7),
+                      letterSpacing: 1.5,
+                    ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 8),
-            Text(
-              'rosary counted',
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w500,
-                color: AppColors.textSecondary.withOpacity(0.7),
-                letterSpacing: 1.5,
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -514,6 +558,39 @@ class _CountingScreenState extends State<CountingScreen>
           ],
         ),
       ),
+    );
+  }
+}
+
+// ── Ripple ring (water-drop effect) ──────────────────────────────────────────
+class _RippleRing extends StatelessWidget {
+  const _RippleRing({required this.animation, required this.baseSize});
+
+  final Animation<double> animation;
+  final double baseSize;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (_, __) {
+        final scale = 1.0 + animation.value * 0.55;
+        final opacity = (1.0 - animation.value).clamp(0.0, 1.0);
+        return Transform.scale(
+          scale: scale,
+          child: Container(
+            width: baseSize,
+            height: baseSize,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: AppColors.goldPrimary.withOpacity(opacity * 0.7),
+                width: 2.5 * (1.0 - animation.value * 0.6),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }
