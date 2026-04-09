@@ -309,7 +309,7 @@ class _LoginScreenState extends State<LoginScreen>
           width: 84,
           height: 84,
           decoration: BoxDecoration(
-            shape: BoxShape.circle,
+            borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
                 color: AppColors.goldPrimary.withOpacity(0.40),
@@ -327,9 +327,10 @@ class _LoginScreenState extends State<LoginScreen>
               width: 2.5,
             ),
           ),
-          child: ClipOval(
-            child: Image.asset('assets/splash/splash_org.png', fit: BoxFit.cover),
-          ),
+          child: ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: Image.asset('assets/splash/upper_room.png', fit: BoxFit.cover),
+            ),
         ),
         const SizedBox(height: 18),
         ShaderMask(
@@ -339,7 +340,7 @@ class _LoginScreenState extends State<LoginScreen>
             end: Alignment.bottomRight,
           ).createShader(bounds),
           child: const Text(
-            'Rosary Bank',
+            'Upper Room',
             style: TextStyle(
               fontSize: 32,
               fontWeight: FontWeight.w800,

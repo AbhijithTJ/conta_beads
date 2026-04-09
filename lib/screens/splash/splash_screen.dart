@@ -50,9 +50,11 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
   late AnimationController _scaleController;
   late AnimationController _slideController;
   late AnimationController _snowController;
+  late AnimationController _prayController;
   late Animation<double> _fadeAnimation;
   late Animation<double> _scaleAnimation;
   late Animation<Offset> _slideAnimation;
+  late Animation<double> _prayAnimation;
   late List<Snowflake> snowflakes = [];
 
   @override
@@ -75,6 +77,15 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
       vsync: this,
       duration: const Duration(seconds: 30),
     )..repeat();
+
+    _prayController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2200),
+    )..repeat(reverse: true);
+
+    _prayAnimation = Tween<double>(begin: 0.06, end: 0.14).animate(
+      CurvedAnimation(parent: _prayController, curve: Curves.easeInOut),
+    );
 
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _fadeController, curve: Curves.easeIn),
@@ -127,6 +138,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
     _scaleController.dispose();
     _slideController.dispose();
     _snowController.dispose();
+    _prayController.dispose();
     super.dispose();
   }
 
@@ -154,6 +166,23 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
               painter: SnowPainter(snowflakes),
               size: Size.infinite,
             ),
+
+            // Praying hands background decoration
+            Positioned.fill(
+              child: AnimatedBuilder(
+                animation: _prayAnimation,
+                builder: (context, child) => Opacity(
+                  opacity: _prayAnimation.value,
+                  child: child,
+                ),
+                child: const Center(
+                  child: Text(
+                    '🙏',
+                    style: TextStyle(fontSize: 280),
+                  ),
+                ),
+              ),
+            ),
             
             // Main content - centered
             Center(
@@ -180,7 +209,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                         width: 240,
                         height: 240,
                         decoration: BoxDecoration(
-                          shape: BoxShape.circle,
+                          borderRadius: BorderRadius.circular(24),
                           boxShadow: [
                             BoxShadow(
                               color: AppColors.goldPrimary.withOpacity(0.4),
@@ -198,9 +227,10 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                             width: 3,
                           ),
                         ),
-                        child: ClipOval(
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(24),
                           child: Image.asset(
-                            'assets/splash/splash_org.png',
+                            'assets/splash/upper_room.png',
                             fit: BoxFit.cover,
                           ),
                         ),
@@ -218,7 +248,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                           end: Alignment.bottomRight,
                         ).createShader(bounds),
                         child: const Text(
-                          'Rosary Bank',
+                          'Upper Room',
                           style: TextStyle(
                             fontSize: 44,
                             fontFamily: 'Georgia',

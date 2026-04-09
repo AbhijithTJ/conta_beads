@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:async';
 import '../../colors/colors.dart';
+import '../../services/localization_service.dart';
 
 class CountingScreen extends StatefulWidget {
   final String userEmail;
@@ -161,18 +162,18 @@ class _CountingScreenState extends State<CountingScreen>
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         backgroundColor: AppColors.cardWhite,
-        title: const Text(
-          'Decrease Count',
-          style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700, fontSize: 20),
+        title: Text(
+          loc.tr('decrease_count'),
+          style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700, fontSize: 20),
         ),
-        content: const Text(
-          'Are you sure you want to go back (decrease) the count?',
-          style: TextStyle(color: AppColors.textSecondary, fontSize: 15),
+        content: Text(
+          loc.tr('decrease_confirm'),
+          style: const TextStyle(color: AppColors.textSecondary, fontSize: 15),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel', style: TextStyle(color: AppColors.textSecondary, fontSize: 15)),
+            child: Text(loc.tr('cancel'), style: const TextStyle(color: AppColors.textSecondary, fontSize: 15)),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -185,7 +186,7 @@ class _CountingScreenState extends State<CountingScreen>
               _decrementController.forward().then((_) => _decrementController.reverse());
               setState(() => _count--);
             },
-            child: const Text('Go Back', style: TextStyle(fontSize: 15)),
+            child: Text(loc.tr('go_back'), style: const TextStyle(fontSize: 15)),
           ),
         ],
       ),
@@ -196,8 +197,8 @@ class _CountingScreenState extends State<CountingScreen>
     HapticFeedback.selectionClick();
     final noteText = _noteController.text.trim();
     final msg = noteText.isEmpty
-        ? 'Count $_count saved successfully!'
-        : 'Count $_count for "$noteText" saved!';
+        ? loc.tr('count_saved', args: {'count': '$_count'})
+        : loc.tr('count_saved_note', args: {'count': '$_count', 'note': noteText});
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -285,23 +286,153 @@ class _CountingScreenState extends State<CountingScreen>
     );
   }
 
+  String _selectedLanguage = 'English';
+
+  final List<Map<String, String>> _languages = [
+    {'code': 'EN', 'name': 'English'},
+    {'code': 'ML', 'name': 'Malayalam'},
+    {'code': 'HI', 'name': 'Hindi'},
+    {'code': 'TA', 'name': 'Tamil'},
+    {'code': 'LA', 'name': 'Latin'},
+  ];
+
+  void _showLanguagePicker() {
+    HapticFeedback.lightImpact();
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (ctx) {
+        return Padding(
+          padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
+          child: Container(
+            decoration: BoxDecoration(
+              color: AppColors.cardWhite,
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+              border: Border.all(color: AppColors.goldPrimary.withOpacity(0.2), width: 1.5),
+            ),
+            padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 40, height: 4,
+                  decoration: BoxDecoration(
+                    color: AppColors.goldPrimary.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  children: [
+                    const Icon(Icons.language_rounded, color: AppColors.goldPrimary, size: 20),
+                    const SizedBox(width: 10),
+                    Text(
+                      loc.tr('select_language'),
+                      style: TextStyle(
+                        fontSize: 16, fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary, letterSpacing: 0.3,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                ConstrainedBox(
+                  constraints: BoxConstraints(maxHeight: MediaQuery.of(ctx).size.height * 0.45),
+                  child: SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: _languages.map((lang) {
+                        final isSelected = lang['name'] == _selectedLanguage;
+                        return GestureDetector(
+                          onTap: () async {
+                            await loc.load(lang['name']!);
+                            setState(() => _selectedLanguage = lang['name']!);
+                            Navigator.pop(ctx);
+                          },
+                          child: Container(
+                            margin: const EdgeInsets.only(bottom: 8),
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                            decoration: BoxDecoration(
+                              color: isSelected ? AppColors.goldPrimary.withOpacity(0.1) : Colors.transparent,
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(
+                                color: isSelected ? AppColors.goldPrimary.withOpacity(0.4) : AppColors.goldPrimary.withOpacity(0.1),
+                                width: 1.5,
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 36, height: 36,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: isSelected ? AppColors.goldPrimary.withOpacity(0.15) : AppColors.lavenderLight,
+                                    border: Border.all(color: AppColors.goldPrimary.withOpacity(0.2)),
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      lang['code']!,
+                                      style: TextStyle(
+                                        fontSize: 10, fontWeight: FontWeight.w800,
+                                        color: isSelected ? AppColors.goldDark : AppColors.textSecondary,
+                                        letterSpacing: 0.5,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 14),
+                                Expanded(
+                                  child: Text(
+                                    lang['name']!,
+                                    style: TextStyle(
+                                      fontSize: 15, fontWeight: FontWeight.w600,
+                                      color: isSelected ? AppColors.textPrimary : AppColors.textSecondary,
+                                    ),
+                                  ),
+                                ),
+                                if (isSelected)
+                                  const Icon(Icons.check_rounded, color: AppColors.goldPrimary, size: 20),
+                              ],
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   Widget _buildHeader() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        // Logo + name
+        Row(
           children: [
-            Text(
-              'ROSARY BANK',
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 3,
-                color: AppColors.goldDark.withOpacity(0.7),
+            Container(
+              width: 42,
+              height: 42,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: AppColors.goldPrimary.withOpacity(0.35), width: 1.5),
+                boxShadow: [
+                  BoxShadow(color: AppColors.goldPrimary.withOpacity(0.25), blurRadius: 10, spreadRadius: 1),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Image.asset('assets/splash/upper_room.png', fit: BoxFit.cover),
               ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(width: 10),
             ShaderMask(
               shaderCallback: (bounds) => const LinearGradient(
                 colors: [AppColors.goldDark, AppColors.goldPrimary, AppColors.plumMid],
@@ -309,30 +440,48 @@ class _CountingScreenState extends State<CountingScreen>
                 end: Alignment.bottomRight,
               ).createShader(bounds),
               child: const Text(
-                'Count',
+                'Upper Room',
                 style: TextStyle(
-                  fontSize: 32,
+                  fontSize: 22,
                   fontWeight: FontWeight.w900,
                   color: Colors.white,
-                  letterSpacing: -0.5,
+                  letterSpacing: 0.5,
                 ),
               ),
             ),
           ],
         ),
-        // Bead icon
-        Container(
-          width: 48,
-          height: 48,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: AppColors.cardWhite,
-            border: Border.all(color: AppColors.goldPrimary.withOpacity(0.3), width: 1.5),
-            boxShadow: [
-              BoxShadow(color: AppColors.plumMid.withOpacity(0.15), blurRadius: 12, offset: const Offset(0, 4)),
-            ],
+        // Language selector
+        GestureDetector(
+          onTap: _showLanguagePicker,
+          child: Container(
+            height: 40,
+            padding: const EdgeInsets.symmetric(horizontal: 14),
+            decoration: BoxDecoration(
+              color: AppColors.cardWhite,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: AppColors.goldPrimary.withOpacity(0.3), width: 1.5),
+              boxShadow: [
+                BoxShadow(color: AppColors.plumMid.withOpacity(0.12), blurRadius: 10, offset: const Offset(0, 3)),
+              ],
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.language_rounded, color: AppColors.goldPrimary, size: 16),
+                const SizedBox(width: 6),
+                Text(
+                  _selectedLanguage,
+                  style: const TextStyle(
+                    fontSize: 12, fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary, letterSpacing: 0.3,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.goldPrimary.withOpacity(0.7), size: 16),
+              ],
+            ),
           ),
-          child: const Icon(Icons.circle_outlined, color: AppColors.goldPrimary, size: 24),
         ),
       ],
     );
@@ -466,7 +615,7 @@ class _CountingScreenState extends State<CountingScreen>
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'rosary counted',
+                    loc.tr('rosary_counted'),
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w500,
@@ -530,7 +679,7 @@ class _CountingScreenState extends State<CountingScreen>
         controller: _noteController,
         style: const TextStyle(color: AppColors.textPrimary, fontSize: 15, fontWeight: FontWeight.w500),
         decoration: InputDecoration(
-          hintText: 'Add your intentions...',
+          hintText: loc.tr('add_intentions'),
           hintStyle: TextStyle(color: AppColors.textSecondary.withOpacity(0.45), fontSize: 14, fontWeight: FontWeight.w400),
           prefixIcon: const Icon(Icons.edit_note_rounded, color: AppColors.goldPrimary, size: 24),
           border: InputBorder.none,
@@ -561,14 +710,14 @@ class _CountingScreenState extends State<CountingScreen>
           ],
           border: Border.all(color: Colors.white.withOpacity(0.25), width: 1),
         ),
-        child: const Row(
+        child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.bookmark_rounded, color: Colors.white, size: 20),
-            SizedBox(width: 8),
+            const Icon(Icons.bookmark_rounded, color: Colors.white, size: 20),
+            const SizedBox(width: 8),
             Text(
-              'Save',
-              style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700, letterSpacing: 0.5),
+              loc.tr('save'),
+              style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700, letterSpacing: 0.5),
             ),
           ],
         ),

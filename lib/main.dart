@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'screens/splash/splash_screen.dart';
+import 'services/localization_service.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await loc.load('English'); // default language
   runApp(const MyApp());
 }
 
@@ -22,4 +25,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
