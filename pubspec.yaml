@@ -37,6 +37,7 @@ dependencies:
   intl_phone_field: ^3.2.0
   curved_navigation_bar: ^1.0.3
   shared_preferences: ^2.2.2
+  local_auth: ^2.3.0
 
 dev_dependencies:
   flutter_test:
