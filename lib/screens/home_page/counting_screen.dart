@@ -301,7 +301,8 @@ class _CountingScreenState extends State<CountingScreen>
       opacity: _quoteFadeAnim,
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 22),
+        height: 160,
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         decoration: BoxDecoration(
           color: AppColors.cardWhite,
           borderRadius: BorderRadius.circular(22),
@@ -312,26 +313,29 @@ class _CountingScreenState extends State<CountingScreen>
           ],
         ),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // ornament
             Text(
               '\u275D',
-              style: TextStyle(fontSize: 26, color: AppColors.goldPrimary.withOpacity(0.55), height: 1.0),
+              style: TextStyle(fontSize: 20, color: AppColors.goldPrimary.withOpacity(0.55), height: 1.0),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 6),
             Text(
               quote['text']!,
               textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 fontSize: 14.5,
                 fontWeight: FontWeight.w500,
                 color: AppColors.textPrimary.withOpacity(0.85),
                 fontStyle: FontStyle.italic,
-                height: 1.65,
+                height: 1.5,
                 letterSpacing: 0.2,
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
             Text(
               quote['reference']!,
               style: const TextStyle(
@@ -341,7 +345,7 @@ class _CountingScreenState extends State<CountingScreen>
                 letterSpacing: 1.2,
               ),
             ),
-            const SizedBox(height: 14),
+            const SizedBox(height: 10),
             // dot indicators
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
