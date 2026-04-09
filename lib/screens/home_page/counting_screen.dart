@@ -230,6 +230,7 @@ class _CountingScreenState extends State<CountingScreen>
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
     return Scaffold(
       resizeToAvoidBottomInset: true,
       body: Container(
@@ -243,28 +244,42 @@ class _CountingScreenState extends State<CountingScreen>
             stops: [0.0, 0.5, 1.0],
           ),
         ),
-        child: SafeArea(
-          child: SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Column(
-              children: [
-                const SizedBox(height: 24),
-                _buildHeader(),
-                const SizedBox(height: 24),
-                _buildQuoteCard(),
-                const SizedBox(height: 32),
-                _buildCountCard(),
-                const SizedBox(height: 36),
-                _buildCountButtons(),
-                const SizedBox(height: 32),
-                _buildNoteInput(),
-                const SizedBox(height: 20),
-                _buildSaveButton(),
-                const SizedBox(height: 40),
-              ],
+        child: Stack(
+          children: [
+            // ── Static orb bubbles (same as login) ──
+            _Orb(left: size.width * 0.2, top: -size.height * 0.08, size: size.width * 0.72,
+              colors: [AppColors.plumMid.withOpacity(0.55), AppColors.plumDeep.withOpacity(0.30)]),
+            _Orb(left: -size.width * 0.22, top: size.height * 0.28, size: size.width * 0.65,
+              colors: [AppColors.dustyRose.withOpacity(0.60), AppColors.dustyRose.withOpacity(0.25)]),
+            _Orb(left: size.width * 0.55, top: size.height * 0.38, size: size.width * 0.60,
+              colors: [AppColors.lavenderSoft.withOpacity(0.70), AppColors.plumMid.withOpacity(0.20)]),
+            _Orb(left: size.width * 0.1, top: size.height * 0.72, size: size.width * 0.55,
+              colors: [AppColors.goldPrimary.withOpacity(0.22), AppColors.dustyRose.withOpacity(0.30)]),
+            // ── Content ──
+            SafeArea(
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 24),
+                    _buildHeader(),
+                    const SizedBox(height: 24),
+                    _buildQuoteCard(),
+                    const SizedBox(height: 32),
+                    _buildCountCard(),
+                    const SizedBox(height: 36),
+                    _buildCountButtons(),
+                    const SizedBox(height: 32),
+                    _buildNoteInput(),
+                    const SizedBox(height: 20),
+                    _buildSaveButton(),
+                    const SizedBox(height: 40),
+                  ],
+                ),
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );
@@ -634,6 +649,49 @@ class _CircleActionButton extends StatelessWidget {
           border: Border.all(color: Colors.white.withOpacity(0.35), width: 2),
         ),
         child: Icon(icon, color: Colors.white, size: iconSize),
+      ),
+    );
+  }
+}
+
+// ── Orb bubble widget ─────────────────────────────────────────────────────────
+class _Orb extends StatelessWidget {
+  final double left;
+  final double top;
+  final double size;
+  final List<Color> colors;
+
+  const _Orb({
+    required this.left,
+    required this.top,
+    required this.size,
+    required this.colors,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      left: left,
+      top: top,
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: RadialGradient(
+            center: const Alignment(-0.3, -0.3),
+            radius: 0.85,
+            colors: colors,
+            stops: const [0.0, 1.0],
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: colors[0].withOpacity(0.25),
+              blurRadius: size * 0.35,
+              spreadRadius: size * 0.05,
+            ),
+          ],
+        ),
       ),
     );
   }
