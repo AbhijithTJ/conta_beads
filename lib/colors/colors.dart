@@ -1,41 +1,53 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  // Gold Palette
+  // Gold Palette — must remain in design
   static const Color goldPrimary = Color(0xFFD4A843);
-  static const Color goldLight = Color(0xFFF0C96A);
+  static const Color goldLight = Color(0xFFE8C97A);
   static const Color goldDark = Color(0xFFB8902E);
-  
-  // Gold/Orange Accents (for buttons)
-  static const Color goldAccent = Color(0xFFE8A020);
-  static const Color goldAccentDark = Color(0xFFD4780A);
-  static const Color saveGold = Color(0xFFE8A020); // Alias for consistency
-  static const Color saveDark = Color(0xFFC8880A);
+  static const Color goldAccent = Color(0xFFD4A843);
+  static const Color goldAccentDark = Color(0xFFB8902E);
+  static const Color saveGold = Color(0xFFD4A843);
+  static const Color saveDark = Color(0xFFB8902E);
 
-  // Header Halo colors
-  static const Color haloLight = Color(0xFFFFF8E7);
-  static const Color haloDark = Color(0xFFF5E8C0);
+  // Halo (warm gold glow)
+  static const Color haloLight = Color(0xFFFFF5F8);
+  static const Color haloDark = Color(0xFFF5E0EC);
 
-  // Sky Palette
-  static const Color skyTop = Color(0xFFDCEEFB);
-  static const Color skyMid = Color(0xFFC8E3F8);
-  static const Color skyBottom = Color(0xFFB8D9F5);
+  // Background Gradient — Plum/Mauve/Lavender palette
+  static const Color bgTop = Color(0xFFF5EEF5);      // soft lavender-white
+  static const Color bgMid = Color(0xFFEDE0ED);       // light mauve
+  static const Color bgBottom = Color(0xFFE5D0E5);    // dusty lavender
 
-  // UI Elements
-  static const Color cardWhite = Color(0xFFF5FAFF);
-  static const Color textPrimary = Color(0xFF1A3A5C);
-  static const Color textSecondary = Color(0xFF4A6FA5);
+  // Legacy sky aliases (used in screens — now mapped to new palette)
+  static const Color skyTop = Color(0xFFF5EEF5);
+  static const Color skyMid = Color(0xFFEDE0ED);
+  static const Color skyBottom = Color(0xFFE5D0E5);
+
+  // Card & Surface
+  static const Color cardWhite = Color(0xFFFAF5FA);
+
+  // Text
+  static const Color textPrimary = Color(0xFF4A1F4A);    // deep plum
+  static const Color textSecondary = Color(0xFF9B6B8A);  // muted mauve
 
   // Action Buttons
-  static const Color greenButton = Color(0xFF4CAF82);
-  static const Color greenDark = Color(0xFF3A9669);
-  static const Color greyButton = Color(0xFF8FA3B1);
-  static const Color greyDark = Color(0xFF6B8291);
-  static const Color resetGrey = Color(0xFFDDE8F0);
-  static const Color resetGreyDark = Color(0xFFC0D0DC);
+  static const Color greenButton = Color(0xFF9B6B8A);    // mauve (replaces green)
+  static const Color greenDark = Color(0xFF7B3F6E);      // deep plum
+  static const Color greyButton = Color(0xFFD4A0A0);     // dusty rose
+  static const Color greyDark = Color(0xFFB88080);
+  static const Color resetGrey = Color(0xFFEDE0ED);
+  static const Color resetGreyDark = Color(0xFFD8C8D8);
 
-  // Intentions Screen - Rose/Pink Palette
-  static const Color rosaryButtonPrimary = Color(0xFFE8908A);
-  static const Color rosaryButtonDark = Color(0xFFD4706A);
-  static const Color prayerRequestsIcon = Color(0xFFE8A0A0);
+  // Intentions / Rosary — Rose/Plum
+  static const Color rosaryButtonPrimary = Color(0xFF9B6B8A);
+  static const Color rosaryButtonDark = Color(0xFF7B3F6E);
+  static const Color prayerRequestsIcon = Color(0xFFD4A0A0);
+
+  // Accent plum shades
+  static const Color plumDeep = Color(0xFF7B3F6E);
+  static const Color plumMid = Color(0xFF9B6B8A);
+  static const Color dustyRose = Color(0xFFD4A0A0);
+  static const Color lavenderSoft = Color(0xFFD8C8D8);
+  static const Color lavenderLight = Color(0xFFF0EBF0);
 }

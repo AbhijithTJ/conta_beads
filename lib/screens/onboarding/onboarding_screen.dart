@@ -23,31 +23,31 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       icon: '📿',
       title: 'Welcome to Rosary Bank',
       description: 'A sacred space to count your rosaries and join a global community of prayer.',
-      color: const Color(0xFFD4A843),
+      color: const Color(0xFFD4A843), // gold
     ),
     OnboardingPage(
       icon: '➕',
       title: 'Count Your Rosaries',
       description: 'Use the Home screen to count each rosary bead. Tap + to add and - to adjust. Save your count when done.',
-      color: const Color(0xFF4CAF82),
+      color: const Color(0xFF9B6B8A), // mauve
     ),
     OnboardingPage(
       icon: '🌍',
       title: 'Global Community',
       description: 'See how many rosaries our community has offered together. Your prayers contribute to our collective goal of 150 million rosaries.',
-      color: const Color(0xFF3182CE),
+      color: const Color(0xFF7B3F6E), // deep plum
     ),
     OnboardingPage(
       icon: '🙏',
       title: 'Share Your Intentions',
       description: 'Visit the Intentions screen to submit your prayer requests. Share your spiritual intentions with our community.',
-      color: const Color(0xFFE8A0A0),
+      color: const Color(0xFFD4A0A0), // dusty rose
     ),
     OnboardingPage(
       icon: '👤',
       title: 'Your Profile',
       description: 'Track your personal statistics and see your contribution to the global rosary count.',
-      color: const Color(0xFF8FA3B1),
+      color: const Color(0xFFD8C8D8), // soft lavender
     ),
   ];
 
@@ -68,7 +68,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
-          color: Color(0xFFFAF7F2),
+          color: Color(0xFFF5EEF5), // soft lavender-white
         ),
         child: SafeArea(
           child: Column(

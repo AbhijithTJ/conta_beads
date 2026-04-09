@@ -115,9 +115,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                AppColors.skyTop.withOpacity(0.05),
-                AppColors.skyMid.withOpacity(0.05),
-                AppColors.skyBottom.withOpacity(0.05),
+                AppColors.bgTop,
+                AppColors.bgMid,
+                AppColors.bgBottom,
               ],
               stops: const [0.0, 0.5, 1.0],
             ),
@@ -382,7 +382,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         const SizedBox(height: 14),
         ShaderMask(
           shaderCallback: (bounds) => const LinearGradient(
-            colors: [AppColors.goldDark, AppColors.goldPrimary, AppColors.goldLight],
+            colors: [AppColors.goldDark, AppColors.goldPrimary, AppColors.plumMid],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ).createShader(bounds),

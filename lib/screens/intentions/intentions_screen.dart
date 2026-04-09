@@ -51,9 +51,9 @@ class _IntentionsScreenState extends State<IntentionsScreen>
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              AppColors.skyTop.withOpacity(0.05),
-              AppColors.skyMid.withOpacity(0.05),
-              AppColors.skyBottom.withOpacity(0.05),
+              AppColors.bgTop,
+              AppColors.bgMid,
+              AppColors.bgBottom,
             ],
             stops: const [0.0, 0.5, 1.0],
           ),
@@ -265,8 +265,8 @@ class _IntentionsScreenState extends State<IntentionsScreen>
           // Intentions - Prayer requests icon box
           _IconBox(
             emoji: '👥',
-            bgColor: AppColors.skyMid.withOpacity(0.3),
-            borderColor: AppColors.textSecondary.withOpacity(0.2),
+            bgColor: AppColors.lavenderSoft.withOpacity(0.4),
+            borderColor: AppColors.plumMid.withOpacity(0.2),
           ),
           const SizedBox(width: 16),
           Expanded(

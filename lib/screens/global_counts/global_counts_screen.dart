@@ -103,9 +103,9 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              AppColors.skyTop.withOpacity(0.05),
-              AppColors.skyMid.withOpacity(0.05),
-              AppColors.skyBottom.withOpacity(0.05),
+              AppColors.bgTop,
+              AppColors.bgMid,
+              AppColors.bgBottom,
             ],
             stops: const [0.0, 0.5, 1.0],
           ),
@@ -613,11 +613,11 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
     } else {
       // GlobalCounts - Bronze rank style
       return {
-        'bg': AppColors.skyMid.withOpacity(0.2),
-        'border': AppColors.textSecondary.withOpacity(0.2),
-        'text': AppColors.textSecondary,
+        'bg': AppColors.lavenderSoft.withOpacity(0.3),
+        'border': AppColors.plumMid.withOpacity(0.2),
+        'text': AppColors.plumMid,
         'nameColor': AppColors.textSecondary,
-        'numGradient': [AppColors.textSecondary, AppColors.skyBottom],
+        'numGradient': [AppColors.plumMid, AppColors.dustyRose],
       };
     }
   }
@@ -625,21 +625,19 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
   // GlobalCounts - Shared card decoration with pulsing glow effect
   BoxDecoration _cardDecoration({double glowValue = 0.5}) {
     return BoxDecoration(
-      color: AppColors.skyMid.withOpacity(0.18),
+      color: AppColors.lavenderSoft.withOpacity(0.25),
       borderRadius: BorderRadius.circular(20),
       border: Border.all(
-        color: AppColors.skyBottom.withOpacity(0.5),
+        color: AppColors.plumMid.withOpacity(0.2),
         width: 1,
       ),
       boxShadow: [
-        // GlobalCounts - Pulsing blue glow
         BoxShadow(
-          color: AppColors.skyMid.withOpacity(0.15 + 0.25 * glowValue),
+          color: AppColors.plumMid.withOpacity(0.1 + 0.15 * glowValue),
           blurRadius: 16 + 14 * glowValue,
           spreadRadius: 1 + 2 * glowValue,
           offset: const Offset(0, 4),
         ),
-        // GlobalCounts - Static white inner glow
         BoxShadow(
           color: Colors.white.withOpacity(0.8),
           blurRadius: 8,

@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:async';
-import 'dart:ui';
 import '../../colors/colors.dart';
 
 class CountingScreen extends StatefulWidget {
   final String userEmail;
-  
+
   const CountingScreen({
     super.key,
     required this.userEmail,
@@ -20,41 +19,45 @@ class _CountingScreenState extends State<CountingScreen>
     with TickerProviderStateMixin {
   int _count = 0;
   final TextEditingController _noteController = TextEditingController();
+
   late AnimationController _pulseController;
   late AnimationController _incrementController;
   late AnimationController _decrementController;
+  late AnimationController _quoteController;
   late Animation<double> _pulseAnimation;
   late Animation<double> _incrementScaleAnim;
   late Animation<double> _decrementScaleAnim;
+  late Animation<double> _quoteFadeAnim;
 
-  // Combined image + quote slides
-  final List<Map<String, String>> _slides = [
+  final List<Map<String, String>> _quotes = [
     {
-      'image': 'assets/demo/jesus.jpg',
-      'text': 'Christ became obedient to the point of death, even death on a cross. Because of this, God greatly exalted him...',
-      'reference': 'Philippians 2:8-9',
+      'text': 'Christ became obedient to the point of death, even death on a cross.',
+      'reference': 'Philippians 2:8',
     },
     {
-      'image': 'assets/demo/1.jpg',
-      'text': 'For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life.',
+      'text': 'For God so loved the world that he gave his one and only Son.',
       'reference': 'John 3:16',
     },
     {
-      'image': 'assets/demo/2.jpg',
-      'text': 'I have told you all this, so that you may have peace by being united with me. The world will make you suffer.',
+      'text': 'I have told you all this, so that you may have peace by being united with me.',
       'reference': 'John 16:33',
+    },
+    {
+      'text': 'Ask and it will be given to you; seek and you will find.',
+      'reference': 'Matthew 7:7',
+    },
+    {
+      'text': 'The Lord is my shepherd; I shall not want.',
+      'reference': 'Psalm 23:1',
     },
   ];
 
-  final PageController _pageController = PageController();
-  int _currentSlideIndex = 0;
-  Timer? _autoSlideTimer;
+  int _currentQuoteIndex = 0;
+  Timer? _quoteTimer;
 
   @override
   void initState() {
     super.initState();
-
-    _startAutoSlide();
 
     _pulseController = AnimationController(
       vsync: this,
@@ -80,29 +83,40 @@ class _CountingScreenState extends State<CountingScreen>
     _decrementScaleAnim = Tween<double>(begin: 1.0, end: 0.92).animate(
       CurvedAnimation(parent: _decrementController, curve: Curves.easeOut),
     );
+
+    _quoteController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
+    _quoteFadeAnim = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _quoteController, curve: Curves.easeInOut),
+    );
+    _quoteController.forward();
+
+    _quoteTimer = Timer.periodic(const Duration(seconds: 5), (_) {
+      _nextQuote();
+    });
+  }
+
+  void _nextQuote() {
+    _quoteController.reverse().then((_) {
+      if (!mounted) return;
+      setState(() {
+        _currentQuoteIndex = (_currentQuoteIndex + 1) % _quotes.length;
+      });
+      _quoteController.forward();
+    });
   }
 
   @override
   void dispose() {
-    _autoSlideTimer?.cancel();
-    _pageController.dispose();
+    _quoteTimer?.cancel();
     _pulseController.dispose();
     _incrementController.dispose();
     _decrementController.dispose();
+    _quoteController.dispose();
     _noteController.dispose();
     super.dispose();
-  }
-
-  void _startAutoSlide() {
-    _autoSlideTimer = Timer.periodic(const Duration(seconds: 4), (_) {
-      if (!mounted) return;
-      final next = (_currentSlideIndex + 1) % _slides.length;
-      _pageController.animateToPage(
-        next,
-        duration: const Duration(milliseconds: 600),
-        curve: Curves.easeInOut,
-      );
-    });
   }
 
   void _increment() {
@@ -113,7 +127,6 @@ class _CountingScreenState extends State<CountingScreen>
 
   void _decrement() {
     if (_count == 0) return;
-
     HapticFeedback.lightImpact();
     showDialog(
       context: context,
@@ -122,11 +135,7 @@ class _CountingScreenState extends State<CountingScreen>
         backgroundColor: AppColors.cardWhite,
         title: const Text(
           'Decrease Count',
-          style: TextStyle(
-            color: AppColors.textPrimary,
-            fontWeight: FontWeight.w700,
-            fontSize: 20,
-          ),
+          style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700, fontSize: 20),
         ),
         content: const Text(
           'Are you sure you want to go back (decrease) the count?',
@@ -135,21 +144,17 @@ class _CountingScreenState extends State<CountingScreen>
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel',
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 15)),
+            child: const Text('Cancel', style: TextStyle(color: AppColors.textSecondary, fontSize: 15)),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.greyButton,
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
             onPressed: () {
               Navigator.pop(ctx);
-              _decrementController
-                  .forward()
-                  .then((_) => _decrementController.reverse());
+              _decrementController.forward().then((_) => _decrementController.reverse());
               setState(() => _count--);
             },
             child: const Text('Go Back', style: TextStyle(fontSize: 15)),
@@ -162,8 +167,8 @@ class _CountingScreenState extends State<CountingScreen>
   void _save() {
     HapticFeedback.selectionClick();
     final noteText = _noteController.text.trim();
-    final successMsg = noteText.isEmpty 
-        ? 'Count $_count saved successfully!' 
+    final msg = noteText.isEmpty
+        ? 'Count $_count saved successfully!'
         : 'Count $_count for "$noteText" saved!';
 
     ScaffoldMessenger.of(context).showSnackBar(
@@ -173,14 +178,7 @@ class _CountingScreenState extends State<CountingScreen>
             const Icon(Icons.check_circle, color: Colors.white, size: 20),
             const SizedBox(width: 10),
             Expanded(
-              child: Text(
-                successMsg,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14,
-                ),
-              ),
+              child: Text(msg, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 14)),
             ),
           ],
         ),
@@ -192,7 +190,6 @@ class _CountingScreenState extends State<CountingScreen>
       ),
     );
 
-    // Reset count and clear note text after saving
     Future.delayed(const Duration(milliseconds: 500), () {
       if (mounted) {
         setState(() {
@@ -210,226 +207,160 @@ class _CountingScreenState extends State<CountingScreen>
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [
-              AppColors.skyTop.withOpacity(0.05),
-              AppColors.skyMid.withOpacity(0.05),
-              AppColors.skyBottom.withOpacity(0.05),
-            ],
-            stops: const [0.0, 0.5, 1.0],
+            colors: [AppColors.bgTop, AppColors.bgMid, AppColors.bgBottom],
+            stops: [0.0, 0.5, 1.0],
           ),
         ),
         child: SafeArea(
-          child: Stack(
-          children: [
-            // ── Quotes Section (Top) with Image Background - Behind ──
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              height: MediaQuery.of(context).size.height * 0.38,
-              child: _buildQuotesSection(),
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Column(
+              children: [
+                const SizedBox(height: 24),
+                _buildHeader(),
+                const SizedBox(height: 24),
+                _buildQuoteCard(),
+                const SizedBox(height: 32),
+                _buildCountCard(),
+                const SizedBox(height: 36),
+                _buildCountButtons(),
+                const SizedBox(height: 32),
+                _buildNoteInput(),
+                const SizedBox(height: 20),
+                _buildSaveButton(),
+                const SizedBox(height: 40),
+              ],
             ),
-            // ── Scrollable Content ──
-            SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              child: Column(
-                children: [
-                  // Spacer to push counting section down - shows more of image
-                  SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.32,
-                  ),
-                  // ── Counting Section (Bottom) with Curved Top - On Top ──
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(40),
-                        topRight: Radius.circular(40),
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 20,
-                          offset: const Offset(0, -5),
-                        ),
-                      ],
-                    ),
-                    child: _buildCountingSection(),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildQuotesSection() {
-    return Stack(
+  Widget _buildHeader() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        // Single PageView — image + quote move together
-        PageView.builder(
-          controller: _pageController,
-          itemCount: _slides.length,
-          onPageChanged: (index) => setState(() => _currentSlideIndex = index),
-          itemBuilder: (context, index) {
-            final slide = _slides[index];
-            return Stack(
-              fit: StackFit.expand,
-              children: [
-                Image.asset(slide['image']!, fit: BoxFit.cover),
-                // gradient overlay
-                Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.black.withOpacity(0.1),
-                        Colors.black.withOpacity(0.45),
-                      ],
-                    ),
-                  ),
-                ),
-                // Quote card
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(20),
-                        child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                          child: Container(
-                            padding: const EdgeInsets.all(20),
-                            decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(
-                                color: Colors.white.withOpacity(0.2),
-                                width: 1.5,
-                              ),
-                            ),
-                            child: Column(
-                              children: [
-                                Text(
-                                  slide['text']!,
-                                  textAlign: TextAlign.center,
-                                  style: const TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.white,
-                                    height: 1.6,
-                                    letterSpacing: 0.3,
-                                  ),
-                                ),
-                                const SizedBox(height: 12),
-                                Text(
-                                  slide['reference']!,
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w500,
-                                    color: AppColors.goldPrimary,
-                                    letterSpacing: 0.5,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            );
-          },
-        ),
-        // Slide indicator dots
-        Positioned(
-          bottom: 12,
-          left: 0,
-          right: 0,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: List.generate(
-              _slides.length,
-              (index) => AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                width: _currentSlideIndex == index ? 20 : 7,
-                height: 7,
-                margin: const EdgeInsets.symmetric(horizontal: 3),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(4),
-                  color: _currentSlideIndex == index
-                      ? Colors.white
-                      : Colors.white.withOpacity(0.4),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'ROSARY BANK',
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 3,
+                color: AppColors.goldDark.withOpacity(0.7),
+              ),
+            ),
+            const SizedBox(height: 4),
+            ShaderMask(
+              shaderCallback: (bounds) => const LinearGradient(
+                colors: [AppColors.goldDark, AppColors.goldPrimary, AppColors.plumMid],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ).createShader(bounds),
+              child: const Text(
+                'Count',
+                style: TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.w900,
+                  color: Colors.white,
+                  letterSpacing: -0.5,
                 ),
               ),
             ),
+          ],
+        ),
+        // Bead icon
+        Container(
+          width: 48,
+          height: 48,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: AppColors.cardWhite,
+            border: Border.all(color: AppColors.goldPrimary.withOpacity(0.3), width: 1.5),
+            boxShadow: [
+              BoxShadow(color: AppColors.plumMid.withOpacity(0.15), blurRadius: 12, offset: const Offset(0, 4)),
+            ],
           ),
+          child: const Icon(Icons.circle_outlined, color: AppColors.goldPrimary, size: 24),
         ),
       ],
     );
   }
 
-  Widget _buildCountingSection() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 28.0, vertical: 24.0),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _buildCountCard(),
-          const SizedBox(height: 32),
-          _buildCountButtons(),
-          const SizedBox(height: 32),
-          _buildNoteInput(),
-          const SizedBox(height: 32),
-          _buildBottomActions(),
-          const SizedBox(height: 32),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildNoteInput() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.5),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withOpacity(0.6), width: 1.5),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: TextField(
-        controller: _noteController,
-        style: const TextStyle(
-          color: AppColors.textPrimary,
-          fontSize: 15,
-          fontWeight: FontWeight.w600,
+  Widget _buildQuoteCard() {
+    final quote = _quotes[_currentQuoteIndex];
+    return FadeTransition(
+      opacity: _quoteFadeAnim,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 22),
+        decoration: BoxDecoration(
+          color: AppColors.cardWhite,
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(color: AppColors.goldPrimary.withOpacity(0.2), width: 1.5),
+          boxShadow: [
+            BoxShadow(color: AppColors.plumMid.withOpacity(0.1), blurRadius: 20, offset: const Offset(0, 6)),
+            BoxShadow(color: Colors.white.withOpacity(0.8), blurRadius: 10, spreadRadius: -2, offset: const Offset(-2, -2)),
+          ],
         ),
-        decoration: InputDecoration(
-          hintText: 'Add your intentions...',
-          hintStyle: TextStyle(
-            color: AppColors.textSecondary.withOpacity(0.5),
-            fontSize: 14,
-            fontWeight: FontWeight.w400,
-          ),
-          prefixIcon: const Icon(Icons.edit_note_rounded, color: AppColors.goldPrimary, size: 24),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        child: Column(
+          children: [
+            // ornament
+            Text(
+              '\u275D',
+              style: TextStyle(fontSize: 26, color: AppColors.goldPrimary.withOpacity(0.55), height: 1.0),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              quote['text']!,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14.5,
+                fontWeight: FontWeight.w500,
+                color: AppColors.textPrimary.withOpacity(0.85),
+                fontStyle: FontStyle.italic,
+                height: 1.65,
+                letterSpacing: 0.2,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              quote['reference']!,
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: AppColors.goldDark,
+                letterSpacing: 1.2,
+              ),
+            ),
+            const SizedBox(height: 14),
+            // dot indicators
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(_quotes.length, (i) {
+                return AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  width: i == _currentQuoteIndex ? 18 : 6,
+                  height: 6,
+                  margin: const EdgeInsets.symmetric(horizontal: 3),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(3),
+                    color: i == _currentQuoteIndex
+                        ? AppColors.goldPrimary
+                        : AppColors.goldPrimary.withOpacity(0.25),
+                  ),
+                );
+              }),
+            ),
+          ],
         ),
       ),
     );
@@ -438,36 +369,18 @@ class _CountingScreenState extends State<CountingScreen>
   Widget _buildCountCard() {
     return AnimatedBuilder(
       animation: _pulseAnimation,
-      builder: (context, child) {
-        return Transform.scale(
-          scale: _pulseAnimation.value,
-          child: child,
-        );
-      },
+      builder: (context, child) => Transform.scale(scale: _pulseAnimation.value, child: child),
       child: Container(
-        width: 220,
-        height: 220,
+        width: 210,
+        height: 210,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: AppColors.cardWhite,
           boxShadow: [
-            BoxShadow(
-              color: AppColors.goldPrimary.withOpacity(0.20),
-              blurRadius: 36,
-              spreadRadius: 4,
-              offset: const Offset(0, 8),
-            ),
-            BoxShadow(
-              color: Colors.white.withOpacity(0.9),
-              blurRadius: 16,
-              spreadRadius: -4,
-              offset: const Offset(-4, -4),
-            ),
+            BoxShadow(color: AppColors.plumMid.withOpacity(0.18), blurRadius: 36, spreadRadius: 4, offset: const Offset(0, 8)),
+            BoxShadow(color: Colors.white.withOpacity(0.9), blurRadius: 16, spreadRadius: -4, offset: const Offset(-4, -4)),
           ],
-          border: Border.all(
-            color: AppColors.goldPrimary.withOpacity(0.25),
-            width: 2.5,
-          ),
+          border: Border.all(color: AppColors.goldPrimary.withOpacity(0.35), width: 2.5),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -475,20 +388,19 @@ class _CountingScreenState extends State<CountingScreen>
             Text(
               '$_count',
               style: const TextStyle(
-                fontSize: 72,
+                fontSize: 68,
                 fontWeight: FontWeight.w900,
-                color: AppColors.textPrimary,
+                color: AppColors.plumDeep,
                 height: 1.0,
                 letterSpacing: -2,
               ),
             ),
             const SizedBox(height: 6),
             Container(
-              width: 40,
+              width: 36,
               height: 2,
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                    colors: [AppColors.goldPrimary, AppColors.goldLight]),
+                gradient: const LinearGradient(colors: [AppColors.goldPrimary, AppColors.goldLight]),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -496,7 +408,7 @@ class _CountingScreenState extends State<CountingScreen>
             Text(
               'rosary counted',
               style: TextStyle(
-                fontSize: 12,
+                fontSize: 11,
                 fontWeight: FontWeight.w500,
                 color: AppColors.textSecondary.withOpacity(0.7),
                 letterSpacing: 1.5,
@@ -512,28 +424,22 @@ class _CountingScreenState extends State<CountingScreen>
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        // Decrement (−)
         AnimatedBuilder(
           animation: _decrementScaleAnim,
-          builder: (context, child) =>
-              Transform.scale(scale: _decrementScaleAnim.value, child: child),
+          builder: (context, child) => Transform.scale(scale: _decrementScaleAnim.value, child: child),
           child: _CircleActionButton(
             onTap: _decrement,
             color: AppColors.greyButton,
             darkColor: AppColors.greyDark,
             icon: Icons.remove_rounded,
-            size: 80,
-            iconSize: 38,
+            size: 76,
+            iconSize: 36,
           ),
         ),
-
-        const SizedBox(width: 40),
-
-        // Increment (+)
+        const SizedBox(width: 44),
         AnimatedBuilder(
           animation: _incrementScaleAnim,
-          builder: (context, child) =>
-              Transform.scale(scale: _incrementScaleAnim.value, child: child),
+          builder: (context, child) => Transform.scale(scale: _incrementScaleAnim.value, child: child),
           child: _CircleActionButton(
             onTap: _increment,
             color: AppColors.greenButton,
@@ -547,32 +453,50 @@ class _CountingScreenState extends State<CountingScreen>
     );
   }
 
-  Widget _buildBottomActions() {
+  Widget _buildNoteInput() {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.cardWhite,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: AppColors.goldPrimary.withOpacity(0.2), width: 1.5),
+        boxShadow: [
+          BoxShadow(color: AppColors.plumMid.withOpacity(0.08), blurRadius: 12, offset: const Offset(0, 4)),
+        ],
+      ),
+      child: TextField(
+        controller: _noteController,
+        style: const TextStyle(color: AppColors.textPrimary, fontSize: 15, fontWeight: FontWeight.w500),
+        decoration: InputDecoration(
+          hintText: 'Add your intentions...',
+          hintStyle: TextStyle(color: AppColors.textSecondary.withOpacity(0.45), fontSize: 14, fontWeight: FontWeight.w400),
+          prefixIcon: const Icon(Icons.edit_note_rounded, color: AppColors.goldPrimary, size: 24),
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(18),
+            borderSide: const BorderSide(color: AppColors.goldPrimary, width: 1.5),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSaveButton() {
     return GestureDetector(
       onTap: _save,
       child: Container(
         height: 56,
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              AppColors.saveGold.withOpacity(0.75),
-              AppColors.goldAccentDark.withOpacity(0.75),
-            ],
+          gradient: const LinearGradient(
+            colors: [AppColors.saveGold, AppColors.goldAccentDark],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
           borderRadius: BorderRadius.circular(18),
           boxShadow: [
-            BoxShadow(
-              color: AppColors.saveGold.withOpacity(0.12),
-              blurRadius: 6,
-              offset: const Offset(0, 2),
-            ),
+            BoxShadow(color: AppColors.saveGold.withOpacity(0.35), blurRadius: 14, offset: const Offset(0, 5)),
           ],
-          border: Border.all(
-            color: Colors.white.withOpacity(0.18),
-            width: 1,
-          ),
+          border: Border.all(color: Colors.white.withOpacity(0.25), width: 1),
         ),
         child: const Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -581,12 +505,7 @@ class _CountingScreenState extends State<CountingScreen>
             SizedBox(width: 8),
             Text(
               'Save',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 0.5,
-              ),
+              style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700, letterSpacing: 0.5),
             ),
           ],
         ),
@@ -628,21 +547,10 @@ class _CircleActionButton extends StatelessWidget {
             end: Alignment.bottomRight,
           ),
           boxShadow: [
-            BoxShadow(
-              color: darkColor.withOpacity(0.45),
-              blurRadius: 18,
-              offset: const Offset(0, 7),
-            ),
-            BoxShadow(
-              color: Colors.white.withOpacity(0.5),
-              blurRadius: 6,
-              offset: const Offset(-2, -2),
-            ),
+            BoxShadow(color: darkColor.withOpacity(0.4), blurRadius: 18, offset: const Offset(0, 7)),
+            BoxShadow(color: Colors.white.withOpacity(0.5), blurRadius: 6, offset: const Offset(-2, -2)),
           ],
-          border: Border.all(
-            color: Colors.white.withOpacity(0.35),
-            width: 2,
-          ),
+          border: Border.all(color: Colors.white.withOpacity(0.35), width: 2),
         ),
         child: Icon(icon, color: Colors.white, size: iconSize),
       ),

@@ -57,7 +57,7 @@ class _IntentionSuccessScreenState extends State<IntentionSuccessScreen>
         width: double.infinity,
         height: double.infinity,
         decoration: const BoxDecoration(
-          color: Color(0xFFFAF7F2),
+          color: Color(0xFFF5EEF5), // soft lavender-white
         ),
         child: SafeArea(
           child: Column(
@@ -122,11 +122,15 @@ class _IntentionSuccessScreenState extends State<IntentionSuccessScreen>
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: AppColors.cardWhite,
                         borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: AppColors.goldPrimary.withOpacity(0.15),
+                          width: 1,
+                        ),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.06),
+                            color: AppColors.plumMid.withOpacity(0.08),
                             blurRadius: 12,
                             offset: const Offset(0, 2),
                           ),

@@ -37,9 +37,9 @@ class ProfileScreen extends StatelessWidget {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              AppColors.skyTop.withOpacity(0.05),
-              AppColors.skyMid.withOpacity(0.05),
-              AppColors.skyBottom.withOpacity(0.05),
+              AppColors.bgTop,
+              AppColors.bgMid,
+              AppColors.bgBottom,
             ],
             stops: const [0.0, 0.5, 1.0],
           ),

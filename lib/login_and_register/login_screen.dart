@@ -1,3 +1,5 @@
+import 'dart:ui';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -12,7 +14,8 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends State<LoginScreen>
+    with TickerProviderStateMixin {
   final _auth = LocalAuthentication();
   late TextEditingController _emailController;
   late TextEditingController _passwordController;
@@ -20,6 +23,16 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isLoading = false;
   bool _biometricAvailable = false;
   bool _biometricEnabled = false;
+
+  // Orb float animations
+  late AnimationController _orb1Controller;
+  late AnimationController _orb2Controller;
+  late AnimationController _orb3Controller;
+  late AnimationController _orb4Controller;
+  late Animation<double> _orb1Anim;
+  late Animation<double> _orb2Anim;
+  late Animation<double> _orb3Anim;
+  late Animation<double> _orb4Anim;
 
   static const _prefKeyBiometric = 'biometric_enabled';
   static const _prefKeyEmail = 'saved_email';
@@ -30,12 +43,49 @@ class _LoginScreenState extends State<LoginScreen> {
     _emailController = TextEditingController();
     _passwordController = TextEditingController();
     _initBiometric();
+    _initOrbAnimations();
+  }
+
+  void _initOrbAnimations() {
+    _orb1Controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 4200),
+    )..repeat(reverse: true);
+    _orb2Controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 5800),
+    )..repeat(reverse: true);
+    _orb3Controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 3600),
+    )..repeat(reverse: true);
+    _orb4Controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 6400),
+    )..repeat(reverse: true);
+
+    _orb1Anim = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(parent: _orb1Controller, curve: Curves.easeInOut),
+    );
+    _orb2Anim = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(parent: _orb2Controller, curve: Curves.easeInOut),
+    );
+    _orb3Anim = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(parent: _orb3Controller, curve: Curves.easeInOut),
+    );
+    _orb4Anim = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(parent: _orb4Controller, curve: Curves.easeInOut),
+    );
   }
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _orb1Controller.dispose();
+    _orb2Controller.dispose();
+    _orb3Controller.dispose();
+    _orb4Controller.dispose();
     super.dispose();
   }
 
@@ -45,14 +95,11 @@ class _LoginScreenState extends State<LoginScreen> {
     final prefs = await SharedPreferences.getInstance();
     final enabled = prefs.getBool(_prefKeyBiometric) ?? false;
     final savedEmail = prefs.getString(_prefKeyEmail) ?? '';
-
     setState(() {
       _biometricAvailable = canCheck && isSupported;
       _biometricEnabled = enabled;
       if (savedEmail.isNotEmpty) _emailController.text = savedEmail;
     });
-
-    // Auto-trigger biometric if already set up
     if (_biometricAvailable && _biometricEnabled) {
       await Future.delayed(const Duration(milliseconds: 400));
       _authenticateWithBiometric();
@@ -63,47 +110,36 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       final authenticated = await _auth.authenticate(
         localizedReason: 'Use biometrics to sign in to Rosary Bank',
-        options: const AuthenticationOptions(
-          biometricOnly: false,
-          stickyAuth: true,
-        ),
+        options: const AuthenticationOptions(biometricOnly: false, stickyAuth: true),
       );
       if (authenticated && mounted) {
         final prefs = await SharedPreferences.getInstance();
         final email = prefs.getString(_prefKeyEmail) ?? 'admin@gmail.com';
         _navigateToHome(email);
       }
-    } catch (_) {
-      // biometric failed or cancelled — user can still use password
-    }
+    } catch (_) {}
   }
 
   void _handleLogin() async {
     final email = _emailController.text.trim();
     final password = _passwordController.text;
-
     if (email != 'admin@gmail.com' || password != '1234') {
       _showError('Invalid email or password');
       return;
     }
-
     setState(() => _isLoading = true);
-
-    // Offer to enable biometric after first successful password login
     if (_biometricAvailable && !_biometricEnabled) {
       await _offerBiometricSetup(email);
     } else {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_prefKeyEmail, email);
     }
-
     if (mounted) _navigateToHome(email);
   }
 
   Future<void> _offerBiometricSetup(String email) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_prefKeyEmail, email);
-
     if (!mounted) return;
     final enable = await showDialog<bool>(
       context: context,
@@ -116,14 +152,9 @@ class _LoginScreenState extends State<LoginScreen> {
             Text('Quick Login', style: TextStyle(fontWeight: FontWeight.w700)),
           ],
         ),
-        content: const Text(
-          'Enable biometric login so you don\'t have to type your password next time.',
-        ),
+        content: const Text('Enable biometric login so you don\'t have to type your password next time.'),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Not now'),
-          ),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Not now')),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.goldPrimary,
@@ -135,7 +166,6 @@ class _LoginScreenState extends State<LoginScreen> {
         ],
       ),
     );
-
     if (enable == true) {
       await prefs.setBool(_prefKeyBiometric, true);
       setState(() => _biometricEnabled = true);
@@ -169,175 +199,294 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: BoxDecoration(
+        // Base gradient background
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
             colors: [
-              AppColors.skyTop.withOpacity(0.05),
-              AppColors.skyMid.withOpacity(0.05),
-              AppColors.skyBottom.withOpacity(0.05),
+              AppColors.bgTop,
+              AppColors.bgMid,
+              AppColors.bgBottom,
             ],
-            stops: const [0.0, 0.5, 1.0],
           ),
         ),
-        child: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 28.0),
-            child: Column(
-              children: [
-                const SizedBox(height: 56),
-                _buildHeader(),
-                const SizedBox(height: 10),
-                Text(
-                  'Every bead of the rosary counts.',
-                  style: TextStyle(
-                    fontSize: 13,
-                    letterSpacing: 0.5,
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.textSecondary.withOpacity(0.8),
-                  ),
+        child: Stack(
+          children: [
+            // ── Floating orbs ──
+            _buildOrbs(size),
+
+            // ── Content ──
+            SafeArea(
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 60),
+                    _buildHeader(),
+                    const SizedBox(height: 48),
+                    _buildGlassCard(),
+                    const SizedBox(height: 28),
+                    _buildRegisterLink(),
+                    const SizedBox(height: 40),
+                  ],
                 ),
-                const SizedBox(height: 52),
-                _buildLoginCard(),
-                const SizedBox(height: 24),
-                _buildRegisterLink(),
-                const SizedBox(height: 40),
-              ],
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );
   }
 
+  // ── Animated floating orbs ──────────────────────────────────────────────────
+  Widget _buildOrbs(Size size) {
+    return AnimatedBuilder(
+      animation: Listenable.merge([_orb1Anim, _orb2Anim, _orb3Anim, _orb4Anim]),
+      builder: (context, _) {
+        return Stack(
+          children: [
+            // Top-center large orb — plum
+            _Orb(
+              left: size.width * 0.2,
+              top: -size.height * 0.08 + _orb1Anim.value * 28,
+              size: size.width * 0.72,
+              colors: [
+                AppColors.plumMid.withOpacity(0.55),
+                AppColors.plumDeep.withOpacity(0.30),
+              ],
+            ),
+            // Left-middle orb — dusty rose
+            _Orb(
+              left: -size.width * 0.22,
+              top: size.height * 0.28 + _orb2Anim.value * -22,
+              size: size.width * 0.65,
+              colors: [
+                AppColors.dustyRose.withOpacity(0.60),
+                AppColors.dustyRose.withOpacity(0.25),
+              ],
+            ),
+            // Right-middle orb — lavender
+            _Orb(
+              left: size.width * 0.55,
+              top: size.height * 0.38 + _orb3Anim.value * 18,
+              size: size.width * 0.60,
+              colors: [
+                AppColors.lavenderSoft.withOpacity(0.70),
+                AppColors.plumMid.withOpacity(0.20),
+              ],
+            ),
+            // Bottom-center orb — gold tint
+            _Orb(
+              left: size.width * 0.1,
+              top: size.height * 0.72 + _orb4Anim.value * -16,
+              size: size.width * 0.55,
+              colors: [
+                AppColors.goldPrimary.withOpacity(0.22),
+                AppColors.dustyRose.withOpacity(0.30),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // ── Header: logo + app name ─────────────────────────────────────────────────
   Widget _buildHeader() {
     return Column(
       children: [
+        // Logo with gold glow ring
         Container(
-          width: 80,
-          height: 80,
+          width: 84,
+          height: 84,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             boxShadow: [
-              BoxShadow(color: AppColors.goldPrimary.withOpacity(0.35), blurRadius: 24, spreadRadius: 3),
-              BoxShadow(color: Colors.white.withOpacity(0.6), blurRadius: 12, spreadRadius: -2),
+              BoxShadow(
+                color: AppColors.goldPrimary.withOpacity(0.40),
+                blurRadius: 28,
+                spreadRadius: 4,
+              ),
+              BoxShadow(
+                color: AppColors.plumMid.withOpacity(0.20),
+                blurRadius: 14,
+                spreadRadius: -2,
+              ),
             ],
-            border: Border.all(color: AppColors.goldPrimary.withOpacity(0.2), width: 2),
+            border: Border.all(
+              color: AppColors.goldPrimary.withOpacity(0.35),
+              width: 2.5,
+            ),
           ),
-          child: ClipOval(child: Image.asset('assets/splash/splash_org.png', fit: BoxFit.cover)),
+          child: ClipOval(
+            child: Image.asset('assets/splash/splash_org.png', fit: BoxFit.cover),
+          ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 18),
         ShaderMask(
           shaderCallback: (bounds) => const LinearGradient(
-            colors: [AppColors.goldDark, AppColors.goldPrimary, AppColors.goldLight],
+            colors: [AppColors.goldDark, AppColors.goldPrimary, AppColors.plumMid],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ).createShader(bounds),
           child: const Text(
             'Rosary Bank',
-            style: TextStyle(fontSize: 30, fontWeight: FontWeight.w800, color: Colors.white, letterSpacing: 1.2),
+            style: TextStyle(
+              fontSize: 32,
+              fontWeight: FontWeight.w800,
+              color: Colors.white,
+              letterSpacing: 1.5,
+            ),
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          'Every bead of the rosary counts.',
+          style: TextStyle(
+            fontSize: 12,
+            letterSpacing: 1.2,
+            fontWeight: FontWeight.w500,
+            color: AppColors.plumDeep.withOpacity(0.55),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildLoginCard() {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.cardWhite,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(color: AppColors.goldPrimary.withOpacity(0.15), blurRadius: 32, spreadRadius: 2, offset: const Offset(0, 8)),
-          BoxShadow(color: Colors.white.withOpacity(0.9), blurRadius: 12, spreadRadius: -2, offset: const Offset(-3, -3)),
-        ],
-        border: Border.all(color: AppColors.goldPrimary.withOpacity(0.2), width: 1.5),
-      ),
-      padding: const EdgeInsets.all(28),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text('Welcome Back', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: AppColors.textPrimary, letterSpacing: 0.5)),
-          const SizedBox(height: 4),
-          Text('Sign in to continue', style: TextStyle(fontSize: 13, color: AppColors.textSecondary.withOpacity(0.8))),
-          const SizedBox(height: 28),
-          _buildInputField(controller: _emailController, label: 'Email', hint: 'Enter your email', icon: Icons.email_outlined),
-          const SizedBox(height: 20),
-          _buildInputField(controller: _passwordController, label: 'Password', hint: 'Enter your password', icon: Icons.lock_outline_rounded, isPassword: true),
-          const SizedBox(height: 32),
-          _buildLoginButton(),
+  // ── Frosted glass login card ────────────────────────────────────────────────
+  Widget _buildGlassCard() {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(28),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.30),
+            borderRadius: BorderRadius.circular(28),
+            border: Border.all(
+              color: Colors.white.withOpacity(0.55),
+              width: 1.5,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.plumMid.withOpacity(0.12),
+                blurRadius: 40,
+                spreadRadius: 2,
+                offset: const Offset(0, 12),
+              ),
+            ],
+          ),
+          padding: const EdgeInsets.fromLTRB(28, 32, 28, 28),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Card title
+              Text(
+                'SIGN IN',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 3,
+                  color: AppColors.plumDeep.withOpacity(0.85),
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Welcome back, continue your prayer journey',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: AppColors.plumMid.withOpacity(0.70),
+                  letterSpacing: 0.3,
+                ),
+              ),
+              const SizedBox(height: 28),
 
-          // Biometric button — shown only when available & enabled
-          if (_biometricAvailable && _biometricEnabled) ...[
-            const SizedBox(height: 16),
-            _buildBiometricButton(),
-          ],
+              // Email field
+              _buildGlassField(
+                controller: _emailController,
+                label: 'Email address',
+                hint: 'Enter your email',
+                icon: Icons.email_outlined,
+              ),
+              const SizedBox(height: 18),
 
-          // "Set up biometric" hint — shown when available but not yet enabled
-          if (_biometricAvailable && !_biometricEnabled) ...[
-            const SizedBox(height: 16),
-            Center(
-              child: GestureDetector(
-                onTap: () async {
-                  final email = _emailController.text.trim();
-                  final password = _passwordController.text;
-                  if (email != 'admin@gmail.com' || password != '1234') {
-                    _showError('Sign in with your password first to enable biometrics');
-                    return;
-                  }
-                  await _offerBiometricSetup(email);
-                },
+              // Password field
+              _buildGlassField(
+                controller: _passwordController,
+                label: 'Password',
+                hint: 'Enter your password',
+                icon: Icons.lock_outline_rounded,
+                isPassword: true,
+              ),
+              const SizedBox(height: 10),
+
+              // Forgot password row
+              Align(
+                alignment: Alignment.centerRight,
                 child: Text(
-                  'Set up biometric login',
+                  'Forgot password?',
                   style: TextStyle(
-                    color: AppColors.goldDark,
+                    fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    fontSize: 13,
-                    decoration: TextDecoration.underline,
-                    decorationColor: AppColors.goldDark,
+                    color: AppColors.goldDark.withOpacity(0.85),
+                    letterSpacing: 0.2,
                   ),
                 ),
               ),
-            ),
-          ],
-        ],
+              const SizedBox(height: 28),
+
+              // Login button
+              _buildLoginButton(),
+
+              // Biometric
+              if (_biometricAvailable && _biometricEnabled) ...[
+                const SizedBox(height: 14),
+                _buildBiometricButton(),
+              ],
+              if (_biometricAvailable && !_biometricEnabled) ...[
+                const SizedBox(height: 14),
+                Center(
+                  child: GestureDetector(
+                    onTap: () async {
+                      final email = _emailController.text.trim();
+                      final password = _passwordController.text;
+                      if (email != 'admin@gmail.com' || password != '1234') {
+                        _showError('Sign in with your password first to enable biometrics');
+                        return;
+                      }
+                      await _offerBiometricSetup(email);
+                    },
+                    child: Text(
+                      'Set up biometric login',
+                      style: TextStyle(
+                        color: AppColors.goldDark,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                        decoration: TextDecoration.underline,
+                        decorationColor: AppColors.goldDark,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
       ),
     );
   }
 
-  Widget _buildBiometricButton() {
-    return GestureDetector(
-      onTap: _authenticateWithBiometric,
-      child: Container(
-        width: double.infinity,
-        height: 56,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: AppColors.goldPrimary.withOpacity(0.4), width: 1.5),
-          boxShadow: [BoxShadow(color: AppColors.goldPrimary.withOpacity(0.1), blurRadius: 10, offset: const Offset(0, 4))],
-        ),
-        child: const Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.fingerprint, color: AppColors.goldPrimary, size: 26),
-            SizedBox(width: 10),
-            Text(
-              'Use Biometric',
-              style: TextStyle(color: AppColors.goldDark, fontSize: 15, fontWeight: FontWeight.w700),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildInputField({
+  // ── Glass-style input field ─────────────────────────────────────────────────
+  Widget _buildGlassField({
     required TextEditingController controller,
     required String label,
     required String hint,
@@ -347,78 +496,225 @@ class _LoginScreenState extends State<LoginScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textPrimary, letterSpacing: 0.5)),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: AppColors.plumDeep.withOpacity(0.70),
+            letterSpacing: 0.4,
+          ),
+        ),
         const SizedBox(height: 8),
-        TextField(
-          controller: controller,
-          obscureText: isPassword ? _obscurePassword : false,
-          style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w500, fontSize: 15),
-          decoration: InputDecoration(
-            hintText: hint,
-            hintStyle: TextStyle(color: AppColors.textSecondary.withOpacity(0.4)),
-            prefixIcon: Icon(icon, color: AppColors.textSecondary, size: 20),
-            suffixIcon: isPassword
-                ? GestureDetector(
-                    onTap: () => setState(() => _obscurePassword = !_obscurePassword),
-                    child: Icon(
-                      _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-                      color: AppColors.textSecondary,
-                      size: 20,
-                    ),
-                  )
-                : null,
-            filled: true,
-            fillColor: Colors.white,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: AppColors.goldPrimary.withOpacity(0.2))),
-            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: AppColors.goldPrimary.withOpacity(0.2))),
-            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: AppColors.goldPrimary, width: 1.5)),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(14),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+            child: TextField(
+              controller: controller,
+              obscureText: isPassword ? _obscurePassword : false,
+              style: TextStyle(
+                color: AppColors.plumDeep,
+                fontWeight: FontWeight.w500,
+                fontSize: 15,
+              ),
+              decoration: InputDecoration(
+                hintText: hint,
+                hintStyle: TextStyle(
+                  color: AppColors.plumMid.withOpacity(0.40),
+                  fontSize: 14,
+                ),
+                prefixIcon: Icon(icon, color: AppColors.plumMid.withOpacity(0.70), size: 20),
+                suffixIcon: isPassword
+                    ? GestureDetector(
+                        onTap: () => setState(() => _obscurePassword = !_obscurePassword),
+                        child: Icon(
+                          _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                          color: AppColors.plumMid.withOpacity(0.60),
+                          size: 20,
+                        ),
+                      )
+                    : null,
+                filled: true,
+                fillColor: Colors.white.withOpacity(0.55),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: BorderSide(color: Colors.white.withOpacity(0.6)),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: BorderSide(color: Colors.white.withOpacity(0.6)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: BorderSide(color: AppColors.goldPrimary.withOpacity(0.7), width: 1.5),
+                ),
+              ),
+            ),
           ),
         ),
       ],
     );
   }
 
+  // ── Login button ────────────────────────────────────────────────────────────
   Widget _buildLoginButton() {
     return GestureDetector(
       onTap: _isLoading ? null : _handleLogin,
       child: Container(
         width: double.infinity,
-        height: 56,
+        height: 54,
         decoration: BoxDecoration(
           gradient: _isLoading
-              ? LinearGradient(colors: [AppColors.goldPrimary.withOpacity(0.5), AppColors.goldDark.withOpacity(0.5)])
-              : const LinearGradient(colors: [AppColors.goldAccent, AppColors.goldAccentDark], begin: Alignment.topLeft, end: Alignment.bottomRight),
-          borderRadius: BorderRadius.circular(18),
-          boxShadow: _isLoading ? [] : [BoxShadow(color: AppColors.goldAccent.withOpacity(0.45), blurRadius: 14, offset: const Offset(0, 5))],
-          border: Border.all(color: Colors.white.withOpacity(0.3), width: 1.5),
+              ? LinearGradient(colors: [
+                  AppColors.goldPrimary.withOpacity(0.5),
+                  AppColors.goldDark.withOpacity(0.5),
+                ])
+              : const LinearGradient(
+                  colors: [AppColors.goldAccent, AppColors.goldAccentDark],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: _isLoading
+              ? []
+              : [
+                  BoxShadow(
+                    color: AppColors.goldAccent.withOpacity(0.50),
+                    blurRadius: 18,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
+          border: Border.all(color: Colors.white.withOpacity(0.35), width: 1.5),
         ),
         child: Center(
           child: _isLoading
-              ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5))
-              : const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.login_rounded, color: Colors.white, size: 20),
-                    SizedBox(width: 8),
-                    Text('Login', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700, letterSpacing: 0.5)),
-                  ],
+              ? const SizedBox(
+                  width: 22,
+                  height: 22,
+                  child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
+                )
+              : const Text(
+                  'SIGN IN',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 2.5,
+                  ),
                 ),
         ),
       ),
     );
   }
 
+  // ── Biometric button ────────────────────────────────────────────────────────
+  Widget _buildBiometricButton() {
+    return GestureDetector(
+      onTap: _authenticateWithBiometric,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(14),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+          child: Container(
+            width: double.infinity,
+            height: 50,
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.35),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: AppColors.goldPrimary.withOpacity(0.40), width: 1.5),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.fingerprint, color: AppColors.goldPrimary, size: 24),
+                const SizedBox(width: 10),
+                Text(
+                  'Use Biometric',
+                  style: TextStyle(
+                    color: AppColors.plumDeep,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ── Register link ───────────────────────────────────────────────────────────
   Widget _buildRegisterLink() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text("Don't have an account? ", style: TextStyle(color: AppColors.textSecondary.withOpacity(0.8))),
+        Text(
+          "Don't have an account? ",
+          style: TextStyle(
+            color: AppColors.plumDeep.withOpacity(0.60),
+            fontSize: 13,
+          ),
+        ),
         GestureDetector(
-          onTap: () => Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const RegisterScreen())),
-          child: const Text('Register', style: TextStyle(color: AppColors.goldDark, fontWeight: FontWeight.w700)),
+          onTap: () => Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (_) => const RegisterScreen()),
+          ),
+          child: const Text(
+            'Register',
+            style: TextStyle(
+              color: AppColors.goldDark,
+              fontWeight: FontWeight.w700,
+              fontSize: 13,
+            ),
+          ),
         ),
       ],
+    );
+  }
+}
+
+// ── Orb widget ─────────────────────────────────────────────────────────────────
+class _Orb extends StatelessWidget {
+  final double left;
+  final double top;
+  final double size;
+  final List<Color> colors;
+
+  const _Orb({
+    required this.left,
+    required this.top,
+    required this.size,
+    required this.colors,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      left: left,
+      top: top,
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: RadialGradient(
+            center: const Alignment(-0.3, -0.3),
+            radius: 0.85,
+            colors: colors,
+            stops: const [0.0, 1.0],
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: colors[0].withOpacity(0.25),
+              blurRadius: size * 0.35,
+              spreadRadius: size * 0.05,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

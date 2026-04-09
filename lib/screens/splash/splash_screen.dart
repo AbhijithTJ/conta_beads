@@ -141,9 +141,9 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              const Color(0xFFFAF0ED), // Soft cream/pink
-              const Color(0xFFF5E8D5), // Soft rose
-              const Color(0xFFEFDCC8), // Warm beige
+              AppColors.bgTop,    // soft lavender-white
+              AppColors.bgMid,    // light mauve
+              AppColors.bgBottom, // dusty lavender
             ],
           ),
         ),
@@ -211,8 +211,8 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                       ShaderMask(
                         shaderCallback: (bounds) => const LinearGradient(
                           colors: [
-                            Color(0xFFD4A574),
-                            Color(0xFF8B6F47),
+                            Color(0xFFD4A843), // gold
+                            Color(0xFF9B6B8A), // mauve
                           ],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
@@ -314,12 +314,12 @@ class SnowPainter extends CustomPainter {
       ..style = PaintingStyle.fill;
 
     for (var snowflake in snowflakes) {
-      // Draw snowflake as a circle
+      // Draw petal particle as a circle
       paint.color = Color.fromARGB(
-        (snowflake.opacity * 255).toInt(),
-        255,
-        255,
-        255,
+        (snowflake.opacity * 180).toInt(),
+        212, // dusty rose R
+        160, // dusty rose G
+        160, // dusty rose B
       );
       
       canvas.drawCircle(
@@ -330,10 +330,10 @@ class SnowPainter extends CustomPainter {
       
       // Add subtle glow
       paint.color = Color.fromARGB(
-        ((snowflake.opacity * 0.3) * 255).toInt(),
-        255,
-        255,
-        255,
+        ((snowflake.opacity * 0.25) * 255).toInt(),
+        155, // mauve R
+        107, // mauve G
+        138, // mauve B
       );
       canvas.drawCircle(
         Offset(snowflake.x, snowflake.y),
