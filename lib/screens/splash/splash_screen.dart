@@ -267,7 +267,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                           fontSize: 14,
                           letterSpacing: 0.5,
                           fontWeight: FontWeight.w600,
-                          color: AppColors.textSecondary.withOpacity(0.8),
+                          color: Colors.white.withOpacity(0.75),
                           fontFamily: 'Georgia',
                         ),
                       ),
@@ -305,9 +305,9 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(10),
                       child: LinearProgressIndicator(
-                        backgroundColor: AppColors.goldPrimary.withOpacity(0.2),
+                        backgroundColor: Colors.white.withOpacity(0.20),
                         valueColor: AlwaysStoppedAnimation<Color>(
-                          AppColors.goldPrimary.withOpacity(0.8),
+                          Colors.white.withOpacity(0.85),
                         ),
                         minHeight: 2,
                       ),
@@ -319,7 +319,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                     style: TextStyle(
                       fontSize: 11,
                       letterSpacing: 1.5,
-                      color: AppColors.textSecondary.withOpacity(0.6),
+                      color: Colors.white.withOpacity(0.60),
                       fontFamily: 'Georgia',
                     ),
                   ),
@@ -346,10 +346,10 @@ class SnowPainter extends CustomPainter {
     for (var snowflake in snowflakes) {
       // Draw petal particle as a circle
       paint.color = Color.fromARGB(
-        (snowflake.opacity * 180).toInt(),
-        212, // dusty rose R
-        160, // dusty rose G
-        160, // dusty rose B
+        (snowflake.opacity * 160).toInt(),
+        255, // white R
+        255, // white G
+        255, // white B
       );
       
       canvas.drawCircle(
@@ -360,10 +360,10 @@ class SnowPainter extends CustomPainter {
       
       // Add subtle glow
       paint.color = Color.fromARGB(
-        ((snowflake.opacity * 0.25) * 255).toInt(),
-        155, // mauve R
-        107, // mauve G
-        138, // mauve B
+        ((snowflake.opacity * 0.20) * 255).toInt(),
+        200, // light purple R
+        180, // light purple G
+        255, // light purple B
       );
       canvas.drawCircle(
         Offset(snowflake.x, snowflake.y),

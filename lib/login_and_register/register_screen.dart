@@ -154,7 +154,11 @@ class _RegisterScreenState extends State<RegisterScreen>
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [AppColors.bgTop, AppColors.bgMid, AppColors.bgBottom],
+              colors: [
+                AppColors.authBgTop,
+                AppColors.authBgMid,
+                AppColors.authBgBottom,
+              ],
             ),
           ),
           child: Stack(
@@ -203,9 +207,9 @@ class _RegisterScreenState extends State<RegisterScreen>
                               width: 1,
                             ),
                           ),
-                          child: Icon(
+                          child: const Icon(
                             Icons.arrow_back_rounded,
-                            color: AppColors.plumDeep.withOpacity(0.75),
+                            color: Colors.white,
                             size: 20,
                           ),
                         ),
@@ -234,8 +238,8 @@ class _RegisterScreenState extends State<RegisterScreen>
               top: -size.height * 0.08 + _orb1Anim.value * 28,
               size: size.width * 0.72,
               colors: [
-                AppColors.plumMid.withOpacity(0.55),
-                AppColors.plumDeep.withOpacity(0.30),
+                AppColors.authPurple.withOpacity(0.55),
+                AppColors.authBgTop.withOpacity(0.30),
               ],
             ),
             _Orb(
@@ -243,8 +247,8 @@ class _RegisterScreenState extends State<RegisterScreen>
               top: size.height * 0.28 + _orb2Anim.value * -22,
               size: size.width * 0.65,
               colors: [
-                AppColors.dustyRose.withOpacity(0.60),
-                AppColors.dustyRose.withOpacity(0.25),
+                AppColors.authPurpleLight.withOpacity(0.45),
+                AppColors.authPurple.withOpacity(0.25),
               ],
             ),
             _Orb(
@@ -252,8 +256,8 @@ class _RegisterScreenState extends State<RegisterScreen>
               top: size.height * 0.38 + _orb3Anim.value * 18,
               size: size.width * 0.60,
               colors: [
-                AppColors.lavenderSoft.withOpacity(0.70),
-                AppColors.plumMid.withOpacity(0.20),
+                AppColors.authBgMid.withOpacity(0.70),
+                AppColors.authBgBottom.withOpacity(0.40),
               ],
             ),
             _Orb(
@@ -261,8 +265,8 @@ class _RegisterScreenState extends State<RegisterScreen>
               top: size.height * 0.72 + _orb4Anim.value * -16,
               size: size.width * 0.55,
               colors: [
-                AppColors.goldPrimary.withOpacity(0.22),
-                AppColors.dustyRose.withOpacity(0.30),
+                AppColors.goldPrimary.withOpacity(0.18),
+                AppColors.authPurple.withOpacity(0.25),
               ],
             ),
           ],
@@ -305,7 +309,7 @@ class _RegisterScreenState extends State<RegisterScreen>
         const SizedBox(height: 18),
         ShaderMask(
           shaderCallback: (bounds) => const LinearGradient(
-            colors: [AppColors.goldDark, AppColors.goldPrimary, AppColors.plumMid],
+            colors: [AppColors.goldDark, AppColors.goldPrimary, AppColors.authLavender],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ).createShader(bounds),
@@ -326,7 +330,7 @@ class _RegisterScreenState extends State<RegisterScreen>
             fontSize: 12,
             letterSpacing: 1.2,
             fontWeight: FontWeight.w500,
-            color: AppColors.plumDeep.withOpacity(0.55),
+            color: Colors.white.withOpacity(0.65),
           ),
         ),
       ],
@@ -341,15 +345,15 @@ class _RegisterScreenState extends State<RegisterScreen>
         filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
         child: Container(
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.30),
+            color: Colors.white.withOpacity(0.92),
             borderRadius: BorderRadius.circular(28),
             border: Border.all(
-              color: Colors.white.withOpacity(0.55),
+              color: Colors.white.withOpacity(0.95),
               width: 1.5,
             ),
             boxShadow: [
               BoxShadow(
-                color: AppColors.plumMid.withOpacity(0.12),
+                color: Colors.black.withOpacity(0.20),
                 blurRadius: 40,
                 spreadRadius: 2,
                 offset: const Offset(0, 12),
@@ -366,7 +370,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                   fontSize: 22,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 3,
-                  color: AppColors.plumDeep.withOpacity(0.85),
+                  color: AppColors.authBgMid,
                 ),
               ),
               const SizedBox(height: 4),
@@ -374,7 +378,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                 'Start your rosary journey today',
                 style: TextStyle(
                   fontSize: 12,
-                  color: AppColors.plumMid.withOpacity(0.70),
+                  color: AppColors.authPurple.withOpacity(0.70),
                   letterSpacing: 0.3,
                 ),
               ),
@@ -445,7 +449,7 @@ class _RegisterScreenState extends State<RegisterScreen>
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w600,
-            color: AppColors.plumDeep.withOpacity(0.70),
+            color: AppColors.authBgMid.withOpacity(0.80),
             letterSpacing: 0.4,
           ),
         ),
@@ -458,18 +462,18 @@ class _RegisterScreenState extends State<RegisterScreen>
               controller: controller,
               obscureText: isPassword ? obscure : false,
               style: TextStyle(
-                color: AppColors.plumDeep,
+                color: AppColors.authBgBottom,
                 fontWeight: FontWeight.w500,
                 fontSize: 15,
               ),
               decoration: InputDecoration(
                 hintText: hint,
                 hintStyle: TextStyle(
-                  color: AppColors.plumMid.withOpacity(0.40),
+                  color: AppColors.authPurple.withOpacity(0.40),
                   fontSize: 14,
                 ),
                 prefixIcon: Icon(icon,
-                    color: AppColors.plumMid.withOpacity(0.70), size: 20),
+                    color: AppColors.authPurple.withOpacity(0.70), size: 20),
                 suffixIcon: isPassword
                     ? GestureDetector(
                         onTap: onToggle,
@@ -477,24 +481,24 @@ class _RegisterScreenState extends State<RegisterScreen>
                           obscure
                               ? Icons.visibility_off_outlined
                               : Icons.visibility_outlined,
-                          color: AppColors.plumMid.withOpacity(0.60),
+                          color: AppColors.authPurple.withOpacity(0.60),
                           size: 20,
                         ),
                       )
                     : null,
                 filled: true,
-                fillColor: Colors.white.withOpacity(0.55),
+                fillColor: Colors.white.withOpacity(0.80),
                 contentPadding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
                   borderSide:
-                      BorderSide(color: Colors.white.withOpacity(0.6)),
+                      BorderSide(color: AppColors.authPurple.withOpacity(0.25)),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
                   borderSide:
-                      BorderSide(color: Colors.white.withOpacity(0.6)),
+                      BorderSide(color: AppColors.authPurple.withOpacity(0.25)),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
@@ -520,7 +524,7 @@ class _RegisterScreenState extends State<RegisterScreen>
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w600,
-            color: AppColors.plumDeep.withOpacity(0.70),
+            color: AppColors.authBgMid.withOpacity(0.80),
             letterSpacing: 0.4,
           ),
         ),
@@ -534,15 +538,15 @@ class _RegisterScreenState extends State<RegisterScreen>
               initialCountryCode: 'IN',
               onChanged: (phone) => _completePhoneNumber = phone.completeNumber,
               style: TextStyle(
-                color: AppColors.plumDeep,
+                color: AppColors.authBgBottom,
                 fontWeight: FontWeight.w500,
                 fontSize: 15,
               ),
               dropdownIconPosition: IconPosition.trailing,
               dropdownIcon: Icon(Icons.arrow_drop_down,
-                  color: AppColors.plumMid.withOpacity(0.70), size: 20),
+                  color: AppColors.authPurple.withOpacity(0.70), size: 20),
               dropdownTextStyle: TextStyle(
-                color: AppColors.plumDeep,
+                color: AppColors.authBgBottom,
                 fontWeight: FontWeight.w600,
                 fontSize: 15,
               ),
@@ -550,22 +554,22 @@ class _RegisterScreenState extends State<RegisterScreen>
               decoration: InputDecoration(
                 hintText: 'Enter phone number',
                 hintStyle: TextStyle(
-                  color: AppColors.plumMid.withOpacity(0.40),
+                  color: AppColors.authPurple.withOpacity(0.40),
                   fontSize: 14,
                 ),
                 filled: true,
-                fillColor: Colors.white.withOpacity(0.55),
+                fillColor: Colors.white.withOpacity(0.80),
                 contentPadding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
                   borderSide:
-                      BorderSide(color: Colors.white.withOpacity(0.6)),
+                      BorderSide(color: AppColors.authPurple.withOpacity(0.25)),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
                   borderSide:
-                      BorderSide(color: Colors.white.withOpacity(0.6)),
+                      BorderSide(color: AppColors.authPurple.withOpacity(0.25)),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
@@ -589,28 +593,34 @@ class _RegisterScreenState extends State<RegisterScreen>
         width: double.infinity,
         height: 54,
         decoration: BoxDecoration(
-          gradient: _isLoading
-              ? LinearGradient(colors: [
-                  AppColors.goldPrimary.withOpacity(0.5),
-                  AppColors.goldDark.withOpacity(0.5),
-                ])
-              : const LinearGradient(
-                  colors: [AppColors.goldAccent, AppColors.goldAccentDark],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-          borderRadius: BorderRadius.circular(16),
+          gradient: LinearGradient(
+            colors: _isLoading
+                ? [
+                    AppColors.authPurple.withOpacity(0.5),
+                    AppColors.authBgMid.withOpacity(0.5),
+                  ]
+                : [
+                    AppColors.authPurpleLight,
+                    AppColors.authPurple,
+                  ],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+          borderRadius: BorderRadius.circular(30),
           boxShadow: _isLoading
               ? []
               : [
                   BoxShadow(
-                    color: AppColors.goldAccent.withOpacity(0.50),
-                    blurRadius: 18,
-                    offset: const Offset(0, 6),
+                    color: AppColors.authBgBottom.withOpacity(0.60),
+                    blurRadius: 0,
+                    offset: const Offset(0, 5),
+                  ),
+                  BoxShadow(
+                    color: AppColors.authPurple.withOpacity(0.35),
+                    blurRadius: 12,
+                    offset: const Offset(0, 8),
                   ),
                 ],
-          border: Border.all(
-              color: Colors.white.withOpacity(0.35), width: 1.5),
         ),
         child: Center(
           child: _isLoading
@@ -621,12 +631,12 @@ class _RegisterScreenState extends State<RegisterScreen>
                       color: Colors.white, strokeWidth: 2.5),
                 )
               : const Text(
-                  'CREATE ACCOUNT',
+                  'Create account',
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 2,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.5,
                   ),
                 ),
         ),
@@ -642,7 +652,7 @@ class _RegisterScreenState extends State<RegisterScreen>
         Text(
           'Already have an account? ',
           style: TextStyle(
-            color: AppColors.plumDeep.withOpacity(0.60),
+            color: Colors.white.withOpacity(0.75),
             fontSize: 13,
           ),
         ),
@@ -653,7 +663,7 @@ class _RegisterScreenState extends State<RegisterScreen>
           child: const Text(
             'Sign In',
             style: TextStyle(
-              color: AppColors.goldDark,
+              color: AppColors.authPurpleLight,
               fontWeight: FontWeight.w700,
               fontSize: 13,
             ),

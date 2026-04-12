@@ -212,9 +212,9 @@ class _LoginScreenState extends State<LoginScreen>
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              AppColors.bgTop,
-              AppColors.bgMid,
-              AppColors.bgBottom,
+              AppColors.authBgTop,
+              AppColors.authBgMid,
+              AppColors.authBgBottom,
             ],
           ),
         ),
@@ -254,34 +254,34 @@ class _LoginScreenState extends State<LoginScreen>
       builder: (context, _) {
         return Stack(
           children: [
-            // Top-center large orb — plum
+            // Top-center large orb — lighter purple
             _Orb(
               left: size.width * 0.2,
               top: -size.height * 0.08 + _orb1Anim.value * 28,
               size: size.width * 0.72,
               colors: [
-                AppColors.plumMid.withOpacity(0.55),
-                AppColors.plumDeep.withOpacity(0.30),
+                AppColors.authPurple.withOpacity(0.55),
+                AppColors.authBgTop.withOpacity(0.30),
               ],
             ),
-            // Left-middle orb — dusty rose
+            // Left-middle orb — violet
             _Orb(
               left: -size.width * 0.22,
               top: size.height * 0.28 + _orb2Anim.value * -22,
               size: size.width * 0.65,
               colors: [
-                AppColors.dustyRose.withOpacity(0.60),
-                AppColors.dustyRose.withOpacity(0.25),
+                AppColors.authPurpleLight.withOpacity(0.45),
+                AppColors.authPurple.withOpacity(0.25),
               ],
             ),
-            // Right-middle orb — lavender
+            // Right-middle orb — deep purple
             _Orb(
               left: size.width * 0.55,
               top: size.height * 0.38 + _orb3Anim.value * 18,
               size: size.width * 0.60,
               colors: [
-                AppColors.lavenderSoft.withOpacity(0.70),
-                AppColors.plumMid.withOpacity(0.20),
+                AppColors.authBgMid.withOpacity(0.70),
+                AppColors.authBgBottom.withOpacity(0.40),
               ],
             ),
             // Bottom-center orb — gold tint
@@ -290,8 +290,8 @@ class _LoginScreenState extends State<LoginScreen>
               top: size.height * 0.72 + _orb4Anim.value * -16,
               size: size.width * 0.55,
               colors: [
-                AppColors.goldPrimary.withOpacity(0.22),
-                AppColors.dustyRose.withOpacity(0.30),
+                AppColors.goldPrimary.withOpacity(0.18),
+                AppColors.authPurple.withOpacity(0.25),
               ],
             ),
           ],
@@ -335,7 +335,7 @@ class _LoginScreenState extends State<LoginScreen>
         const SizedBox(height: 18),
         ShaderMask(
           shaderCallback: (bounds) => const LinearGradient(
-            colors: [AppColors.goldDark, AppColors.goldPrimary, AppColors.plumMid],
+            colors: [AppColors.goldDark, AppColors.goldPrimary, AppColors.authLavender],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ).createShader(bounds),
@@ -356,7 +356,7 @@ class _LoginScreenState extends State<LoginScreen>
             fontSize: 12,
             letterSpacing: 1.2,
             fontWeight: FontWeight.w500,
-            color: AppColors.plumDeep.withOpacity(0.55),
+            color: Colors.white.withOpacity(0.65),
           ),
         ),
       ],
@@ -371,15 +371,15 @@ class _LoginScreenState extends State<LoginScreen>
         filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
         child: Container(
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.30),
+            color: Colors.white.withOpacity(0.92),
             borderRadius: BorderRadius.circular(28),
             border: Border.all(
-              color: Colors.white.withOpacity(0.55),
+              color: Colors.white.withOpacity(0.95),
               width: 1.5,
             ),
             boxShadow: [
               BoxShadow(
-                color: AppColors.plumMid.withOpacity(0.12),
+                color: Colors.black.withOpacity(0.20),
                 blurRadius: 40,
                 spreadRadius: 2,
                 offset: const Offset(0, 12),
@@ -397,7 +397,7 @@ class _LoginScreenState extends State<LoginScreen>
                   fontSize: 22,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 3,
-                  color: AppColors.plumDeep.withOpacity(0.85),
+                  color: AppColors.authBgMid,
                 ),
               ),
               const SizedBox(height: 4),
@@ -405,7 +405,7 @@ class _LoginScreenState extends State<LoginScreen>
                 'Welcome back, continue your prayer journey',
                 style: TextStyle(
                   fontSize: 12,
-                  color: AppColors.plumMid.withOpacity(0.70),
+                  color: AppColors.authPurple.withOpacity(0.70),
                   letterSpacing: 0.3,
                 ),
               ),
@@ -469,11 +469,11 @@ class _LoginScreenState extends State<LoginScreen>
                     child: Text(
                       'Set up biometric login',
                       style: TextStyle(
-                        color: AppColors.goldDark,
+                        color: AppColors.authPurple,
                         fontWeight: FontWeight.w600,
                         fontSize: 13,
                         decoration: TextDecoration.underline,
-                        decorationColor: AppColors.goldDark,
+                        decorationColor: AppColors.authPurple,
                       ),
                     ),
                   ),
@@ -502,7 +502,7 @@ class _LoginScreenState extends State<LoginScreen>
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w600,
-            color: AppColors.plumDeep.withOpacity(0.70),
+            color: AppColors.authBgMid.withOpacity(0.80),
             letterSpacing: 0.4,
           ),
         ),
@@ -515,37 +515,37 @@ class _LoginScreenState extends State<LoginScreen>
               controller: controller,
               obscureText: isPassword ? _obscurePassword : false,
               style: TextStyle(
-                color: AppColors.plumDeep,
+                color: AppColors.authBgBottom,
                 fontWeight: FontWeight.w500,
                 fontSize: 15,
               ),
               decoration: InputDecoration(
                 hintText: hint,
                 hintStyle: TextStyle(
-                  color: AppColors.plumMid.withOpacity(0.40),
+                  color: AppColors.authPurple.withOpacity(0.40),
                   fontSize: 14,
                 ),
-                prefixIcon: Icon(icon, color: AppColors.plumMid.withOpacity(0.70), size: 20),
+                prefixIcon: Icon(icon, color: AppColors.authPurple.withOpacity(0.70), size: 20),
                 suffixIcon: isPassword
                     ? GestureDetector(
                         onTap: () => setState(() => _obscurePassword = !_obscurePassword),
                         child: Icon(
                           _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-                          color: AppColors.plumMid.withOpacity(0.60),
+                          color: AppColors.authPurple.withOpacity(0.60),
                           size: 20,
                         ),
                       )
                     : null,
                 filled: true,
-                fillColor: Colors.white.withOpacity(0.55),
+                fillColor: Colors.white.withOpacity(0.80),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
-                  borderSide: BorderSide(color: Colors.white.withOpacity(0.6)),
+                  borderSide: BorderSide(color: AppColors.authPurple.withOpacity(0.25)),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
-                  borderSide: BorderSide(color: Colors.white.withOpacity(0.6)),
+                  borderSide: BorderSide(color: AppColors.authPurple.withOpacity(0.25)),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
@@ -567,27 +567,34 @@ class _LoginScreenState extends State<LoginScreen>
         width: double.infinity,
         height: 54,
         decoration: BoxDecoration(
-          gradient: _isLoading
-              ? LinearGradient(colors: [
-                  AppColors.goldPrimary.withOpacity(0.5),
-                  AppColors.goldDark.withOpacity(0.5),
-                ])
-              : const LinearGradient(
-                  colors: [AppColors.goldAccent, AppColors.goldAccentDark],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-          borderRadius: BorderRadius.circular(16),
+          gradient: LinearGradient(
+            colors: _isLoading
+                ? [
+                    AppColors.authPurple.withOpacity(0.5),
+                    AppColors.authBgMid.withOpacity(0.5),
+                  ]
+                : [
+                    AppColors.authPurpleLight,
+                    AppColors.authPurple,
+                  ],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+          borderRadius: BorderRadius.circular(30),
           boxShadow: _isLoading
               ? []
               : [
                   BoxShadow(
-                    color: AppColors.goldAccent.withOpacity(0.50),
-                    blurRadius: 18,
-                    offset: const Offset(0, 6),
+                    color: AppColors.authBgBottom.withOpacity(0.60),
+                    blurRadius: 0,
+                    offset: const Offset(0, 5),
+                  ),
+                  BoxShadow(
+                    color: AppColors.authPurple.withOpacity(0.35),
+                    blurRadius: 12,
+                    offset: const Offset(0, 8),
                   ),
                 ],
-          border: Border.all(color: Colors.white.withOpacity(0.35), width: 1.5),
         ),
         child: Center(
           child: _isLoading
@@ -597,12 +604,12 @@ class _LoginScreenState extends State<LoginScreen>
                   child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
                 )
               : const Text(
-                  'SIGN IN',
+                  'Sign in',
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 2.5,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.5,
                   ),
                 ),
         ),
@@ -614,34 +621,28 @@ class _LoginScreenState extends State<LoginScreen>
   Widget _buildBiometricButton() {
     return GestureDetector(
       onTap: _authenticateWithBiometric,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(14),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-          child: Container(
-            width: double.infinity,
-            height: 50,
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.35),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: AppColors.goldPrimary.withOpacity(0.40), width: 1.5),
+      child: Container(
+        width: double.infinity,
+        height: 46,
+        decoration: BoxDecoration(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(30),
+          border: Border.all(color: AppColors.authPurple.withOpacity(0.45), width: 1.5),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.fingerprint, color: AppColors.authPurple, size: 22),
+            const SizedBox(width: 8),
+            Text(
+              'Use biometric login',
+              style: TextStyle(
+                color: AppColors.authBgMid,
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+              ),
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.fingerprint, color: AppColors.goldPrimary, size: 24),
-                const SizedBox(width: 10),
-                Text(
-                  'Use Biometric',
-                  style: TextStyle(
-                    color: AppColors.plumDeep,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
-            ),
-          ),
+          ],
         ),
       ),
     );
@@ -655,7 +656,7 @@ class _LoginScreenState extends State<LoginScreen>
         Text(
           "Don't have an account? ",
           style: TextStyle(
-            color: AppColors.plumDeep.withOpacity(0.60),
+            color: Colors.white.withOpacity(0.75),
             fontSize: 13,
           ),
         ),
