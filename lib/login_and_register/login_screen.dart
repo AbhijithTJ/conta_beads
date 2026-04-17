@@ -333,25 +333,18 @@ class _LoginScreenState extends State<LoginScreen>
             ),
         ),
         const SizedBox(height: 18),
-        ShaderMask(
-          shaderCallback: (bounds) => const LinearGradient(
-            colors: [AppColors.goldDark, AppColors.goldPrimary, AppColors.authLavender],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ).createShader(bounds),
-          child: const Text(
-            'Upper Room',
-            style: TextStyle(
-              fontSize: 32,
-              fontWeight: FontWeight.w800,
-              color: Colors.white,
-              letterSpacing: 1.5,
-            ),
+        const Text(
+          'Upper Room',
+          style: TextStyle(
+            fontSize: 32,
+            fontWeight: FontWeight.w800,
+            color: Colors.white,
+            letterSpacing: 1.5,
           ),
         ),
         const SizedBox(height: 6),
         Text(
-          'Every bead of the rosary counts.',
+          'One Prayer One Mission.',
           style: TextStyle(
             fontSize: 12,
             letterSpacing: 1.2,
@@ -667,7 +660,7 @@ class _LoginScreenState extends State<LoginScreen>
           child: const Text(
             'Register',
             style: TextStyle(
-              color: AppColors.goldDark,
+              color: Colors.white,
               fontWeight: FontWeight.w700,
               fontSize: 13,
             ),
