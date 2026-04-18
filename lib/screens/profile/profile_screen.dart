@@ -1,16 +1,80 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../colors/colors.dart';
 import '../../dialog_box/logout_alert_dialog.dart';
 import '../../login_and_register/login_screen.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   final String userEmail;
 
   const ProfileScreen({
     super.key,
     required this.userEmail,
   });
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen>
+    with TickerProviderStateMixin {
+  // Orb float animations
+  late AnimationController _orb1Controller;
+  late AnimationController _orb2Controller;
+  late AnimationController _orb3Controller;
+  late AnimationController _orb4Controller;
+  late Animation<double> _orb1Anim;
+  late Animation<double> _orb2Anim;
+  late Animation<double> _orb3Anim;
+  late Animation<double> _orb4Anim;
+
+  @override
+  void initState() {
+    super.initState();
+    _initOrbAnimations();
+  }
+
+  void _initOrbAnimations() {
+    _orb1Controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 4500),
+    )..repeat(reverse: true);
+    _orb2Controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 6200),
+    )..repeat(reverse: true);
+    _orb3Controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 3800),
+    )..repeat(reverse: true);
+    _orb4Controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 6800),
+    )..repeat(reverse: true);
+
+    _orb1Anim = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(parent: _orb1Controller, curve: Curves.easeInOut),
+    );
+    _orb2Anim = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(parent: _orb2Controller, curve: Curves.easeInOut),
+    );
+    _orb3Anim = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(parent: _orb3Controller, curve: Curves.easeInOut),
+    );
+    _orb4Anim = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(parent: _orb4Controller, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _orb1Controller.dispose();
+    _orb2Controller.dispose();
+    _orb3Controller.dispose();
+    _orb4Controller.dispose();
+    super.dispose();
+  }
 
   Future<void> _logout(BuildContext context) async {
     HapticFeedback.lightImpact();
@@ -19,9 +83,10 @@ class ProfileScreen extends StatelessWidget {
       barrierDismissible: false,
       builder: (_) => const LogoutAlertDialog(),
     );
-    if (confirmed == true && context.mounted) {
-      Navigator.of(context).pushReplacement(
+    if (confirmed == true && mounted) {
+      Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (_) => const LoginScreen()),
+        (route) => false,
       );
     }
   }
@@ -35,23 +100,20 @@ class ProfileScreen extends StatelessWidget {
         height: double.infinity,
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [AppColors.bgTop, AppColors.bgMid, AppColors.bgBottom],
-            stops: [0.0, 0.5, 1.0],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              AppColors.authBgTop,
+              AppColors.authBgMid,
+              AppColors.authBgBottom,
+            ],
           ),
         ),
         child: Stack(
           children: [
-            // ── Static orb bubbles ──
-            _Orb(left: size.width * 0.2,   top: -size.height * 0.08, size: size.width * 0.72,
-              colors: [AppColors.plumMid.withOpacity(0.55),     AppColors.plumDeep.withOpacity(0.30)]),
-            _Orb(left: -size.width * 0.22, top: size.height * 0.28,  size: size.width * 0.65,
-              colors: [AppColors.dustyRose.withOpacity(0.60),   AppColors.dustyRose.withOpacity(0.25)]),
-            _Orb(left: size.width * 0.55,  top: size.height * 0.38,  size: size.width * 0.60,
-              colors: [AppColors.lavenderSoft.withOpacity(0.70), AppColors.plumMid.withOpacity(0.20)]),
-            _Orb(left: size.width * 0.1,   top: size.height * 0.72,  size: size.width * 0.55,
-              colors: [AppColors.goldPrimary.withOpacity(0.22),  AppColors.dustyRose.withOpacity(0.30)]),
+            // ── Animated floating orbs ──
+            _buildOrbs(size),
+
             // ── Content ──
             SafeArea(
               child: SingleChildScrollView(
@@ -68,19 +130,17 @@ class ProfileScreen extends StatelessWidget {
                     _buildUserName(),
                     const SizedBox(height: 6),
                     _buildUserSubtitle(),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 32),
                     _buildStatsRow(),
-                    const SizedBox(height: 28),
-                    _buildGoldDivider(),
-                    const SizedBox(height: 28),
+                    const SizedBox(height: 36),
                     _buildSectionLabel('Account Details'),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 12),
                     _buildDetailsCard(),
-                    const SizedBox(height: 24),
-                    _buildSectionLabel('Settings'),
-                    const SizedBox(height: 10),
-                    _buildSettingsList(),
                     const SizedBox(height: 28),
+                    _buildSectionLabel('Settings'),
+                    const SizedBox(height: 12),
+                    _buildSettingsList(),
+                    const SizedBox(height: 40),
                     _buildLogoutButton(context),
                     const SizedBox(height: 40),
                   ],
@@ -93,6 +153,54 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
+  Widget _buildOrbs(Size size) {
+    return AnimatedBuilder(
+      animation: Listenable.merge([_orb1Anim, _orb2Anim, _orb3Anim, _orb4Anim]),
+      builder: (context, _) {
+        return Stack(
+          children: [
+            _Orb(
+              left: size.width * 0.2,
+              top: -size.height * 0.08 + _orb1Anim.value * 28,
+              size: size.width * 0.72,
+              colors: [
+                AppColors.authPurple.withOpacity(0.55),
+                AppColors.authBgTop.withOpacity(0.30),
+              ],
+            ),
+            _Orb(
+              left: -size.width * 0.22,
+              top: size.height * 0.28 + _orb2Anim.value * -22,
+              size: size.width * 0.65,
+              colors: [
+                AppColors.authPurpleLight.withOpacity(0.45),
+                AppColors.authPurple.withOpacity(0.25),
+              ],
+            ),
+            _Orb(
+              left: size.width * 0.55,
+              top: size.height * 0.38 + _orb3Anim.value * 18,
+              size: size.width * 0.60,
+              colors: [
+                AppColors.authBgMid.withOpacity(0.70),
+                AppColors.authBgBottom.withOpacity(0.40),
+              ],
+            ),
+            _Orb(
+              left: size.width * 0.1,
+              top: size.height * 0.72 + _orb4Anim.value * -16,
+              size: size.width * 0.55,
+              colors: [
+                AppColors.goldPrimary.withOpacity(0.18),
+                AppColors.authPurple.withOpacity(0.25),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Widget _buildPageLabel() {
     return Text(
       'MY PROFILE',
@@ -100,7 +208,7 @@ class ProfileScreen extends StatelessWidget {
         fontSize: 10,
         fontWeight: FontWeight.w700,
         letterSpacing: 3.5,
-        color: AppColors.goldDark.withOpacity(0.7),
+        color: Colors.white.withOpacity(0.65),
       ),
     );
   }
@@ -111,42 +219,58 @@ class ProfileScreen extends StatelessWidget {
         clipBehavior: Clip.none,
         children: [
           Container(
-            width: 100,
-            height: 100,
-            decoration: const BoxDecoration(
+            width: 110,
+            height: 110,
+            decoration: BoxDecoration(
               shape: BoxShape.circle,
-              gradient: LinearGradient(
+              gradient: const LinearGradient(
                 colors: [AppColors.goldDark, AppColors.goldPrimary, AppColors.goldLight],
-                stops: [0.0, 0.5, 1.0],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.goldPrimary.withOpacity(0.3),
+                  blurRadius: 25,
+                  spreadRadius: 2,
+                ),
+              ],
             ),
-            padding: const EdgeInsets.all(2.5),
-            child: Container(
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppColors.cardWhite,
-              ),
-              child: const Center(
-                child: Text(
-                  'JD',
-                  style: TextStyle(
-                    fontSize: 30,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.goldDark,
-                    letterSpacing: -0.5,
+            padding: const EdgeInsets.all(4),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(60),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+                child: Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white.withOpacity(0.92),
+                    border: Border.all(
+                      color: Colors.white.withOpacity(0.4),
+                      width: 1,
+                    ),
+                  ),
+                  child: const Center(
+                    child: Text(
+                      'JD',
+                      style: TextStyle(
+                        fontSize: 36,
+                        fontWeight: FontWeight.w900,
+                        color: AppColors.authBgBottom,
+                        letterSpacing: -1,
+                      ),
+                    ),
                   ),
                 ),
               ),
             ),
           ),
           Positioned(
-            bottom: 2,
-            right: 2,
+            bottom: 4,
+            right: 4,
             child: Container(
-              width: 26,
-              height: 26,
+              width: 32,
+              height: 32,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: const LinearGradient(
@@ -154,9 +278,16 @@ class ProfileScreen extends StatelessWidget {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
-                border: Border.all(color: Colors.white, width: 2),
+                border: Border.all(color: Colors.white, width: 2.5),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.15),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
-              child: const Icon(Icons.camera_alt_rounded, size: 12, color: Colors.white),
+              child: const Icon(Icons.camera_alt_rounded, size: 14, color: Colors.white),
             ),
           ),
         ],
@@ -165,20 +296,13 @@ class ProfileScreen extends StatelessWidget {
   }
 
   Widget _buildUserName() {
-    return ShaderMask(
-      shaderCallback: (bounds) => const LinearGradient(
-        colors: [AppColors.goldDark, AppColors.goldPrimary, AppColors.goldLight],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      ).createShader(bounds),
-      child: const Text(
-        'John David',
-        style: TextStyle(
-          fontSize: 26,
-          fontWeight: FontWeight.w800,
-          color: Colors.white,
-          letterSpacing: 0.3,
-        ),
+    return const Text(
+      'John David',
+      style: TextStyle(
+        fontSize: 28,
+        fontWeight: FontWeight.w800,
+        color: Colors.white,
+        letterSpacing: 0.5,
       ),
     );
   }
@@ -188,9 +312,9 @@ class ProfileScreen extends StatelessWidget {
       'MEMBER SINCE 2023',
       style: TextStyle(
         fontSize: 10,
-        fontWeight: FontWeight.w500,
+        fontWeight: FontWeight.w600,
         letterSpacing: 2.0,
-        color: AppColors.textSecondary.withOpacity(0.6),
+        color: Colors.white.withOpacity(0.5),
       ),
     );
   }
@@ -199,44 +323,10 @@ class ProfileScreen extends StatelessWidget {
     return Row(
       children: [
         _StatBox(value: '342', label: 'Prayers'),
-        const SizedBox(width: 8),
+        const SizedBox(width: 12),
         _StatBox(value: '28', label: 'Novenas'),
-        const SizedBox(width: 8),
+        const SizedBox(width: 12),
         _StatBox(value: '14', label: 'Day Streak'),
-      ],
-    );
-  }
-
-  Widget _buildGoldDivider() {
-    return Row(
-      children: [
-        Expanded(
-          child: Container(
-            height: 1,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.transparent, AppColors.goldPrimary.withOpacity(0.3)],
-              ),
-            ),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14),
-          child: Text(
-            '✦',
-            style: TextStyle(fontSize: 11, color: AppColors.goldPrimary.withOpacity(0.5)),
-          ),
-        ),
-        Expanded(
-          child: Container(
-            height: 1,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [AppColors.goldPrimary.withOpacity(0.3), Colors.transparent],
-              ),
-            ),
-          ),
-        ),
       ],
     );
   }
@@ -247,24 +337,24 @@ class ProfileScreen extends StatelessWidget {
       child: Text(
         text.toUpperCase(),
         style: TextStyle(
-          fontSize: 9.5,
-          fontWeight: FontWeight.w700,
-          letterSpacing: 2.5,
-          color: AppColors.goldDark.withOpacity(0.6),
+          fontSize: 10,
+          fontWeight: FontWeight.w800,
+          letterSpacing: 2.0,
+          color: AppColors.goldLight.withOpacity(0.9),
         ),
       ),
     );
   }
 
   Widget _buildDetailsCard() {
-    return _LightCard(
+    return _GlassCard(
       child: Column(
         children: [
-          _InfoRow(icon: Icons.email_outlined, label: 'Email Address', value: userEmail),
+          _InfoRow(icon: Icons.email_outlined, label: 'Email Address', value: widget.userEmail),
           _buildCardDivider(),
-          _InfoRow(icon: Icons.phone_outlined, label: 'Phone Number', value: '+91 98765 43210'),
+          const _InfoRow(icon: Icons.phone_outlined, label: 'Phone Number', value: '+91 98765 43210'),
           _buildCardDivider(),
-          _InfoRow(icon: Icons.location_on_outlined, label: 'Region', value: 'Kerala, India'),
+          const _InfoRow(icon: Icons.location_on_outlined, label: 'Region', value: 'Kerala, India'),
         ],
       ),
     );
@@ -272,16 +362,10 @@ class ProfileScreen extends StatelessWidget {
 
   Widget _buildCardDivider() {
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 4),
       height: 1,
+      margin: const EdgeInsets.symmetric(horizontal: 4),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Colors.transparent,
-            AppColors.goldPrimary.withOpacity(0.15),
-            Colors.transparent,
-          ],
-        ),
+        color: AppColors.authPurple.withOpacity(0.1),
       ),
     );
   }
@@ -289,10 +373,10 @@ class ProfileScreen extends StatelessWidget {
   Widget _buildSettingsList() {
     return const Column(
       children: [
-        _SettingRow(icon: Icons.layers_rounded, title: 'Counting History'),
-        SizedBox(height: 8),
-        _SettingRow(icon: Icons.shield_outlined, title: 'Account Security'),
-        SizedBox(height: 8),
+        _SettingRow(icon: Icons.history_rounded, title: 'Counting History'),
+        SizedBox(height: 12),
+        _SettingRow(icon: Icons.security_rounded, title: 'Account Security'),
+        SizedBox(height: 12),
         _SettingRow(icon: Icons.help_outline_rounded, title: 'Help & Support'),
       ],
     );
@@ -303,77 +387,79 @@ class ProfileScreen extends StatelessWidget {
       onTap: () => _logout(context),
       child: Container(
         width: double.infinity,
-        height: 52,
+        height: 56,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(30),
           gradient: LinearGradient(
             colors: [
-              const Color(0xFFB43232).withOpacity(0.85),
-              const Color(0xFF8C1919).withOpacity(0.9),
+              Colors.redAccent.shade400,
+              Colors.red.shade800,
             ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
           ),
-          border: Border.all(
-            color: const Color(0xFFC85050).withOpacity(0.2),
-            width: 1,
-          ),
-        ),
-        child: const Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.logout_rounded, color: Color(0xFFFFC8C8), size: 18),
-            SizedBox(width: 10),
-            Text(
-              'SIGN OUT',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 1.8,
-                color: Color(0xFFFFC8C8),
-              ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.25),
+              blurRadius: 15,
+              offset: const Offset(0, 8),
             ),
           ],
         ),
+        child: const Center(
+          child: Text(
+            'SIGN OUT',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 1.5,
+              color: Colors.white,
+            ),
+          ),
+        ),
       ),
     );
   }
 }
 
-// ─── Reusable: Light Card (matches intentions screen) ────────────────────────
-class _LightCard extends StatelessWidget {
+// ── Glassmorphic Card (Matches Login Screen Style) ──────────────────────────
+class _GlassCard extends StatelessWidget {
   final Widget child;
-  const _LightCard({required this.child});
+  const _GlassCard({required this.child});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-      decoration: BoxDecoration(
-        color: AppColors.cardWhite,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.goldPrimary.withOpacity(0.2), width: 1.5),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.goldPrimary.withOpacity(0.12),
-            blurRadius: 24,
-            offset: const Offset(0, 8),
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(28),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.92),
+            borderRadius: BorderRadius.circular(28),
+            border: Border.all(
+              color: Colors.white.withOpacity(0.95),
+              width: 1.5,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.20),
+                blurRadius: 40,
+                spreadRadius: 2,
+                offset: const Offset(0, 12),
+              ),
+            ],
           ),
-          BoxShadow(
-            color: Colors.white.withOpacity(0.9),
-            blurRadius: 12,
-            spreadRadius: -2,
-            offset: const Offset(-3, -3),
-          ),
-        ],
+          child: child,
+        ),
       ),
-      child: child,
     );
   }
 }
 
-// ─── Reusable: Info Row ───────────────────────────────────────────────────────
+// ── Info Row ─────────────────────────────────────────────────────────────────
 class _InfoRow extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -383,7 +469,7 @@ class _InfoRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 14),
+      padding: const EdgeInsets.symmetric(vertical: 16),
       child: Row(
         children: [
           _IconBox(icon: icon),
@@ -395,19 +481,19 @@ class _InfoRow extends StatelessWidget {
                 Text(
                   label.toUpperCase(),
                   style: TextStyle(
-                    fontSize: 9.5,
+                    fontSize: 10,
                     fontWeight: FontWeight.w700,
-                    letterSpacing: 1.8,
-                    color: AppColors.goldDark.withOpacity(0.7),
+                    letterSpacing: 1.2,
+                    color: AppColors.authBgMid.withOpacity(0.6),
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   value,
                   style: const TextStyle(
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.textPrimary,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.authBgBottom,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -420,7 +506,7 @@ class _InfoRow extends StatelessWidget {
   }
 }
 
-// ─── Reusable: Setting Row ────────────────────────────────────────────────────
+// ── Setting Row ───────────────────────────────────────────────────────────────
 class _SettingRow extends StatelessWidget {
   final IconData icon;
   final String title;
@@ -428,46 +514,36 @@ class _SettingRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      decoration: BoxDecoration(
-        color: AppColors.cardWhite,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.goldPrimary.withOpacity(0.15), width: 1),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.goldPrimary.withOpacity(0.08),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          _IconBox(icon: icon, size: 38, iconSize: 17, radius: 11),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Text(
-              title,
-              style: const TextStyle(
-                fontSize: 13.5,
-                fontWeight: FontWeight.w500,
-                color: AppColors.textPrimary,
+    return _GlassCard(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Row(
+          children: [
+            _IconBox(icon: icon, size: 40, iconSize: 18, radius: 12),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.authBgBottom,
+                ),
               ),
             ),
-          ),
-          Icon(
-            Icons.chevron_right_rounded,
-            color: AppColors.textSecondary.withOpacity(0.4),
-            size: 20,
-          ),
-        ],
+            Icon(
+              Icons.chevron_right_rounded,
+              color: AppColors.authPurple.withOpacity(0.3),
+              size: 24,
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
-// ─── Reusable: Icon Box ───────────────────────────────────────────────────────
+// ── Icon Box ─────────────────────────────────────────────────────────────────
 class _IconBox extends StatelessWidget {
   final IconData icon;
   final double size;
@@ -477,8 +553,8 @@ class _IconBox extends StatelessWidget {
   const _IconBox({
     required this.icon,
     this.size = 42,
-    this.iconSize = 18,
-    this.radius = 12,
+    this.iconSize = 20,
+    this.radius = 14,
   });
 
   @override
@@ -488,18 +564,18 @@ class _IconBox extends StatelessWidget {
       height: size,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(radius),
-        color: AppColors.goldPrimary.withOpacity(0.1),
+        color: AppColors.authPurple.withOpacity(0.08),
         border: Border.all(
-          color: AppColors.goldPrimary.withOpacity(0.25),
+          color: AppColors.authPurple.withOpacity(0.15),
           width: 1,
         ),
       ),
-      child: Icon(icon, color: AppColors.goldDark, size: iconSize),
+      child: Icon(icon, color: AppColors.authPurple, size: iconSize),
     );
   }
 }
 
-// ─── Reusable: Stat Box ───────────────────────────────────────────────────────
+// ── Stat Box ─────────────────────────────────────────────────────────────────
 class _StatBox extends StatelessWidget {
   final String value;
   final String label;
@@ -508,49 +584,55 @@ class _StatBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        decoration: BoxDecoration(
-          color: AppColors.cardWhite,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: AppColors.goldPrimary.withOpacity(0.2), width: 1),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.goldPrimary.withOpacity(0.1),
-              blurRadius: 14,
-              offset: const Offset(0, 4),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 18),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.92),
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: Colors.white.withOpacity(0.95), width: 1),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 20,
+                  offset: const Offset(0, 8),
+                ),
+              ],
             ),
-          ],
-        ),
-        child: Column(
-          children: [
-            Text(
-              value,
-              style: const TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w700,
-                color: AppColors.goldDark,
-                height: 1,
-              ),
+            child: Column(
+              children: [
+                Text(
+                  value,
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.authBgMid,
+                    height: 1,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  label.toUpperCase(),
+                  style: TextStyle(
+                    fontSize: 9,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 1.2,
+                    color: AppColors.authPurple.withOpacity(0.5),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 5),
-            Text(
-              label.toUpperCase(),
-              style: TextStyle(
-                fontSize: 8.5,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 1.5,
-                color: AppColors.textSecondary.withOpacity(0.6),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
   }
 }
 
-// ── Orb bubble widget ─────────────────────────────────────────────────────────
+// ── Orb Widget ───────────────────────────────────────────────────────────────
 class _Orb extends StatelessWidget {
   final double left;
   final double top;

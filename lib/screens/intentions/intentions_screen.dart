@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../../colors/colors.dart';
 import 'intention_success_screen.dart';
@@ -10,10 +11,18 @@ class IntentionsScreen extends StatefulWidget {
 }
 
 class _IntentionsScreenState extends State<IntentionsScreen>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   final TextEditingController _intentionController = TextEditingController();
-  late AnimationController _fadeController;
-  late Animation<double> _fadeAnimation;
+
+  // Orb float animations
+  late AnimationController _orb1Controller;
+  late AnimationController _orb2Controller;
+  late AnimationController _orb3Controller;
+  late AnimationController _orb4Controller;
+  late Animation<double> _orb1Anim;
+  late Animation<double> _orb2Anim;
+  late Animation<double> _orb3Anim;
+  late Animation<double> _orb4Anim;
 
   final String quote =
       '"Prayer joined to sacrifice constitutes the most powerful force in human history."';
@@ -24,19 +33,48 @@ class _IntentionsScreenState extends State<IntentionsScreen>
   @override
   void initState() {
     super.initState();
-    _fadeController = AnimationController(
+    _initOrbAnimations();
+  }
+
+  void _initOrbAnimations() {
+    _orb1Controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 900),
+      duration: const Duration(milliseconds: 4800),
+    )..repeat(reverse: true);
+    _orb2Controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 6500),
+    )..repeat(reverse: true);
+    _orb3Controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 4000),
+    )..repeat(reverse: true);
+    _orb4Controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 7200),
+    )..repeat(reverse: true);
+
+    _orb1Anim = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(parent: _orb1Controller, curve: Curves.easeInOut),
     );
-    _fadeAnimation =
-        CurvedAnimation(parent: _fadeController, curve: Curves.easeOut);
-    _fadeController.forward();
+    _orb2Anim = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(parent: _orb2Controller, curve: Curves.easeInOut),
+    );
+    _orb3Anim = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(parent: _orb3Controller, curve: Curves.easeInOut),
+    );
+    _orb4Anim = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(parent: _orb4Controller, curve: Curves.easeInOut),
+    );
   }
 
   @override
   void dispose() {
     _intentionController.dispose();
-    _fadeController.dispose();
+    _orb1Controller.dispose();
+    _orb2Controller.dispose();
+    _orb3Controller.dispose();
+    _orb4Controller.dispose();
     super.dispose();
   }
 
@@ -49,48 +87,42 @@ class _IntentionsScreenState extends State<IntentionsScreen>
         height: double.infinity,
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [AppColors.bgTop, AppColors.bgMid, AppColors.bgBottom],
-            stops: [0.0, 0.5, 1.0],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              AppColors.authBgTop,
+              AppColors.authBgMid,
+              AppColors.authBgBottom,
+            ],
           ),
         ),
         child: Stack(
           children: [
-            // ── Static orb bubbles ──
-            _Orb(left: size.width * 0.2,   top: -size.height * 0.08, size: size.width * 0.72,
-              colors: [AppColors.plumMid.withOpacity(0.55),     AppColors.plumDeep.withOpacity(0.30)]),
-            _Orb(left: -size.width * 0.22, top: size.height * 0.28,  size: size.width * 0.65,
-              colors: [AppColors.dustyRose.withOpacity(0.60),   AppColors.dustyRose.withOpacity(0.25)]),
-            _Orb(left: size.width * 0.55,  top: size.height * 0.38,  size: size.width * 0.60,
-              colors: [AppColors.lavenderSoft.withOpacity(0.70), AppColors.plumMid.withOpacity(0.20)]),
-            _Orb(left: size.width * 0.1,   top: size.height * 0.72,  size: size.width * 0.55,
-              colors: [AppColors.goldPrimary.withOpacity(0.22),  AppColors.dustyRose.withOpacity(0.30)]),
+            // ── Animated floating orbs ──
+            _buildOrbs(size),
+
             // ── Content ──
             SafeArea(
-              child: FadeTransition(
-                opacity: _fadeAnimation,
-                child: SingleChildScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  padding: const EdgeInsets.symmetric(horizontal: 22.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: 32),
-                      _buildHeader(),
-                      const SizedBox(height: 28),
-                      _buildQuoteCard(),
-                      const SizedBox(height: 14),
-                      _buildTodayIntentionCard(),
-                      const SizedBox(height: 14),
-                      _buildPrayerRequestsCard(),
-                      const SizedBox(height: 28),
-                      _buildDivider(),
-                      const SizedBox(height: 28),
-                      _buildRequestRosaryCard(),
-                      const SizedBox(height: 48),
-                    ],
-                  ),
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 32),
+                    _buildHeader(),
+                    const SizedBox(height: 32),
+                    _buildQuoteCard(),
+                    const SizedBox(height: 16),
+                    _buildTodayIntentionCard(),
+                    const SizedBox(height: 16),
+                    _buildPrayerRequestsCard(),
+                    const SizedBox(height: 32),
+                    _buildDivider(),
+                    const SizedBox(height: 32),
+                    _buildRequestRosaryCard(),
+                    const SizedBox(height: 48),
+                  ],
                 ),
               ),
             ),
@@ -100,14 +132,61 @@ class _IntentionsScreenState extends State<IntentionsScreen>
     );
   }
 
+  Widget _buildOrbs(Size size) {
+    return AnimatedBuilder(
+      animation: Listenable.merge([_orb1Anim, _orb2Anim, _orb3Anim, _orb4Anim]),
+      builder: (context, _) {
+        return Stack(
+          children: [
+            _Orb(
+              left: size.width * 0.2,
+              top: -size.height * 0.08 + _orb1Anim.value * 28,
+              size: size.width * 0.72,
+              colors: [
+                AppColors.authPurple.withOpacity(0.55),
+                AppColors.authBgTop.withOpacity(0.30),
+              ],
+            ),
+            _Orb(
+              left: -size.width * 0.22,
+              top: size.height * 0.28 + _orb2Anim.value * -22,
+              size: size.width * 0.65,
+              colors: [
+                AppColors.authPurpleLight.withOpacity(0.45),
+                AppColors.authPurple.withOpacity(0.25),
+              ],
+            ),
+            _Orb(
+              left: size.width * 0.55,
+              top: size.height * 0.38 + _orb3Anim.value * 18,
+              size: size.width * 0.60,
+              colors: [
+                AppColors.authBgMid.withOpacity(0.70),
+                AppColors.authBgBottom.withOpacity(0.40),
+              ],
+            ),
+            _Orb(
+              left: size.width * 0.1,
+              top: size.height * 0.72 + _orb4Anim.value * -16,
+              size: size.width * 0.55,
+              colors: [
+                AppColors.goldPrimary.withOpacity(0.18),
+                AppColors.authPurple.withOpacity(0.25),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Widget _buildHeader() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Intentions - Decorative gold line
         Container(
-          width: 40,
-          height: 1.5,
+          width: 45,
+          height: 2,
           decoration: BoxDecoration(
             gradient: const LinearGradient(
               colors: [AppColors.goldDark, AppColors.goldPrimary],
@@ -115,34 +194,25 @@ class _IntentionsScreenState extends State<IntentionsScreen>
             borderRadius: BorderRadius.circular(2),
           ),
         ),
-        const SizedBox(height: 12),
-        // Intentions - Title with gold gradient
-        ShaderMask(
-          shaderCallback: (bounds) => const LinearGradient(
-            colors: [AppColors.goldDark, AppColors.goldPrimary, AppColors.goldLight],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ).createShader(bounds),
-          child: const Text(
-            'Intentions',
-            style: TextStyle(
-              fontSize: 42,
-              fontWeight: FontWeight.w900,
-              color: Colors.white,
-              letterSpacing: -0.5,
-              height: 1.0,
-            ),
+        const SizedBox(height: 16),
+        const Text(
+          'Intentions',
+          style: TextStyle(
+            fontSize: 42,
+            fontWeight: FontWeight.w900,
+            color: Colors.white,
+            letterSpacing: -1,
+            height: 1.0,
           ),
         ),
-        const SizedBox(height: 6),
-        // Intentions - Subtitle text
+        const SizedBox(height: 8),
         Text(
-          'Lift your heart in prayer',
+          'LIFT YOUR HEART IN PRAYER',
           style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w400,
-            color: AppColors.textSecondary.withOpacity(0.7),
-            letterSpacing: 1.6,
+            fontSize: 10,
+            fontWeight: FontWeight.w700,
+            color: Colors.white.withOpacity(0.6),
+            letterSpacing: 2.5,
           ),
         ),
       ],
@@ -150,67 +220,38 @@ class _IntentionsScreenState extends State<IntentionsScreen>
   }
 
   Widget _buildQuoteCard() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 22),
-      decoration: BoxDecoration(
-        color: AppColors.cardWhite,
-        borderRadius: BorderRadius.circular(20),
-        // Intentions - Quote card border with gold accent
-        border: Border.all(
-          color: AppColors.goldPrimary.withOpacity(0.2),
-          width: 1.5,
-        ),
-        boxShadow: [
-          // Intentions - Gold shadow for depth
-          BoxShadow(
-            color: AppColors.goldPrimary.withOpacity(0.12),
-            blurRadius: 24,
-            offset: const Offset(0, 8),
-          ),
-          // Intentions - White inner glow
-          BoxShadow(
-            color: Colors.white.withOpacity(0.9),
-            blurRadius: 12,
-            spreadRadius: -2,
-            offset: const Offset(-3, -3),
-          ),
-        ],
-      ),
+    return _GlassCard(
       child: Column(
         children: [
-          // Intentions - Quote ornament
           Text(
             '\u275D',
             style: TextStyle(
-              fontSize: 28,
-              color: AppColors.goldPrimary.withOpacity(0.6),
+              fontSize: 32,
+              color: AppColors.authPurple.withOpacity(0.3),
               height: 1.0,
             ),
           ),
-          const SizedBox(height: 10),
-          // Intentions - Quote text
+          const SizedBox(height: 8),
           Text(
             quote,
             textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 14.5,
-              fontWeight: FontWeight.w400,
-              color: AppColors.textPrimary.withOpacity(0.85),
+            style: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w500,
+              color: AppColors.authBgMid,
               fontStyle: FontStyle.italic,
-              height: 1.65,
-              letterSpacing: 0.2,
+              height: 1.6,
             ),
           ),
           const SizedBox(height: 12),
-          // Intentions - Quote author
           Text(
-            quoteAuthor,
+            quoteAuthor.toUpperCase(),
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: AppColors.goldDark,
-              letterSpacing: 1.2,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
+              color: AppColors.authPurple.withOpacity(0.7),
+              letterSpacing: 1.5,
             ),
           ),
         ],
@@ -219,50 +260,41 @@ class _IntentionsScreenState extends State<IntentionsScreen>
   }
 
   Widget _buildTodayIntentionCard() {
-    return _LightCard(
+    return _GlassCard(
       child: Row(
         children: [
-          // Intentions - Today's intention icon box
-          _IconBox(
-            emoji: '⛪',
-            bgColor: AppColors.goldPrimary.withOpacity(0.1),
-            borderColor: AppColors.goldPrimary.withOpacity(0.25),
-          ),
+          _IconBox(icon: Icons.church_rounded),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Intentions - Today's intention label
                 Text(
                   "TODAY'S INTENTION",
                   style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.goldDark,
-                    letterSpacing: 1.8,
+                    fontSize: 9,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.authBgMid.withOpacity(0.5),
+                    letterSpacing: 1.5,
                   ),
                 ),
-                const SizedBox(height: 6),
-                // Intentions - Today's intention text
+                const SizedBox(height: 4),
                 Text(
                   todayIntention,
                   style: const TextStyle(
                     fontSize: 17,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
-                    height: 1.3,
-                    letterSpacing: -0.2,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.authBgBottom,
+                    letterSpacing: -0.3,
                   ),
                 ),
               ],
             ),
           ),
-          // Intentions - Chevron icon
           Icon(
             Icons.chevron_right_rounded,
-            color: AppColors.textSecondary.withOpacity(0.4),
-            size: 22,
+            color: AppColors.authPurple.withOpacity(0.3),
+            size: 24,
           ),
         ],
       ),
@@ -270,51 +302,42 @@ class _IntentionsScreenState extends State<IntentionsScreen>
   }
 
   Widget _buildPrayerRequestsCard() {
-    return _LightCard(
+    return _GlassCard(
       child: Row(
         children: [
-          // Intentions - Prayer requests icon box
-          _IconBox(
-            emoji: '👥',
-            bgColor: AppColors.lavenderSoft.withOpacity(0.4),
-            borderColor: AppColors.plumMid.withOpacity(0.2),
-          ),
+          _IconBox(icon: Icons.people_alt_rounded),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Intentions - Prayer requests title
                 const Text(
-                  'Pray for One Another',
+                  'Community Prayers',
                   style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
-                    letterSpacing: -0.1,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.authBgBottom,
+                    letterSpacing: -0.2,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Row(
                   children: [
-                    // Intentions - Prayer requests indicator dot
                     Container(
                       width: 6,
                       height: 6,
-                      decoration: BoxDecoration(
+                      decoration: const BoxDecoration(
                         shape: BoxShape.circle,
-                        color: AppColors.textSecondary.withOpacity(0.7),
+                        color: Colors.green,
                       ),
                     ),
                     const SizedBox(width: 6),
-                    // Intentions - Prayer requests count
                     Text(
-                      '$prayerRequests active prayer requests',
+                      '$prayerRequests active requests',
                       style: TextStyle(
-                        fontSize: 12.5,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.textSecondary.withOpacity(0.7),
-                        letterSpacing: 0.1,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.authBgMid.withOpacity(0.6),
                       ),
                     ),
                   ],
@@ -322,11 +345,10 @@ class _IntentionsScreenState extends State<IntentionsScreen>
               ],
             ),
           ),
-          // Intentions - Chevron icon
           Icon(
             Icons.chevron_right_rounded,
-            color: AppColors.textSecondary.withOpacity(0.4),
-            size: 22,
+            color: AppColors.authPurple.withOpacity(0.3),
+            size: 24,
           ),
         ],
       ),
@@ -338,39 +360,30 @@ class _IntentionsScreenState extends State<IntentionsScreen>
       children: [
         Expanded(
           child: Container(
-            height: 1,
-            // Intentions - Divider gradient left
+            height: 1.5,
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [
-                  Colors.transparent,
-                  AppColors.goldPrimary.withOpacity(0.3),
-                ],
+                colors: [Colors.transparent, Colors.white.withOpacity(0.2)],
               ),
             ),
           ),
         ),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14),
-          // Intentions - Divider ornament
+          padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Text(
             '✦',
             style: TextStyle(
-              fontSize: 13,
-              color: AppColors.goldPrimary.withOpacity(0.5),
+              fontSize: 14,
+              color: AppColors.goldPrimary.withOpacity(0.6),
             ),
           ),
         ),
         Expanded(
           child: Container(
-            height: 1,
-            // Intentions - Divider gradient right
+            height: 1.5,
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [
-                  AppColors.goldPrimary.withOpacity(0.3),
-                  Colors.transparent,
-                ],
+                colors: [Colors.white.withOpacity(0.2), Colors.transparent],
               ),
             ),
           ),
@@ -380,283 +393,230 @@ class _IntentionsScreenState extends State<IntentionsScreen>
   }
 
   Widget _buildRequestRosaryCard() {
-    return Container(
+    return _GlassCard(
       padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: AppColors.cardWhite,
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(
-          color: AppColors.goldPrimary.withOpacity(0.2),
-          width: 1.5,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.goldPrimary.withOpacity(0.15),
-            blurRadius: 32,
-            spreadRadius: 2,
-            offset: const Offset(0, 8),
-          ),
-          BoxShadow(
-            color: Colors.white.withOpacity(0.9),
-            blurRadius: 12,
-            spreadRadius: -2,
-            offset: const Offset(-3, -3),
-          ),
-        ],
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              // Intentions - Request rosary icon box
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  color: AppColors.goldPrimary.withOpacity(0.12),
-                  border: Border.all(
-                    color: AppColors.goldPrimary.withOpacity(0.3),
-                    width: 1,
-                  ),
-                ),
-                child: const Center(
-                  child: Text('🙏', style: TextStyle(fontSize: 22)),
-                ),
-              ),
-              const SizedBox(width: 14),
+              _IconBox(icon: Icons.auto_awesome_rounded),
+              const SizedBox(width: 16),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Intentions - Request rosary label
                   Text(
                     'REQUEST A ROSARY',
                     style: TextStyle(
                       fontSize: 10,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.goldDark,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.authPurple.withOpacity(0.8),
                       letterSpacing: 1.8,
                     ),
                   ),
-                  const SizedBox(height: 3),
-                  // Intentions - Request rosary title
+                  const SizedBox(height: 2),
                   const Text(
                     'Offer your intention',
                     style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.textPrimary,
-                      letterSpacing: -0.3,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w900,
+                      color: AppColors.authBgBottom,
+                      letterSpacing: -0.5,
                     ),
                   ),
                 ],
               ),
             ],
           ),
-          const SizedBox(height: 18),
-          // Intentions - Request rosary description
+          const SizedBox(height: 20),
           Text(
             'Share your personal intention with the community in prayer and trust it to the Mother of God.',
             style: TextStyle(
               fontSize: 13,
-              fontWeight: FontWeight.w400,
-              color: AppColors.textSecondary.withOpacity(0.75),
-              fontStyle: FontStyle.italic,
+              fontWeight: FontWeight.w500,
+              color: AppColors.authBgMid.withOpacity(0.7),
               height: 1.6,
             ),
           ),
-          const SizedBox(height: 18),
-          // Intentions - Text input field
-          TextField(
-            controller: _intentionController,
-            maxLines: 4,
-            style: const TextStyle(
-              fontSize: 14,
-              color: AppColors.textPrimary,
-              fontWeight: FontWeight.w500,
-              height: 1.5,
-            ),
-            cursorColor: AppColors.goldPrimary,
-            decoration: InputDecoration(
-              hintText: 'Write your intention here...',
-              hintStyle: TextStyle(
-                color: AppColors.textSecondary.withOpacity(0.4),
-                fontSize: 14,
-                fontStyle: FontStyle.italic,
-                fontWeight: FontWeight.w400,
-              ),
-              filled: true,
-              fillColor: Colors.white,
-              contentPadding: const EdgeInsets.all(16),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(14),
-                borderSide: BorderSide(
-                  color: AppColors.goldPrimary.withOpacity(0.2),
+          const SizedBox(height: 20),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+              child: TextField(
+                controller: _intentionController,
+                maxLines: 4,
+                style: const TextStyle(
+                  fontSize: 15,
+                  color: AppColors.authBgBottom,
+                  fontWeight: FontWeight.w600,
                 ),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(14),
-                borderSide: BorderSide(
-                  color: AppColors.goldPrimary.withOpacity(0.2),
-                ),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(14),
-                borderSide: const BorderSide(
-                  color: AppColors.goldPrimary,
-                  width: 1.5,
+                decoration: InputDecoration(
+                  hintText: 'Write your intention here...',
+                  hintStyle: TextStyle(
+                    color: AppColors.authPurple.withOpacity(0.3),
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  filled: true,
+                  fillColor: Colors.white.withOpacity(0.7),
+                  contentPadding: const EdgeInsets.all(18),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide.none,
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide(
+                      color: AppColors.goldPrimary.withOpacity(0.5),
+                      width: 1.5,
+                    ),
+                  ),
                 ),
               ),
             ),
           ),
-          const SizedBox(height: 18),
-          // Intentions - Submit button
-          GestureDetector(
-            onTap: () {
-              if (_intentionController.text.isNotEmpty) {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => IntentionSuccessScreen(
-                      intention: _intentionController.text,
+          const SizedBox(height: 24),
+          _buildSubmitButton(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSubmitButton() {
+    return GestureDetector(
+      onTap: () {
+        if (_intentionController.text.isNotEmpty) {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => IntentionSuccessScreen(
+                intention: _intentionController.text,
+              ),
+            ),
+          );
+          _intentionController.clear();
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Row(
+                children: [
+                  Icon(Icons.info_outline, color: Colors.white, size: 20),
+                  const SizedBox(width: 10),
+                  Text(
+                    'Please write your intention',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
                     ),
-                  ),
-                );
-                _intentionController.clear();
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: const Row(
-                      children: [
-                        Icon(Icons.info_outline, color: Colors.white, size: 20),
-                        SizedBox(width: 10),
-                        Text(
-                          'Please write your intention',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                    // Intentions - Error snackbar background
-                    backgroundColor: AppColors.textSecondary,
-                    behavior: SnackBarBehavior.floating,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    margin: const EdgeInsets.all(16),
-                    duration: const Duration(seconds: 2),
-                  ),
-                );
-              }
-            },
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 17),
-              decoration: BoxDecoration(
-                // Intentions - Rosary button gradient
-                gradient: const LinearGradient(
-                  colors: [AppColors.rosaryButtonPrimary, AppColors.rosaryButtonDark],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(14),
-                boxShadow: [
-                  // Intentions - Rosary button shadow
-                  BoxShadow(
-                    color: AppColors.rosaryButtonPrimary,
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
                   ),
                 ],
               ),
-              child: const Center(
-                child: Text(
-                  'Request Rosary',
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                    letterSpacing: 0.6,
-                  ),
-                ),
+              backgroundColor: Colors.redAccent,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
               ),
+              margin: const EdgeInsets.all(16),
+            ),
+          );
+        }
+      },
+      child: Container(
+        width: double.infinity,
+        height: 56,
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [AppColors.authPurpleLight, AppColors.authPurple],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+          borderRadius: BorderRadius.circular(30),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.authPurple.withOpacity(0.35),
+              blurRadius: 15,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: const Center(
+          child: Text(
+            'Request Rosary',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w800,
+              color: Colors.white,
+              letterSpacing: 0.5,
             ),
           ),
-        ],
+        ),
       ),
     );
   }
 }
 
-class _LightCard extends StatelessWidget {
+// ── Glassmorphic Card (Matches Login/Profile Style) ─────────────────────────
+class _GlassCard extends StatelessWidget {
   final Widget child;
-  const _LightCard({required this.child});
+  final EdgeInsets? padding;
+  const _GlassCard({required this.child, this.padding});
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(28),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+        child: Container(
+          width: double.infinity,
+          padding: padding ?? const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.92),
+            borderRadius: BorderRadius.circular(28),
+            border: Border.all(
+              color: Colors.white.withOpacity(0.95),
+              width: 1.5,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.20),
+                blurRadius: 40,
+                spreadRadius: 2,
+                offset: const Offset(0, 12),
+              ),
+            ],
+          ),
+          child: child,
+        ),
+      ),
+    );
+  }
+}
+
+// ── Icon Box (Consistent with Profile Screen) ───────────────────────────────
+class _IconBox extends StatelessWidget {
+  final IconData icon;
+  const _IconBox({required this.icon});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+      width: 46,
+      height: 46,
       decoration: BoxDecoration(
-        color: AppColors.cardWhite,
-        borderRadius: BorderRadius.circular(18),
-        // Intentions - Light card border
+        borderRadius: BorderRadius.circular(14),
+        color: AppColors.authPurple.withOpacity(0.08),
         border: Border.all(
-          color: AppColors.goldPrimary.withOpacity(0.15),
+          color: AppColors.authPurple.withOpacity(0.15),
           width: 1,
         ),
-        boxShadow: [
-          // Intentions - Gold shadow for depth
-          BoxShadow(
-            color: AppColors.goldPrimary.withOpacity(0.1),
-            blurRadius: 14,
-            offset: const Offset(0, 4),
-          ),
-          // Intentions - White inner glow
-          BoxShadow(
-            color: Colors.white.withOpacity(0.8),
-            blurRadius: 8,
-            spreadRadius: -2,
-            offset: const Offset(-2, -2),
-          ),
-        ],
       ),
-      child: child,
+      child: Icon(icon, color: AppColors.authPurple, size: 22),
     );
   }
 }
 
-// Intentions - Icon box widget for card headers
-class _IconBox extends StatelessWidget {
-  final String emoji;
-  final Color bgColor;
-  final Color borderColor;
-
-  const _IconBox({
-    required this.emoji,
-    required this.bgColor,
-    required this.borderColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 50,
-      height: 50,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(13),
-        color: bgColor,
-        border: Border.all(color: borderColor, width: 1),
-      ),
-      child: Center(
-        child: Text(emoji, style: const TextStyle(fontSize: 26)),
-      ),
-    );
-  }
-}
-
-// ── Orb bubble widget ─────────────────────────────────────────────────────────
+// ── Orb Widget ───────────────────────────────────────────────────────────────
 class _Orb extends StatelessWidget {
   final double left;
   final double top;
