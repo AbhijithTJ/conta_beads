@@ -241,21 +241,21 @@ class _CountingScreenState extends State<CountingScreen>
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [AppColors.bgTop, AppColors.bgMid, AppColors.bgBottom],
+            colors: [AppColors.authBgTop, AppColors.authBgMid, AppColors.authBgBottom],
             stops: [0.0, 0.5, 1.0],
           ),
         ),
         child: Stack(
           children: [
-            // ── Static orb bubbles (same as login) ──
+            // ── Static orb bubbles ──
             _Orb(left: size.width * 0.2, top: -size.height * 0.08, size: size.width * 0.72,
-              colors: [AppColors.plumMid.withOpacity(0.55), AppColors.plumDeep.withOpacity(0.30)]),
+              colors: [AppColors.authPurple.withOpacity(0.55), AppColors.authBgTop.withOpacity(0.30)]),
             _Orb(left: -size.width * 0.22, top: size.height * 0.28, size: size.width * 0.65,
-              colors: [AppColors.dustyRose.withOpacity(0.60), AppColors.dustyRose.withOpacity(0.25)]),
+              colors: [AppColors.authPurpleLight.withOpacity(0.45), AppColors.authPurple.withOpacity(0.25)]),
             _Orb(left: size.width * 0.55, top: size.height * 0.38, size: size.width * 0.60,
-              colors: [AppColors.lavenderSoft.withOpacity(0.70), AppColors.plumMid.withOpacity(0.20)]),
+              colors: [AppColors.authBgMid.withOpacity(0.70), AppColors.authBgBottom.withOpacity(0.40)]),
             _Orb(left: size.width * 0.1, top: size.height * 0.72, size: size.width * 0.55,
-              colors: [AppColors.goldPrimary.withOpacity(0.22), AppColors.dustyRose.withOpacity(0.30)]),
+              colors: [AppColors.authPurpleLight.withOpacity(0.20), AppColors.authPurple.withOpacity(0.25)]),
             // ── Content ──
             SafeArea(
               child: SingleChildScrollView(
@@ -307,9 +307,9 @@ class _CountingScreenState extends State<CountingScreen>
           padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
           child: Container(
             decoration: BoxDecoration(
-              color: AppColors.cardWhite,
+              color: AppColors.authBgMid,
               borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-              border: Border.all(color: AppColors.goldPrimary.withOpacity(0.2), width: 1.5),
+              border: Border.all(color: AppColors.authPurpleLight.withOpacity(0.3), width: 1.5),
             ),
             padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
             child: Column(
@@ -318,20 +318,20 @@ class _CountingScreenState extends State<CountingScreen>
                 Container(
                   width: 40, height: 4,
                   decoration: BoxDecoration(
-                    color: AppColors.goldPrimary.withOpacity(0.3),
+                    color: AppColors.authPurpleLight.withOpacity(0.4),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
                 const SizedBox(height: 20),
                 Row(
                   children: [
-                    const Icon(Icons.language_rounded, color: AppColors.goldPrimary, size: 20),
+                    const Icon(Icons.language_rounded, color: AppColors.authPurpleLight, size: 20),
                     const SizedBox(width: 10),
                     Text(
                       loc.tr('select_language'),
                       style: TextStyle(
                         fontSize: 16, fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary, letterSpacing: 0.3,
+                        color: Colors.white, letterSpacing: 0.3,
                       ),
                     ),
                   ],
@@ -355,10 +355,10 @@ class _CountingScreenState extends State<CountingScreen>
                             margin: const EdgeInsets.only(bottom: 8),
                             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                             decoration: BoxDecoration(
-                              color: isSelected ? AppColors.goldPrimary.withOpacity(0.1) : Colors.transparent,
+                              color: isSelected ? AppColors.authPurpleLight.withOpacity(0.15) : Colors.transparent,
                               borderRadius: BorderRadius.circular(14),
                               border: Border.all(
-                                color: isSelected ? AppColors.goldPrimary.withOpacity(0.4) : AppColors.goldPrimary.withOpacity(0.1),
+                                color: isSelected ? AppColors.authPurpleLight.withOpacity(0.5) : AppColors.authPurpleLight.withOpacity(0.15),
                                 width: 1.5,
                               ),
                             ),
@@ -368,15 +368,15 @@ class _CountingScreenState extends State<CountingScreen>
                                   width: 36, height: 36,
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
-                                    color: isSelected ? AppColors.goldPrimary.withOpacity(0.15) : AppColors.lavenderLight,
-                                    border: Border.all(color: AppColors.goldPrimary.withOpacity(0.2)),
+                                    color: isSelected ? AppColors.authPurpleLight.withOpacity(0.20) : AppColors.authBgTop.withOpacity(0.3),
+                                    border: Border.all(color: AppColors.authPurpleLight.withOpacity(0.3)),
                                   ),
                                   child: Center(
                                     child: Text(
                                       lang['code']!,
                                       style: TextStyle(
                                         fontSize: 10, fontWeight: FontWeight.w800,
-                                        color: isSelected ? AppColors.goldDark : AppColors.textSecondary,
+                                        color: isSelected ? Colors.white : AppColors.authLavender,
                                         letterSpacing: 0.5,
                                       ),
                                     ),
@@ -388,12 +388,12 @@ class _CountingScreenState extends State<CountingScreen>
                                     lang['name']!,
                                     style: TextStyle(
                                       fontSize: 15, fontWeight: FontWeight.w600,
-                                      color: isSelected ? AppColors.textPrimary : AppColors.textSecondary,
+                                      color: isSelected ? Colors.white : Colors.white.withOpacity(0.70),
                                     ),
                                   ),
                                 ),
                                 if (isSelected)
-                                  const Icon(Icons.check_rounded, color: AppColors.goldPrimary, size: 20),
+                                  const Icon(Icons.check_rounded, color: AppColors.authPurpleLight, size: 20),
                               ],
                             ),
                           ),
@@ -422,31 +422,24 @@ class _CountingScreenState extends State<CountingScreen>
               height: 42,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: AppColors.goldPrimary.withOpacity(0.35), width: 1.5),
+                border: Border.all(color: AppColors.authPurpleLight.withOpacity(0.45), width: 1.5),
                 boxShadow: [
-                  BoxShadow(color: AppColors.goldPrimary.withOpacity(0.25), blurRadius: 10, spreadRadius: 1),
+                  BoxShadow(color: AppColors.authPurple.withOpacity(0.25), blurRadius: 10, spreadRadius: 1),
                 ],
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(10),
-                child: Image.asset('assets/splash/upper_room.png', fit: BoxFit.cover),
+                child: Image.asset('assets/splash/ur_logo.png', fit: BoxFit.cover),
               ),
             ),
             const SizedBox(width: 10),
-            ShaderMask(
-              shaderCallback: (bounds) => const LinearGradient(
-                colors: [AppColors.goldDark, AppColors.goldPrimary, AppColors.plumMid],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ).createShader(bounds),
-              child: const Text(
-                'Upper Room',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w900,
-                  color: Colors.white,
-                  letterSpacing: 0.5,
-                ),
+            const Text(
+              'Upper Room',
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.w900,
+                color: Colors.white,
+                letterSpacing: 0.5,
               ),
             ),
           ],
@@ -458,27 +451,27 @@ class _CountingScreenState extends State<CountingScreen>
             height: 40,
             padding: const EdgeInsets.symmetric(horizontal: 14),
             decoration: BoxDecoration(
-              color: AppColors.cardWhite,
+              color: AppColors.authBgMid,
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: AppColors.goldPrimary.withOpacity(0.3), width: 1.5),
+              border: Border.all(color: AppColors.authPurpleLight.withOpacity(0.5), width: 1.5),
               boxShadow: [
-                BoxShadow(color: AppColors.plumMid.withOpacity(0.12), blurRadius: 10, offset: const Offset(0, 3)),
+                BoxShadow(color: AppColors.authBgBottom.withOpacity(0.25), blurRadius: 10, offset: const Offset(0, 3)),
               ],
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.language_rounded, color: AppColors.goldPrimary, size: 16),
+                const Icon(Icons.language_rounded, color: AppColors.authPurpleLight, size: 16),
                 const SizedBox(width: 6),
                 Text(
                   _selectedLanguage,
                   style: const TextStyle(
                     fontSize: 12, fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary, letterSpacing: 0.3,
+                    color: Colors.white, letterSpacing: 0.3,
                   ),
                 ),
                 const SizedBox(width: 4),
-                Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.goldPrimary.withOpacity(0.7), size: 16),
+                Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.authPurpleLight.withOpacity(0.7), size: 16),
               ],
             ),
           ),
@@ -699,16 +692,16 @@ class _CountingScreenState extends State<CountingScreen>
       child: Container(
         height: 56,
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [AppColors.saveGold, AppColors.goldAccentDark],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+          gradient: LinearGradient(
+            colors: [AppColors.authPurpleLight, AppColors.authPurple],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
           ),
           borderRadius: BorderRadius.circular(18),
           boxShadow: [
-            BoxShadow(color: AppColors.saveGold.withOpacity(0.35), blurRadius: 14, offset: const Offset(0, 5)),
+            BoxShadow(color: AppColors.authBgBottom.withOpacity(0.60), blurRadius: 0, offset: const Offset(0, 5)),
+            BoxShadow(color: AppColors.authPurple.withOpacity(0.35), blurRadius: 12, offset: const Offset(0, 8)),
           ],
-          border: Border.all(color: Colors.white.withOpacity(0.25), width: 1),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
