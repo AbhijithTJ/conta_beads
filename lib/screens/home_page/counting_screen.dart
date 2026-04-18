@@ -510,65 +510,13 @@ class _CountingScreenState extends State<CountingScreen>
   Widget _buildQuoteCard() {
     final prayer = _isRosary ? _rosaryPrayer : _chapletPrayer;
     final title  = _isRosary ? 'Rosary Prayers' : 'Divine Mercy Chaplet';
-    final _prayerScrollController = ScrollController();
-    return Container(
-      width: double.infinity,
-      height: 180,
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: _accent.withOpacity(0.30), width: 1.5),
-        boxShadow: [
-          BoxShadow(color: _bgBottom.withOpacity(0.20), blurRadius: 20, offset: const Offset(0, 6)),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.menu_book_rounded, color: _dark, size: 14),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w800,
-                    color: _dark,
-                    letterSpacing: 1.0,
-                  ),
-                ),
-              ),
-              GestureDetector(
-                onTap: () => _showPrayerExpanded(title, prayer),
-                child: Icon(Icons.open_in_full_rounded, color: _accent, size: 18),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Expanded(
-            child: Scrollbar(
-              controller: _prayerScrollController,
-              thumbVisibility: true,
-              child: SingleChildScrollView(
-                controller: _prayerScrollController,
-                child: Text(
-                  prayer,
-                  style: TextStyle(
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.w400,
-                    color: const Color(0xFF333333).withOpacity(0.88),
-                    height: 1.7,
-                    letterSpacing: 0.2,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
+    return _PrayerInlineCard(
+      prayer: prayer,
+      title: title,
+      accentColor: _accent,
+      darkColor: _dark,
+      bgBottom: _bgBottom,
+      onExpand: () => _showPrayerExpanded(title, prayer),
     );
   }
 
@@ -845,6 +793,163 @@ class _CircleActionButton extends StatelessWidget {
           border: Border.all(color: Colors.white.withOpacity(0.35), width: 2),
         ),
         child: Icon(icon, color: Colors.white, size: iconSize),
+      ),
+    );
+  }
+}
+
+// ── Prayer inline card (unexpanded, with auto-scroll + speed) ─────────────────
+class _PrayerInlineCard extends StatefulWidget {
+  final String prayer;
+  final String title;
+  final Color accentColor;
+  final Color darkColor;
+  final Color bgBottom;
+  final VoidCallback onExpand;
+
+  const _PrayerInlineCard({
+    required this.prayer,
+    required this.title,
+    required this.accentColor,
+    required this.darkColor,
+    required this.bgBottom,
+    required this.onExpand,
+  });
+
+  @override
+  State<_PrayerInlineCard> createState() => _PrayerInlineCardState();
+}
+
+class _PrayerInlineCardState extends State<_PrayerInlineCard> {
+  final ScrollController _scrollController = ScrollController();
+  double _speed = 20.0;
+  Timer? _scrollTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _startScroll());
+  }
+
+  void _startScroll() {
+    _scrollTimer?.cancel();
+    if (_speed == 0) return;
+    _scrollTimer = Timer.periodic(const Duration(milliseconds: 16), (_) {
+      if (!mounted) return;
+      if (!_scrollController.hasClients) return;
+      final pos = _scrollController.offset;
+      final max = _scrollController.position.maxScrollExtent;
+      if (pos >= max) return;
+      _scrollController.jumpTo((pos + _speed / 60).clamp(0, max));
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollTimer?.cancel();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      height: 220,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: widget.accentColor.withOpacity(0.30), width: 1.5),
+        boxShadow: [
+          BoxShadow(color: widget.bgBottom.withOpacity(0.20), blurRadius: 20, offset: const Offset(0, 6)),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // title row
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 12, 6),
+            child: Row(
+              children: [
+                Icon(Icons.menu_book_rounded, color: widget.darkColor, size: 14),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    widget.title,
+                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: widget.darkColor, letterSpacing: 1.0),
+                  ),
+                ),
+                GestureDetector(
+                  onTap: widget.onExpand,
+                  child: Icon(Icons.open_in_full_rounded, color: widget.accentColor, size: 18),
+                ),
+              ],
+            ),
+          ),
+          Divider(color: widget.accentColor.withOpacity(0.15), height: 1, indent: 16, endIndent: 16),
+          // scrollable text
+          Expanded(
+            child: Listener(
+              onPointerDown: (_) => _scrollTimer?.cancel(),
+              onPointerUp: (_) => _startScroll(),
+              child: SingleChildScrollView(
+                controller: _scrollController,
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+                physics: const BouncingScrollPhysics(),
+              child: Text(
+                widget.prayer,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w400,
+                  color: const Color(0xFF333333).withOpacity(0.88),
+                  height: 1.7,
+                  letterSpacing: 0.2,
+                ),
+              ),
+              ),
+            ),
+          ),
+          // speed slider
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
+            child: Row(
+              children: [
+                Icon(Icons.speed_rounded, color: widget.accentColor, size: 14),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: SliderTheme(
+                    data: SliderThemeData(
+                      activeTrackColor: widget.accentColor,
+                      inactiveTrackColor: widget.accentColor.withOpacity(0.20),
+                      thumbColor: widget.darkColor,
+                      overlayColor: widget.accentColor.withOpacity(0.12),
+                      trackHeight: 2.5,
+                      thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
+                    ),
+                    child: Slider(
+                      value: _speed,
+                      min: 0,
+                      max: 120,
+                      onChanged: (v) {
+                        setState(() => _speed = v);
+                        if (v == 0) {
+                          _scrollTimer?.cancel();
+                        } else {
+                          _startScroll();
+                        }
+                      },
+                    ),
+                  ),
+                ),
+                Text(
+                  _speed == 0 ? 'Off' : '${_speed.toInt()}',
+                  style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: widget.accentColor),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
