@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:async';
+import 'dart:ui';
 import '../../colors/colors.dart';
 import '../../services/localization_service.dart';
 
@@ -529,14 +530,20 @@ class _CountingScreenState extends State<CountingScreen>
             children: [
               Icon(Icons.menu_book_rounded, color: _dark, size: 14),
               const SizedBox(width: 8),
-              Text(
-                title,
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w800,
-                  color: _dark,
-                  letterSpacing: 1.0,
+              Expanded(
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    color: _dark,
+                    letterSpacing: 1.0,
+                  ),
                 ),
+              ),
+              GestureDetector(
+                onTap: () => _showPrayerExpanded(title, prayer),
+                child: Icon(Icons.open_in_full_rounded, color: _accent, size: 18),
               ),
             ],
           ),
@@ -562,6 +569,94 @@ class _CountingScreenState extends State<CountingScreen>
           ),
         ],
       ),
+    );
+  }
+
+  void _showPrayerExpanded(String title, String prayer) {
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: 'prayer',
+      barrierColor: Colors.transparent,
+      transitionDuration: const Duration(milliseconds: 300),
+      pageBuilder: (_, __, ___) => const SizedBox.shrink(),
+      transitionBuilder: (ctx, anim, _, __) {
+        return FadeTransition(
+          opacity: anim,
+          child: Stack(
+            children: [
+              // blurred background
+              BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+                child: Container(color: _bgBottom.withOpacity(0.75)),
+              ),
+              // modal card
+              Center(
+                child: ScaleTransition(
+                  scale: CurvedAnimation(parent: anim, curve: Curves.easeOutBack),
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 80),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(24),
+                      boxShadow: [
+                        BoxShadow(color: _bgBottom.withOpacity(0.40), blurRadius: 40, offset: const Offset(0, 12)),
+                      ],
+                    ),
+                    child: Column(
+                      children: [
+                        // header
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(20, 20, 12, 12),
+                          child: Row(
+                            children: [
+                              Icon(Icons.menu_book_rounded, color: _dark, size: 18),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  title,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w800,
+                                    color: _dark,
+                                    letterSpacing: 0.8,
+                                  ),
+                                ),
+                              ),
+                              IconButton(
+                                onPressed: () => Navigator.of(ctx).pop(),
+                                icon: Icon(Icons.close_rounded, color: _dark.withOpacity(0.6), size: 22),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Divider(color: _accent.withOpacity(0.20), height: 1, indent: 20, endIndent: 20),
+                        // scrollable content
+                        Expanded(
+                          child: SingleChildScrollView(
+                            padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+                            physics: const BouncingScrollPhysics(),
+                            child: Text(
+                              prayer,
+                              style: TextStyle(
+                                fontSize: 14.5,
+                                fontWeight: FontWeight.w400,
+                                color: const Color(0xFF222222).withOpacity(0.90),
+                                height: 1.8,
+                                letterSpacing: 0.2,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
