@@ -19,6 +19,8 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen>
     with TickerProviderStateMixin {
+  bool _isDarkMode = true;
+
   // Orb float animations
   late AnimationController _orb1Controller;
   late AnimationController _orb2Controller;
@@ -94,19 +96,25 @@ class _ProfileScreenState extends State<ProfileScreen>
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final isDark = _isDarkMode;
+
+    // Theme dynamic colors
+    final bgColors = isDark
+        ? [AppColors.authBgTop, AppColors.authBgMid, AppColors.authBgBottom]
+        : [AppColors.bgTop, AppColors.bgMid, AppColors.bgBottom];
+    final headerTextColor = isDark ? Colors.white : AppColors.authBgBottom;
+    final subHeaderTextColor = isDark ? Colors.white.withOpacity(0.65) : AppColors.authBgMid.withOpacity(0.7);
+
     return Scaffold(
-      body: Container(
+      body: AnimatedContainer(
+        duration: const Duration(milliseconds: 500),
         width: double.infinity,
         height: double.infinity,
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              AppColors.authBgTop,
-              AppColors.authBgMid,
-              AppColors.authBgBottom,
-            ],
+            colors: bgColors,
           ),
         ),
         child: Stack(
@@ -123,23 +131,47 @@ class _ProfileScreenState extends State<ProfileScreen>
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     const SizedBox(height: 12),
-                    _buildPageLabel(),
+                    Text(
+                      'MY PROFILE',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 3.5,
+                        color: subHeaderTextColor,
+                      ),
+                    ),
                     const SizedBox(height: 28),
-                    _buildAvatar(),
+                    _buildAvatar(isDark),
                     const SizedBox(height: 16),
-                    _buildUserName(),
+                    Text(
+                      'John David',
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.w800,
+                        color: headerTextColor,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
                     const SizedBox(height: 6),
-                    _buildUserSubtitle(),
+                    Text(
+                      'MEMBER SINCE 2023',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 2.0,
+                        color: subHeaderTextColor.withOpacity(0.8),
+                      ),
+                    ),
                     const SizedBox(height: 32),
-                    _buildStatsRow(),
+                    _buildStatsRow(isDark),
                     const SizedBox(height: 36),
-                    _buildSectionLabel('Account Details'),
+                    _buildSectionLabel('Account Details', isDark),
                     const SizedBox(height: 12),
-                    _buildDetailsCard(),
+                    _buildDetailsCard(isDark),
                     const SizedBox(height: 28),
-                    _buildSectionLabel('Settings'),
+                    _buildSectionLabel('Settings', isDark),
                     const SizedBox(height: 12),
-                    _buildSettingsList(),
+                    _buildSettingsList(isDark),
                     const SizedBox(height: 40),
                     _buildLogoutButton(context),
                     const SizedBox(height: 40),
@@ -201,19 +233,7 @@ class _ProfileScreenState extends State<ProfileScreen>
     );
   }
 
-  Widget _buildPageLabel() {
-    return Text(
-      'MY PROFILE',
-      style: TextStyle(
-        fontSize: 10,
-        fontWeight: FontWeight.w700,
-        letterSpacing: 3.5,
-        color: Colors.white.withOpacity(0.65),
-      ),
-    );
-  }
-
-  Widget _buildAvatar() {
+  Widget _buildAvatar(bool isDark) {
     return Center(
       child: Stack(
         clipBehavior: Clip.none,
@@ -244,19 +264,19 @@ class _ProfileScreenState extends State<ProfileScreen>
                 child: Container(
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Colors.white.withOpacity(0.92),
+                    color: isDark ? Colors.white.withOpacity(0.1) : Colors.white.withOpacity(0.92),
                     border: Border.all(
-                      color: Colors.white.withOpacity(0.4),
+                      color: Colors.white.withOpacity(isDark ? 0.1 : 0.4),
                       width: 1,
                     ),
                   ),
-                  child: const Center(
+                  child: Center(
                     child: Text(
                       'JD',
                       style: TextStyle(
                         fontSize: 36,
                         fontWeight: FontWeight.w900,
-                        color: AppColors.authBgBottom,
+                        color: isDark ? Colors.white : AppColors.authBgBottom,
                         letterSpacing: -1,
                       ),
                     ),
@@ -278,7 +298,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
-                border: Border.all(color: Colors.white, width: 2.5),
+                border: Border.all(color: isDark ? AppColors.authBgMid : Colors.white, width: 2.5),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.15),
@@ -295,43 +315,19 @@ class _ProfileScreenState extends State<ProfileScreen>
     );
   }
 
-  Widget _buildUserName() {
-    return const Text(
-      'John David',
-      style: TextStyle(
-        fontSize: 28,
-        fontWeight: FontWeight.w800,
-        color: Colors.white,
-        letterSpacing: 0.5,
-      ),
-    );
-  }
-
-  Widget _buildUserSubtitle() {
-    return Text(
-      'MEMBER SINCE 2023',
-      style: TextStyle(
-        fontSize: 10,
-        fontWeight: FontWeight.w600,
-        letterSpacing: 2.0,
-        color: Colors.white.withOpacity(0.5),
-      ),
-    );
-  }
-
-  Widget _buildStatsRow() {
+  Widget _buildStatsRow(bool isDark) {
     return Row(
       children: [
-        _StatBox(value: '342', label: 'Prayers'),
+        _StatBox(value: '342', label: 'Prayers', isDark: isDark),
         const SizedBox(width: 12),
-        _StatBox(value: '28', label: 'Novenas'),
+        _StatBox(value: '28', label: 'Novenas', isDark: isDark),
         const SizedBox(width: 12),
-        _StatBox(value: '14', label: 'Day Streak'),
+        _StatBox(value: '14', label: 'Day Streak', isDark: isDark),
       ],
     );
   }
 
-  Widget _buildSectionLabel(String text) {
+  Widget _buildSectionLabel(String text, bool isDark) {
     return Align(
       alignment: Alignment.centerLeft,
       child: Text(
@@ -340,45 +336,87 @@ class _ProfileScreenState extends State<ProfileScreen>
           fontSize: 10,
           fontWeight: FontWeight.w800,
           letterSpacing: 2.0,
-          color: AppColors.goldLight.withOpacity(0.9),
+          color: isDark ? AppColors.goldLight.withOpacity(0.9) : AppColors.goldDark,
         ),
       ),
     );
   }
 
-  Widget _buildDetailsCard() {
+  Widget _buildDetailsCard(bool isDark) {
     return _GlassCard(
+      isDark: isDark,
       child: Column(
         children: [
-          _InfoRow(icon: Icons.email_outlined, label: 'Email Address', value: widget.userEmail),
-          _buildCardDivider(),
-          const _InfoRow(icon: Icons.phone_outlined, label: 'Phone Number', value: '+91 98765 43210'),
-          _buildCardDivider(),
-          const _InfoRow(icon: Icons.location_on_outlined, label: 'Region', value: 'Kerala, India'),
+          _InfoRow(icon: Icons.email_outlined, label: 'Email Address', value: widget.userEmail, isDark: isDark),
+          _buildCardDivider(isDark),
+          _InfoRow(icon: Icons.phone_outlined, label: 'Phone Number', value: '+91 98765 43210', isDark: isDark),
+          _buildCardDivider(isDark),
+          _InfoRow(icon: Icons.location_on_outlined, label: 'Region', value: 'Kerala, India', isDark: isDark),
         ],
       ),
     );
   }
 
-  Widget _buildCardDivider() {
+  Widget _buildCardDivider(bool isDark) {
     return Container(
       height: 1,
       margin: const EdgeInsets.symmetric(horizontal: 4),
       decoration: BoxDecoration(
-        color: AppColors.authPurple.withOpacity(0.1),
+        color: isDark ? Colors.white.withOpacity(0.05) : AppColors.authPurple.withOpacity(0.1),
       ),
     );
   }
 
-  Widget _buildSettingsList() {
-    return const Column(
+  Widget _buildSettingsList(bool isDark) {
+    return Column(
       children: [
-        _SettingRow(icon: Icons.history_rounded, title: 'Counting History'),
-        SizedBox(height: 12),
-        _SettingRow(icon: Icons.security_rounded, title: 'Account Security'),
-        SizedBox(height: 12),
-        _SettingRow(icon: Icons.help_outline_rounded, title: 'Help & Support'),
+        _buildDarkThemeToggle(isDark),
+        const SizedBox(height: 12),
+        _SettingRow(icon: Icons.history_rounded, title: 'Counting History', isDark: isDark),
+        const SizedBox(height: 12),
+        _SettingRow(icon: Icons.security_rounded, title: 'Account Security', isDark: isDark),
+        const SizedBox(height: 12),
+        _SettingRow(icon: Icons.help_outline_rounded, title: 'Help & Support', isDark: isDark),
       ],
+    );
+  }
+
+  Widget _buildDarkThemeToggle(bool isDark) {
+    return _GlassCard(
+      isDark: isDark,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Row(
+          children: [
+            _IconBox(icon: Icons.dark_mode_rounded, size: 40, iconSize: 18, radius: 12, isDark: isDark),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Text(
+                'Dark Mode',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: isDark ? Colors.white : AppColors.authBgBottom,
+                ),
+              ),
+            ),
+            Transform.scale(
+              scale: 0.8,
+              child: Switch.adaptive(
+                value: _isDarkMode,
+                activeColor: AppColors.goldPrimary,
+                activeTrackColor: AppColors.goldPrimary.withOpacity(0.3),
+                inactiveThumbColor: AppColors.authPurple.withOpacity(0.5),
+                inactiveTrackColor: AppColors.authPurple.withOpacity(0.1),
+                onChanged: (val) {
+                  setState(() => _isDarkMode = val);
+                  HapticFeedback.selectionClick();
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -422,10 +460,11 @@ class _ProfileScreenState extends State<ProfileScreen>
   }
 }
 
-// ── Glassmorphic Card (Matches Login Screen Style) ──────────────────────────
+// ── Glassmorphic Card ────────────────────────────────────────────────────────
 class _GlassCard extends StatelessWidget {
   final Widget child;
-  const _GlassCard({required this.child});
+  final bool isDark;
+  const _GlassCard({required this.child, required this.isDark});
 
   @override
   Widget build(BuildContext context) {
@@ -437,13 +476,13 @@ class _GlassCard extends StatelessWidget {
           width: double.infinity,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.92),
+            color: isDark ? Colors.white.withOpacity(0.08) : Colors.white.withOpacity(0.92),
             borderRadius: BorderRadius.circular(28),
             border: Border.all(
-              color: Colors.white.withOpacity(0.95),
+              color: isDark ? Colors.white.withOpacity(0.1) : Colors.white.withOpacity(0.95),
               width: 1.5,
             ),
-            boxShadow: [
+            boxShadow: isDark ? [] : [
               BoxShadow(
                 color: Colors.black.withOpacity(0.20),
                 blurRadius: 40,
@@ -464,7 +503,8 @@ class _InfoRow extends StatelessWidget {
   final IconData icon;
   final String label;
   final String value;
-  const _InfoRow({required this.icon, required this.label, required this.value});
+  final bool isDark;
+  const _InfoRow({required this.icon, required this.label, required this.value, required this.isDark});
 
   @override
   Widget build(BuildContext context) {
@@ -472,7 +512,7 @@ class _InfoRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 16),
       child: Row(
         children: [
-          _IconBox(icon: icon),
+          _IconBox(icon: icon, isDark: isDark),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
@@ -484,16 +524,16 @@ class _InfoRow extends StatelessWidget {
                     fontSize: 10,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 1.2,
-                    color: AppColors.authBgMid.withOpacity(0.6),
+                    color: isDark ? Colors.white.withOpacity(0.4) : AppColors.authBgMid.withOpacity(0.6),
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   value,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.authBgBottom,
+                    color: isDark ? Colors.white : AppColors.authBgBottom,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -510,30 +550,32 @@ class _InfoRow extends StatelessWidget {
 class _SettingRow extends StatelessWidget {
   final IconData icon;
   final String title;
-  const _SettingRow({required this.icon, required this.title});
+  final bool isDark;
+  const _SettingRow({required this.icon, required this.title, required this.isDark});
 
   @override
   Widget build(BuildContext context) {
     return _GlassCard(
+      isDark: isDark,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 8),
         child: Row(
           children: [
-            _IconBox(icon: icon, size: 40, iconSize: 18, radius: 12),
+            _IconBox(icon: icon, size: 40, iconSize: 18, radius: 12, isDark: isDark),
             const SizedBox(width: 16),
             Expanded(
               child: Text(
                 title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.authBgBottom,
+                  color: isDark ? Colors.white : AppColors.authBgBottom,
                 ),
               ),
             ),
             Icon(
               Icons.chevron_right_rounded,
-              color: AppColors.authPurple.withOpacity(0.3),
+              color: isDark ? Colors.white.withOpacity(0.2) : AppColors.authPurple.withOpacity(0.3),
               size: 24,
             ),
           ],
@@ -549,12 +591,14 @@ class _IconBox extends StatelessWidget {
   final double size;
   final double iconSize;
   final double radius;
+  final bool isDark;
 
   const _IconBox({
     required this.icon,
     this.size = 42,
     this.iconSize = 20,
     this.radius = 14,
+    required this.isDark,
   });
 
   @override
@@ -564,13 +608,13 @@ class _IconBox extends StatelessWidget {
       height: size,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(radius),
-        color: AppColors.authPurple.withOpacity(0.08),
+        color: isDark ? Colors.white.withOpacity(0.05) : AppColors.authPurple.withOpacity(0.08),
         border: Border.all(
-          color: AppColors.authPurple.withOpacity(0.15),
+          color: isDark ? Colors.white.withOpacity(0.1) : AppColors.authPurple.withOpacity(0.15),
           width: 1,
         ),
       ),
-      child: Icon(icon, color: AppColors.authPurple, size: iconSize),
+      child: Icon(icon, color: isDark ? Colors.white.withOpacity(0.8) : AppColors.authPurple, size: iconSize),
     );
   }
 }
@@ -579,7 +623,8 @@ class _IconBox extends StatelessWidget {
 class _StatBox extends StatelessWidget {
   final String value;
   final String label;
-  const _StatBox({required this.value, required this.label});
+  final bool isDark;
+  const _StatBox({required this.value, required this.label, required this.isDark});
 
   @override
   Widget build(BuildContext context) {
@@ -591,10 +636,10 @@ class _StatBox extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 18),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.92),
+              color: isDark ? Colors.white.withOpacity(0.08) : Colors.white.withOpacity(0.92),
               borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: Colors.white.withOpacity(0.95), width: 1),
-              boxShadow: [
+              border: Border.all(color: isDark ? Colors.white.withOpacity(0.1) : Colors.white.withOpacity(0.95), width: 1),
+              boxShadow: isDark ? [] : [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.1),
                   blurRadius: 20,
@@ -606,10 +651,10 @@ class _StatBox extends StatelessWidget {
               children: [
                 Text(
                   value,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.w800,
-                    color: AppColors.authBgMid,
+                    color: isDark ? Colors.white : AppColors.authBgMid,
                     height: 1,
                   ),
                 ),
@@ -620,7 +665,7 @@ class _StatBox extends StatelessWidget {
                     fontSize: 9,
                     fontWeight: FontWeight.w800,
                     letterSpacing: 1.2,
-                    color: AppColors.authPurple.withOpacity(0.5),
+                    color: isDark ? Colors.white.withOpacity(0.4) : AppColors.authPurple.withOpacity(0.5),
                   ),
                 ),
               ],
