@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:math';
-import '../../colors/colors.dart';
 import '../../login_and_register/login_screen.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -10,122 +8,38 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class Snowflake {
-  late double x;
-  late double y;
-  late double size;
-  late double speed;
-  late double opacity;
-  late double angle;
-
-  Snowflake({required double screenWidth, required double screenHeight}) {
-    x = Random().nextDouble() * screenWidth;
-    y = Random().nextDouble() * screenHeight - screenHeight;
-    size = Random().nextDouble() * 4 + 2;
-    speed = Random().nextDouble() * 3 + 2;
-    opacity = Random().nextDouble() * 0.8 + 0.4;
-    angle = Random().nextDouble() * 2 * pi;
-  }
-
-  void update(double screenHeight, double screenWidth) {
-    y += speed;
-    x += sin(angle) * 1.5;
-    angle += 0.02;
-    
-    if (y > screenHeight) {
-      y = -10;
-      x = Random().nextDouble() * screenWidth;
-    }
-    if (x < -10) {
-      x = screenWidth + 10;
-    }
-    if (x > screenWidth + 10) {
-      x = -10;
-    }
-  }
-}
-
-class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMixin {
-  late AnimationController _fadeController;
-  late AnimationController _scaleController;
-  late AnimationController _slideController;
-  late AnimationController _snowController;
-  late AnimationController _prayController;
+class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
   late Animation<double> _fadeAnimation;
   late Animation<double> _scaleAnimation;
-  late Animation<Offset> _slideAnimation;
-  late Animation<double> _prayAnimation;
-  late List<Snowflake> snowflakes = [];
 
   @override
   void initState() {
     super.initState();
 
-    _fadeController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1500),
-    );
-    _scaleController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 2000),
-    );
-    _slideController = AnimationController(
+    _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1800),
     );
-    _snowController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 30),
-    )..repeat();
-
-    _prayController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 2200),
-    )..repeat(reverse: true);
-
-    _prayAnimation = Tween<double>(begin: 0.06, end: 0.14).animate(
-      CurvedAnimation(parent: _prayController, curve: Curves.easeInOut),
-    );
 
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _fadeController, curve: Curves.easeIn),
-    );
-    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
-      CurvedAnimation(parent: _scaleController, curve: Curves.easeOutBack),
-    );
-    _slideAnimation = Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero).animate(
-      CurvedAnimation(parent: _slideController, curve: Curves.easeOut),
+      CurvedAnimation(parent: _controller, curve: const Interval(0.0, 0.6, curve: Curves.easeIn)),
     );
 
-    _fadeController.forward();
-    _scaleController.forward();
-    _slideController.forward();
+    _scaleAnimation = Tween<double>(begin: 0.85, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: const Interval(0.0, 0.7, curve: Curves.easeOutBack)),
+    );
 
-    // Initialize snowflakes
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final size = MediaQuery.of(context).size;
-      for (int i = 0; i < 80; i++) {
-        snowflakes.add(Snowflake(screenWidth: size.width, screenHeight: size.height));
-      }
-      _snowController.addListener(() {
-        setState(() {
-          for (var snowflake in snowflakes) {
-            snowflake.update(size.height, size.width);
-          }
-        });
-      });
-    });
+    _controller.forward();
 
-    // Navigate to Login after 3.5 seconds
-    Future.delayed(const Duration(milliseconds: 3500), () {
+    Future.delayed(const Duration(milliseconds: 3200), () {
       if (mounted) {
         Navigator.of(context).pushReplacement(
           PageRouteBuilder(
-            pageBuilder: (context, animation, secondaryAnimation) => const LoginScreen(),
-            transitionsBuilder: (context, animation, secondaryAnimation, child) {
-              return FadeTransition(opacity: animation, child: child);
-            },
-            transitionDuration: const Duration(milliseconds: 1000),
+            pageBuilder: (_, __, ___) => const LoginScreen(),
+            transitionsBuilder: (_, animation, __, child) =>
+                FadeTransition(opacity: animation, child: child),
+            transitionDuration: const Duration(milliseconds: 800),
           ),
         );
       }
@@ -134,245 +48,130 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
 
   @override
   void dispose() {
-    _fadeController.dispose();
-    _scaleController.dispose();
-    _slideController.dispose();
-    _snowController.dispose();
-    _prayController.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              AppColors.bgTop,    // soft lavender-white
-              AppColors.bgMid,    // light mauve
-              AppColors.bgBottom, // dusty lavender
-            ],
-          ),
-        ),
-        child: Stack(
-          children: [
-            // Snowflakes background
-            CustomPaint(
-              painter: SnowPainter(snowflakes),
-              size: Size.infinite,
-            ),
-
-            // Praying hands background decoration
-            Positioned.fill(
-              child: AnimatedBuilder(
-                animation: _prayAnimation,
-                builder: (context, child) => Opacity(
-                  opacity: _prayAnimation.value,
+      backgroundColor: const Color(0xFF3B1F7A),
+      body: Stack(
+        children: [
+          // Main centered content
+          Center(
+            child: AnimatedBuilder(
+              animation: _controller,
+              builder: (context, child) => FadeTransition(
+                opacity: _fadeAnimation,
+                child: Transform.scale(
+                  scale: _scaleAnimation.value,
                   child: child,
                 ),
-                child: const Center(
-                  child: Text(
-                    '🙏',
-                    style: TextStyle(fontSize: 280),
-                  ),
-                ),
               ),
-            ),
-            
-            // Main content - centered
-            Center(
-              child: AnimatedBuilder(
-                animation: Listenable.merge([_fadeAnimation, _scaleAnimation, _slideAnimation]),
-                builder: (context, child) {
-                  return FadeTransition(
-                    opacity: _fadeAnimation,
-                    child: Transform.scale(
-                      scale: _scaleAnimation.value,
-                      child: SlideTransition(
-                        position: _slideAnimation,
-                        child: child,
-                      ),
-                    ),
-                  );
-                },
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // Rounded logo image with shadow
-                      Container(
-                        width: 240,
-                        height: 240,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(24),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColors.goldPrimary.withOpacity(0.4),
-                              blurRadius: 40,
-                              spreadRadius: 8,
-                            ),
-                            BoxShadow(
-                              color: Colors.white.withOpacity(0.6),
-                              blurRadius: 20,
-                              spreadRadius: -5,
-                            ),
-                          ],
-                          border: Border.all(
-                            color: AppColors.goldPrimary.withOpacity(0.3),
-                            width: 3,
-                          ),
-                        ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(24),
-                          child: Image.asset(
-                            'assets/splash/upper_room.png',
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 40),
-                      
-                      // Premium app name
-                      ShaderMask(
-                        shaderCallback: (bounds) => const LinearGradient(
-                          colors: [
-                            Color(0xFFD4A843), // gold
-                            Color(0xFF9B6B8A), // mauve
-                          ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ).createShader(bounds),
-                        child: const Text(
-                          'Upper Room',
-                          style: TextStyle(
-                            fontSize: 44,
-                            fontFamily: 'Georgia',
-                            fontWeight: FontWeight.w900,
-                            color: Colors.white,
-                            letterSpacing: 2.0,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      
-                      // Tagline
-                      Text(
-                        'Every bead of the rosary counts.',
-                        style: TextStyle(
-                          fontSize: 14,
-                          letterSpacing: 0.5,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white.withOpacity(0.75),
-                          fontFamily: 'Georgia',
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      
-                      // Decorative line
-                      Container(
-                        width: 50,
-                        height: 2,
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              Colors.transparent,
-                              AppColors.goldPrimary,
-                              Colors.transparent,
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            
-            // Bottom loading indicator
-            Positioned(
-              bottom: 50,
-              left: 0,
-              right: 0,
               child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  SizedBox(
-                    width: 50,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
-                      child: LinearProgressIndicator(
-                        backgroundColor: Colors.white.withOpacity(0.20),
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          Colors.white.withOpacity(0.85),
-                        ),
-                        minHeight: 2,
-                      ),
+                  // UR Logo
+                  Image.asset(
+                    'assets/splash/ur_logo.png',
+                    width: 160,
+                    height: 160,
+                  ),
+                  const SizedBox(height: 28),
+                  // App name
+                  const Text(
+                    'Upper Room',
+                    style: TextStyle(
+                      fontSize: 36,
+                      fontFamily: 'Georgia',
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                      letterSpacing: 1.5,
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 10),
+                  // Tagline
                   Text(
-                    'Loading...',
+                    'One Prayer One Mission',
                     style: TextStyle(
-                      fontSize: 11,
-                      letterSpacing: 1.5,
-                      color: Colors.white.withOpacity(0.60),
+                      fontSize: 14,
                       fontFamily: 'Georgia',
+                      fontWeight: FontWeight.w400,
+                      color: Colors.white.withOpacity(0.80),
+                      letterSpacing: 0.5,
                     ),
                   ),
                 ],
               ),
             ),
-          ],
-        ),
+          ),
+
+          // Bottom crowd silhouette
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: AnimatedBuilder(
+              animation: _fadeAnimation,
+              builder: (context, child) => Opacity(
+                opacity: _fadeAnimation.value * 0.35,
+                child: child,
+              ),
+              child: CustomPaint(
+                size: Size(MediaQuery.of(context).size.width, 120),
+                painter: _CrowdPainter(),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 }
 
-class SnowPainter extends CustomPainter {
-  final List<Snowflake> snowflakes;
-
-  SnowPainter(this.snowflakes);
-
+class _CrowdPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
+      ..color = const Color(0xFFD4A843)
       ..style = PaintingStyle.fill;
 
-    for (var snowflake in snowflakes) {
-      // Draw petal particle as a circle
-      paint.color = Color.fromARGB(
-        (snowflake.opacity * 160).toInt(),
-        255, // white R
-        255, // white G
-        255, // white B
+    // Draw a row of simple person silhouettes
+    final double personWidth = size.width / 14;
+    for (int i = 0; i < 14; i++) {
+      final double cx = personWidth * i + personWidth / 2;
+      final double baseY = size.height;
+      final double heightVariation = (i % 3 == 0) ? 0.0 : (i % 3 == 1 ? 8.0 : -5.0);
+      final double bodyH = 55 + heightVariation;
+      final double headR = 7.0;
+
+      // Head
+      canvas.drawCircle(Offset(cx, baseY - bodyH - headR), headR, paint);
+
+      // Body
+      final path = Path();
+      path.moveTo(cx - 8, baseY - bodyH);
+      path.lineTo(cx + 8, baseY - bodyH);
+      path.lineTo(cx + 12, baseY);
+      path.lineTo(cx - 12, baseY);
+      path.close();
+      canvas.drawPath(path, paint);
+
+      // Arms
+      canvas.drawLine(
+        Offset(cx - 8, baseY - bodyH + 10),
+        Offset(cx - 18, baseY - bodyH + 28),
+        paint..strokeWidth = 3,
       );
-      
-      canvas.drawCircle(
-        Offset(snowflake.x, snowflake.y),
-        snowflake.size,
-        paint,
-      );
-      
-      // Add subtle glow
-      paint.color = Color.fromARGB(
-        ((snowflake.opacity * 0.20) * 255).toInt(),
-        200, // light purple R
-        180, // light purple G
-        255, // light purple B
-      );
-      canvas.drawCircle(
-        Offset(snowflake.x, snowflake.y),
-        snowflake.size * 1.5,
-        paint,
+      canvas.drawLine(
+        Offset(cx + 8, baseY - bodyH + 10),
+        Offset(cx + 18, baseY - bodyH + 28),
+        paint..strokeWidth = 3,
       );
     }
   }
 
   @override
-  bool shouldRepaint(SnowPainter oldDelegate) => true;
+  bool shouldRepaint(_CrowdPainter oldDelegate) => false;
 }
