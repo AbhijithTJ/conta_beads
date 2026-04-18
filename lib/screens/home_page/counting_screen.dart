@@ -19,6 +19,30 @@ class CountingScreen extends StatefulWidget {
 class _CountingScreenState extends State<CountingScreen>
     with TickerProviderStateMixin {
   int _count = 0;
+  int _chapletCount = 0;
+  bool _isRosary = true;
+
+  int get _activeCount => _isRosary ? _count : _chapletCount;
+
+  // Rosary palette
+  static const _rosaryBgTop    = AppColors.authBgTop;
+  static const _rosaryBgMid    = AppColors.authBgMid;
+  static const _rosaryBgBottom = AppColors.authBgBottom;
+  static const _rosaryAccent   = AppColors.authPurpleLight;
+  static const _rosaryDark     = AppColors.authPurple;
+
+  // Chaplet palette — deep teal/indigo
+  static const _chapletBgTop    = AppColors.chapletBgTop;
+  static const _chapletBgMid    = AppColors.chapletBgMid;
+  static const _chapletBgBottom = AppColors.chapletBgBottom;
+  static const _chapletAccent   = AppColors.chapletAccent;
+  static const _chapletDark     = AppColors.chapletDark;
+
+  Color get _bgTop    => _isRosary ? _rosaryBgTop    : _chapletBgTop;
+  Color get _bgMid    => _isRosary ? _rosaryBgMid    : _chapletBgMid;
+  Color get _bgBottom => _isRosary ? _rosaryBgBottom : _chapletBgBottom;
+  Color get _accent   => _isRosary ? _rosaryAccent   : _chapletAccent;
+  Color get _dark     => _isRosary ? _rosaryDark     : _chapletDark;
   final TextEditingController _noteController = TextEditingController();
 
   late AnimationController _pulseController;
@@ -151,11 +175,11 @@ class _CountingScreenState extends State<CountingScreen>
     _ripple1Controller.forward(from: 0);
     Future.delayed(const Duration(milliseconds: 150), () { if (mounted) _ripple2Controller.forward(from: 0); });
     Future.delayed(const Duration(milliseconds: 300), () { if (mounted) _ripple3Controller.forward(from: 0); });
-    setState(() => _count++);
+    setState(() => _isRosary ? _count++ : _chapletCount++);
   }
 
   void _decrement() {
-    if (_count == 0) return;
+    if (_activeCount == 0) return;
     HapticFeedback.lightImpact();
     showDialog(
       context: context,
@@ -184,7 +208,7 @@ class _CountingScreenState extends State<CountingScreen>
             onPressed: () {
               Navigator.pop(ctx);
               _decrementController.forward().then((_) => _decrementController.reverse());
-              setState(() => _count--);
+              setState(() => _isRosary ? _count-- : _chapletCount--);
             },
             child: Text(loc.tr('go_back'), style: const TextStyle(fontSize: 15)),
           ),
@@ -197,8 +221,8 @@ class _CountingScreenState extends State<CountingScreen>
     HapticFeedback.selectionClick();
     final noteText = _noteController.text.trim();
     final msg = noteText.isEmpty
-        ? loc.tr('count_saved', args: {'count': '$_count'})
-        : loc.tr('count_saved_note', args: {'count': '$_count', 'note': noteText});
+        ? loc.tr('count_saved', args: {'count': '$_activeCount'})
+        : loc.tr('count_saved_note', args: {'count': '$_activeCount', 'note': noteText});
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -222,7 +246,7 @@ class _CountingScreenState extends State<CountingScreen>
     Future.delayed(const Duration(milliseconds: 500), () {
       if (mounted) {
         setState(() {
-          _count = 0;
+          if (_isRosary) _count = 0; else _chapletCount = 0;
           _noteController.clear();
         });
       }
@@ -237,25 +261,25 @@ class _CountingScreenState extends State<CountingScreen>
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [AppColors.authBgTop, AppColors.authBgMid, AppColors.authBgBottom],
-            stops: [0.0, 0.5, 1.0],
+            colors: [_bgTop, _bgMid, _bgBottom],
+            stops: const [0.0, 0.5, 1.0],
           ),
         ),
         child: Stack(
           children: [
             // ── Static orb bubbles ──
             _Orb(left: size.width * 0.2, top: -size.height * 0.08, size: size.width * 0.72,
-              colors: [AppColors.authPurple.withOpacity(0.55), AppColors.authBgTop.withOpacity(0.30)]),
+              colors: [_dark.withOpacity(0.55), _bgTop.withOpacity(0.30)]),
             _Orb(left: -size.width * 0.22, top: size.height * 0.28, size: size.width * 0.65,
-              colors: [AppColors.authPurpleLight.withOpacity(0.45), AppColors.authPurple.withOpacity(0.25)]),
+              colors: [_accent.withOpacity(0.45), _dark.withOpacity(0.25)]),
             _Orb(left: size.width * 0.55, top: size.height * 0.38, size: size.width * 0.60,
-              colors: [AppColors.authBgMid.withOpacity(0.70), AppColors.authBgBottom.withOpacity(0.40)]),
+              colors: [_bgMid.withOpacity(0.70), _bgBottom.withOpacity(0.40)]),
             _Orb(left: size.width * 0.1, top: size.height * 0.72, size: size.width * 0.55,
-              colors: [AppColors.authPurpleLight.withOpacity(0.20), AppColors.authPurple.withOpacity(0.25)]),
+              colors: [_accent.withOpacity(0.20), _dark.withOpacity(0.25)]),
             // ── Content ──
             SafeArea(
               child: SingleChildScrollView(
@@ -267,6 +291,8 @@ class _CountingScreenState extends State<CountingScreen>
                     _buildHeader(),
                     const SizedBox(height: 24),
                     _buildQuoteCard(),
+                    const SizedBox(height: 24),
+                    _buildModeToggle(),
                     const SizedBox(height: 32),
                     _buildCountCard(),
                     const SizedBox(height: 36),
@@ -410,6 +436,48 @@ class _CountingScreenState extends State<CountingScreen>
     );
   }
 
+  Widget _buildModeToggle() {
+    return Container(
+      height: 48,
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(30),
+      ),
+      child: Row(
+        children: [
+          _toggleTab('Rosary', true),
+          _toggleTab('Chaplet', false),
+        ],
+      ),
+    );
+  }
+
+  Widget _toggleTab(String label, bool isRosary) {
+    final selected = _isRosary == isRosary;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => setState(() => _isRosary = isRosary),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeInOut,
+          decoration: BoxDecoration(
+            color: selected ? Colors.white : Colors.transparent,
+            borderRadius: BorderRadius.circular(30),
+          ),
+          alignment: Alignment.center,
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+              color: selected ? AppColors.authBgMid : Colors.white.withOpacity(0.55),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildHeader() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -489,12 +557,11 @@ class _CountingScreenState extends State<CountingScreen>
         height: 160,
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         decoration: BoxDecoration(
-          color: AppColors.cardWhite,
+          color: Colors.white.withOpacity(0.10),
           borderRadius: BorderRadius.circular(22),
-          border: Border.all(color: AppColors.goldPrimary.withOpacity(0.2), width: 1.5),
+          border: Border.all(color: _accent.withOpacity(0.30), width: 1.5),
           boxShadow: [
-            BoxShadow(color: AppColors.plumMid.withOpacity(0.1), blurRadius: 20, offset: const Offset(0, 6)),
-            BoxShadow(color: Colors.white.withOpacity(0.8), blurRadius: 10, spreadRadius: -2, offset: const Offset(-2, -2)),
+            BoxShadow(color: _bgBottom.withOpacity(0.20), blurRadius: 20, offset: const Offset(0, 6)),
           ],
         ),
         child: Column(
@@ -503,7 +570,7 @@ class _CountingScreenState extends State<CountingScreen>
             // ornament
             Text(
               '\u275D',
-              style: TextStyle(fontSize: 20, color: AppColors.goldPrimary.withOpacity(0.55), height: 1.0),
+              style: TextStyle(fontSize: 20, color: _accent.withOpacity(0.70), height: 1.0),
             ),
             const SizedBox(height: 6),
             Text(
@@ -514,7 +581,7 @@ class _CountingScreenState extends State<CountingScreen>
               style: TextStyle(
                 fontSize: 14.5,
                 fontWeight: FontWeight.w500,
-                color: AppColors.textPrimary.withOpacity(0.85),
+                color: Colors.white.withOpacity(0.90),
                 fontStyle: FontStyle.italic,
                 height: 1.5,
                 letterSpacing: 0.2,
@@ -523,10 +590,10 @@ class _CountingScreenState extends State<CountingScreen>
             const SizedBox(height: 8),
             Text(
               quote['reference']!,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
-                color: AppColors.goldDark,
+                color: _accent,
                 letterSpacing: 1.2,
               ),
             ),
@@ -543,8 +610,8 @@ class _CountingScreenState extends State<CountingScreen>
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(3),
                     color: i == _currentQuoteIndex
-                        ? AppColors.goldPrimary
-                        : AppColors.goldPrimary.withOpacity(0.25),
+                        ? _accent
+                        : _accent.withOpacity(0.30),
                   ),
                 );
               }),
@@ -563,11 +630,11 @@ class _CountingScreenState extends State<CountingScreen>
         alignment: Alignment.center,
         children: [
           // ripple ring 1
-          _RippleRing(animation: _ripple1Anim, baseSize: 210),
+          _RippleRing(animation: _ripple1Anim, baseSize: 210, color: _accent),
           // ripple ring 2
-          _RippleRing(animation: _ripple2Anim, baseSize: 210),
+          _RippleRing(animation: _ripple2Anim, baseSize: 210, color: _accent),
           // ripple ring 3
-          _RippleRing(animation: _ripple3Anim, baseSize: 210),
+          _RippleRing(animation: _ripple3Anim, baseSize: 210, color: _accent),
           // main orb
           AnimatedBuilder(
             animation: _pulseAnimation,
@@ -577,22 +644,22 @@ class _CountingScreenState extends State<CountingScreen>
               height: 210,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: AppColors.cardWhite,
+                color: Colors.white.withOpacity(0.12),
                 boxShadow: [
-                  BoxShadow(color: AppColors.plumMid.withOpacity(0.18), blurRadius: 36, spreadRadius: 4, offset: const Offset(0, 8)),
-                  BoxShadow(color: Colors.white.withOpacity(0.9), blurRadius: 16, spreadRadius: -4, offset: const Offset(-4, -4)),
+                  BoxShadow(color: _bgBottom.withOpacity(0.35), blurRadius: 36, spreadRadius: 4, offset: const Offset(0, 8)),
+                  BoxShadow(color: Colors.white.withOpacity(0.08), blurRadius: 16, spreadRadius: -4, offset: const Offset(-4, -4)),
                 ],
-                border: Border.all(color: AppColors.goldPrimary.withOpacity(0.35), width: 2.5),
+                border: Border.all(color: _accent.withOpacity(0.45), width: 2.5),
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    '$_count',
+                    '$_activeCount',
                     style: const TextStyle(
                       fontSize: 68,
                       fontWeight: FontWeight.w900,
-                      color: AppColors.plumDeep,
+                      color: Colors.white,
                       height: 1.0,
                       letterSpacing: -2,
                     ),
@@ -602,17 +669,17 @@ class _CountingScreenState extends State<CountingScreen>
                     width: 36,
                     height: 2,
                     decoration: BoxDecoration(
-                      gradient: const LinearGradient(colors: [AppColors.goldPrimary, AppColors.goldLight]),
+                      gradient: LinearGradient(colors: [_accent, _dark]),
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    loc.tr('rosary_counted'),
+                    _isRosary ? loc.tr('rosary_counted') : 'Chaplet Counted',
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w500,
-                      color: AppColors.textSecondary.withOpacity(0.7),
+                      color: Colors.white.withOpacity(0.65),
                       letterSpacing: 1.5,
                     ),
                   ),
@@ -661,25 +728,25 @@ class _CountingScreenState extends State<CountingScreen>
   Widget _buildNoteInput() {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.cardWhite,
+        color: Colors.white.withOpacity(0.10),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppColors.goldPrimary.withOpacity(0.2), width: 1.5),
+        border: Border.all(color: _accent.withOpacity(0.35), width: 1.5),
         boxShadow: [
-          BoxShadow(color: AppColors.plumMid.withOpacity(0.08), blurRadius: 12, offset: const Offset(0, 4)),
+          BoxShadow(color: _bgBottom.withOpacity(0.15), blurRadius: 12, offset: const Offset(0, 4)),
         ],
       ),
       child: TextField(
         controller: _noteController,
-        style: const TextStyle(color: AppColors.textPrimary, fontSize: 15, fontWeight: FontWeight.w500),
+        style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w500),
         decoration: InputDecoration(
           hintText: loc.tr('add_intentions'),
-          hintStyle: TextStyle(color: AppColors.textSecondary.withOpacity(0.45), fontSize: 14, fontWeight: FontWeight.w400),
-          prefixIcon: const Icon(Icons.edit_note_rounded, color: AppColors.goldPrimary, size: 24),
+          hintStyle: TextStyle(color: Colors.white.withOpacity(0.40), fontSize: 14, fontWeight: FontWeight.w400),
+          prefixIcon: Icon(Icons.edit_note_rounded, color: _accent, size: 24),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(18),
-            borderSide: const BorderSide(color: AppColors.goldPrimary, width: 1.5),
+            borderSide: BorderSide(color: _accent, width: 1.5),
           ),
         ),
       ),
@@ -693,14 +760,14 @@ class _CountingScreenState extends State<CountingScreen>
         height: 56,
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [AppColors.authPurpleLight, AppColors.authPurple],
+            colors: [_accent, _dark],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
           borderRadius: BorderRadius.circular(18),
           boxShadow: [
-            BoxShadow(color: AppColors.authBgBottom.withOpacity(0.60), blurRadius: 0, offset: const Offset(0, 5)),
-            BoxShadow(color: AppColors.authPurple.withOpacity(0.35), blurRadius: 12, offset: const Offset(0, 8)),
+            BoxShadow(color: _bgBottom.withOpacity(0.60), blurRadius: 0, offset: const Offset(0, 5)),
+            BoxShadow(color: _dark.withOpacity(0.35), blurRadius: 12, offset: const Offset(0, 8)),
           ],
         ),
         child: Row(
@@ -721,10 +788,11 @@ class _CountingScreenState extends State<CountingScreen>
 
 // ── Ripple ring (water-drop effect) ──────────────────────────────────────────
 class _RippleRing extends StatelessWidget {
-  const _RippleRing({required this.animation, required this.baseSize});
+  const _RippleRing({required this.animation, required this.baseSize, required this.color});
 
   final Animation<double> animation;
   final double baseSize;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
@@ -741,7 +809,7 @@ class _RippleRing extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(
-                color: AppColors.goldPrimary.withOpacity(opacity * 0.7),
+                color: color.withOpacity(opacity * 0.7),
                 width: 2.5 * (1.0 - animation.value * 0.6),
               ),
             ),

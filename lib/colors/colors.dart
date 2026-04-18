@@ -39,6 +39,13 @@ class AppColors {
   static const Color authPurpleLight = Color(0xFF9B5FD8);
   static const Color authLavender = Color(0xFFD4B8F0);
 
+  // Chaplet screen — Deep Teal palette
+  static const Color chapletBgTop    = Color(0xFF0D3B5E);
+  static const Color chapletBgMid    = Color(0xFF0A2A45);
+  static const Color chapletBgBottom = Color(0xFF061A2E);
+  static const Color chapletAccent   = Color(0xFF4DB8C8);
+  static const Color chapletDark     = Color(0xFF1A7A8A);
+
   // Action Buttons
   static const Color greenButton = Color(0xFF9B6B8A);    // mauve (replaces green)
   static const Color greenDark = Color(0xFF7B3F6E);      // deep plum
