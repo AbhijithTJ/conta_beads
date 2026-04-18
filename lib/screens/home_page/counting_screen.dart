@@ -50,43 +50,22 @@ class _CountingScreenState extends State<CountingScreen>
   late AnimationController _pulseController;
   late AnimationController _incrementController;
   late AnimationController _decrementController;
-  late AnimationController _quoteController;
   late AnimationController _ripple1Controller;
   late AnimationController _ripple2Controller;
   late AnimationController _ripple3Controller;
   late Animation<double> _pulseAnimation;
   late Animation<double> _incrementScaleAnim;
   late Animation<double> _decrementScaleAnim;
-  late Animation<double> _quoteFadeAnim;
   late Animation<double> _ripple1Anim;
   late Animation<double> _ripple2Anim;
   late Animation<double> _ripple3Anim;
 
-  final List<Map<String, String>> _quotes = [
-    {
-      'text': 'Christ became obedient to the point of death, even death on a cross.',
-      'reference': 'Philippians 2:8',
-    },
-    {
-      'text': 'For God so loved the world that he gave his one and only Son.',
-      'reference': 'John 3:16',
-    },
-    {
-      'text': 'I have told you all this, so that you may have peace by being united with me.',
-      'reference': 'John 16:33',
-    },
-    {
-      'text': 'Ask and it will be given to you; seek and you will find.',
-      'reference': 'Matthew 7:7',
-    },
-    {
-      'text': 'The Lord is my shepherd; I shall not want.',
-      'reference': 'Psalm 23:1',
-    },
-  ];
+  // Prayer text for the scrollable box
+  static const String _rosaryPrayer =
+      'The Apostles\' Creed\n\nI believe in God, the Father Almighty, Creator of Heaven and earth; and in Jesus Christ, His only Son, Our Lord, Who was conceived by the Holy Spirit, born of the Virgin Mary, suffered under Pontius Pilate, was crucified, died, and was buried. He descended into Hell; the third day He rose again from the dead; He ascended into Heaven, and sitteth at the right hand of God, the Father Almighty; from thence He shall come to judge the living and the dead.\n\nI believe in the Holy Spirit, the holy Catholic Church, the communion of saints, the forgiveness of sins, the resurrection of the body, and life everlasting. Amen.\n\nOur Father\n\nOur Father, Who art in heaven, hallowed be Thy name; Thy kingdom come; Thy will be done on earth as it is in heaven. Give us this day our daily bread; and forgive us our trespasses as we forgive those who trespass against us; and lead us not into temptation, but deliver us from evil. Amen.\n\nHail Mary\n\nHail Mary, full of grace, the Lord is with thee; blessed art thou among women, and blessed is the fruit of thy womb, Jesus. Holy Mary, Mother of God, pray for us sinners, now and at the hour of our death. Amen.\n\nGlory Be\n\nGlory be to the Father, and to the Son, and to the Holy Spirit. As it was in the beginning, is now, and ever shall be, world without end. Amen.';
 
-  int _currentQuoteIndex = 0;
-  Timer? _quoteTimer;
+  static const String _chapletPrayer =
+      'Divine Mercy Chaplet\n\nBegin with:\nOur Father, Hail Mary, and The Apostles\' Creed.\n\nOn the Our Father beads say:\n"Eternal Father, I offer You the Body and Blood, Soul and Divinity of Your dearly beloved Son, Our Lord Jesus Christ, in atonement for our sins and those of the whole world."\n\nOn the Hail Mary beads say:\n"For the sake of His sorrowful Passion, have mercy on us and on the whole world."\n\nRepeat for all five decades.\n\nConclude with (3 times):\n"Holy God, Holy Mighty One, Holy Immortal One, have mercy on us and on the whole world."';
 
   @override
   void initState() {
@@ -118,15 +97,6 @@ class _CountingScreenState extends State<CountingScreen>
       CurvedAnimation(parent: _decrementController, curve: Curves.easeOut),
     );
 
-    _quoteController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 600),
-    );
-    _quoteFadeAnim = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _quoteController, curve: Curves.easeInOut),
-    );
-    _quoteController.forward();
-
     // ripple rings — each 900ms, staggered
     _ripple1Controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 900));
     _ripple2Controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 900));
@@ -142,28 +112,13 @@ class _CountingScreenState extends State<CountingScreen>
       CurvedAnimation(parent: _ripple3Controller, curve: Curves.easeOut),
     );
 
-    _quoteTimer = Timer.periodic(const Duration(seconds: 5), (_) {
-      _nextQuote();
-    });
-  }
-
-  void _nextQuote() {
-    _quoteController.reverse().then((_) {
-      if (!mounted) return;
-      setState(() {
-        _currentQuoteIndex = (_currentQuoteIndex + 1) % _quotes.length;
-      });
-      _quoteController.forward();
-    });
   }
 
   @override
   void dispose() {
-    _quoteTimer?.cancel();
     _pulseController.dispose();
     _incrementController.dispose();
     _decrementController.dispose();
-    _quoteController.dispose();
     _ripple1Controller.dispose();
     _ripple2Controller.dispose();
     _ripple3Controller.dispose();
@@ -552,75 +507,60 @@ class _CountingScreenState extends State<CountingScreen>
   }
 
   Widget _buildQuoteCard() {
-    final quote = _quotes[_currentQuoteIndex];
-    return FadeTransition(
-      opacity: _quoteFadeAnim,
-      child: Container(
-        width: double.infinity,
-        height: 160,
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.10),
-          borderRadius: BorderRadius.circular(22),
-          border: Border.all(color: _accent.withOpacity(0.30), width: 1.5),
-          boxShadow: [
-            BoxShadow(color: _bgBottom.withOpacity(0.20), blurRadius: 20, offset: const Offset(0, 6)),
-          ],
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // ornament
-            Text(
-              '\u275D',
-              style: TextStyle(fontSize: 20, color: _accent.withOpacity(0.70), height: 1.0),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              quote['text']!,
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: 14.5,
-                fontWeight: FontWeight.w500,
-                color: Colors.white.withOpacity(0.90),
-                fontStyle: FontStyle.italic,
-                height: 1.5,
-                letterSpacing: 0.2,
+    final prayer = _isRosary ? _rosaryPrayer : _chapletPrayer;
+    final title  = _isRosary ? 'Rosary Prayers' : 'Divine Mercy Chaplet';
+    final _prayerScrollController = ScrollController();
+    return Container(
+      width: double.infinity,
+      height: 180,
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: _accent.withOpacity(0.30), width: 1.5),
+        boxShadow: [
+          BoxShadow(color: _bgBottom.withOpacity(0.20), blurRadius: 20, offset: const Offset(0, 6)),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.menu_book_rounded, color: _dark, size: 14),
+              const SizedBox(width: 8),
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                  color: _dark,
+                  letterSpacing: 1.0,
+                ),
               ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              quote['reference']!,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                color: _accent,
-                letterSpacing: 1.2,
-              ),
-            ),
-            const SizedBox(height: 10),
-            // dot indicators
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(_quotes.length, (i) {
-                return AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
-                  width: i == _currentQuoteIndex ? 18 : 6,
-                  height: 6,
-                  margin: const EdgeInsets.symmetric(horizontal: 3),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(3),
-                    color: i == _currentQuoteIndex
-                        ? _accent
-                        : _accent.withOpacity(0.30),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Expanded(
+            child: Scrollbar(
+              controller: _prayerScrollController,
+              thumbVisibility: true,
+              child: SingleChildScrollView(
+                controller: _prayerScrollController,
+                child: Text(
+                  prayer,
+                  style: TextStyle(
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w400,
+                    color: const Color(0xFF333333).withOpacity(0.88),
+                    height: 1.7,
+                    letterSpacing: 0.2,
                   ),
-                );
-              }),
+                ),
+              ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
