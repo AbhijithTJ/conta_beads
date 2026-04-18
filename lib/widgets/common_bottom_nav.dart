@@ -18,26 +18,11 @@ class CommonBottomNav extends StatelessWidget {
       index: selectedIndex,
       height: 65.0,
       items: [
-        Icon(
-          Icons.home_rounded,
-          size: 30,
-          color: selectedIndex == 0 ? Colors.white : AppColors.authPurpleLight,
-        ),
-        Icon(
-          Icons.public_rounded,
-          size: 30,
-          color: selectedIndex == 1 ? Colors.white : AppColors.authPurpleLight,
-        ),
-        Icon(
-          Icons.group_rounded,
-          size: 30,
-          color: selectedIndex == 2 ? Colors.white : AppColors.authPurpleLight,
-        ),
-        Icon(
-          Icons.person_rounded,
-          size: 30,
-          color: selectedIndex == 3 ? Colors.white : AppColors.authPurpleLight,
-        ),
+        Icon(Icons.home_rounded, size: 28, color: selectedIndex == 0 ? Colors.white : AppColors.authPurpleLight),
+        Icon(Icons.auto_awesome_rounded, size: 28, color: selectedIndex == 1 ? Colors.white : AppColors.authPurpleLight),
+        Icon(Icons.public_rounded, size: 28, color: selectedIndex == 2 ? Colors.white : AppColors.authPurpleLight),
+        Icon(Icons.group_rounded, size: 28, color: selectedIndex == 3 ? Colors.white : AppColors.authPurpleLight),
+        Icon(Icons.person_rounded, size: 28, color: selectedIndex == 4 ? Colors.white : AppColors.authPurpleLight),
       ],
       color: AppColors.authBgMid,
       buttonBackgroundColor: AppColors.authPurple,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../widgets/common_bottom_nav.dart';
+import 'home_page/home_screen.dart';
 import 'home_page/counting_screen.dart';
 import 'global_counts/global_counts_screen.dart';
 import 'intentions/intentions_screen.dart';
@@ -28,6 +29,7 @@ class _BottomNavWrapperState extends State<BottomNavWrapper> {
   void initState() {
     super.initState();
     _screens = [
+      HomeScreen(userEmail: widget.userEmail),
       CountingScreen(userEmail: widget.userEmail),
       GlobalCountsScreen(personalCount: 245, globalCount: 1245000),
       const IntentionsScreen(),
