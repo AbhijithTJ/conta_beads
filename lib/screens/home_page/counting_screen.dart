@@ -516,11 +516,11 @@ class _CountingScreenState extends State<CountingScreen>
       accentColor: _accent,
       darkColor: _dark,
       bgBottom: _bgBottom,
-      onExpand: () => _showPrayerExpanded(title, prayer),
+      onExpand: (speed) => _showPrayerExpanded(title, prayer, speed),
     );
   }
 
-  void _showPrayerExpanded(String title, String prayer) {
+  void _showPrayerExpanded(String title, String prayer, double initialSpeed) {
     showGeneralDialog(
       context: context,
       barrierDismissible: true,
@@ -546,6 +546,7 @@ class _CountingScreenState extends State<CountingScreen>
                     accentColor: _accent,
                     darkColor: _dark,
                     bgBottom: _bgBottom,
+                    initialSpeed: initialSpeed,
                   ),
                 ),
               ),
@@ -805,7 +806,7 @@ class _PrayerInlineCard extends StatefulWidget {
   final Color accentColor;
   final Color darkColor;
   final Color bgBottom;
-  final VoidCallback onExpand;
+  final void Function(double speed) onExpand;
 
   const _PrayerInlineCard({
     required this.prayer,
@@ -892,7 +893,7 @@ class _PrayerInlineCardState extends State<_PrayerInlineCard> {
                 ),
                 const SizedBox(width: 8),
                 GestureDetector(
-                  onTap: widget.onExpand,
+                  onTap: () => widget.onExpand(_speed),
                   child: Icon(Icons.open_in_full_rounded, color: widget.accentColor, size: 18),
                 ),
               ],
@@ -973,6 +974,7 @@ class _PrayerExpandedModal extends StatefulWidget {
   final Color accentColor;
   final Color darkColor;
   final Color bgBottom;
+  final double initialSpeed;
 
   const _PrayerExpandedModal({
     required this.title,
@@ -980,6 +982,7 @@ class _PrayerExpandedModal extends StatefulWidget {
     required this.accentColor,
     required this.darkColor,
     required this.bgBottom,
+    required this.initialSpeed,
   });
 
   @override
@@ -988,13 +991,14 @@ class _PrayerExpandedModal extends StatefulWidget {
 
 class _PrayerExpandedModalState extends State<_PrayerExpandedModal> {
   final ScrollController _scrollController = ScrollController();
-  double _speed = 30.0;
+  late double _speed;
   double _fontSize = 14.5;
   Timer? _scrollTimer;
 
   @override
   void initState() {
     super.initState();
+    _speed = widget.initialSpeed;
     WidgetsBinding.instance.addPostFrameCallback((_) => _startScroll());
   }
 
