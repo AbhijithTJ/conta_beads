@@ -823,6 +823,7 @@ class _PrayerInlineCard extends StatefulWidget {
 class _PrayerInlineCardState extends State<_PrayerInlineCard> {
   final ScrollController _scrollController = ScrollController();
   double _speed = 20.0;
+  double _fontSize = 13.0;
   Timer? _scrollTimer;
 
   @override
@@ -881,6 +882,16 @@ class _PrayerInlineCardState extends State<_PrayerInlineCard> {
                   ),
                 ),
                 GestureDetector(
+                  onTap: () => setState(() => _fontSize = (_fontSize - 1).clamp(10.0, 24.0)),
+                  child: Icon(Icons.zoom_out_rounded, color: widget.accentColor, size: 20),
+                ),
+                const SizedBox(width: 6),
+                GestureDetector(
+                  onTap: () => setState(() => _fontSize = (_fontSize + 1).clamp(10.0, 24.0)),
+                  child: Icon(Icons.zoom_in_rounded, color: widget.accentColor, size: 22),
+                ),
+                const SizedBox(width: 8),
+                GestureDetector(
                   onTap: widget.onExpand,
                   child: Icon(Icons.open_in_full_rounded, color: widget.accentColor, size: 18),
                 ),
@@ -900,7 +911,7 @@ class _PrayerInlineCardState extends State<_PrayerInlineCard> {
               child: Text(
                 widget.prayer,
                 style: TextStyle(
-                  fontSize: 13,
+                  fontSize: _fontSize,
                   fontWeight: FontWeight.w400,
                   color: const Color(0xFF333333).withOpacity(0.88),
                   height: 1.7,
@@ -978,6 +989,7 @@ class _PrayerExpandedModal extends StatefulWidget {
 class _PrayerExpandedModalState extends State<_PrayerExpandedModal> {
   final ScrollController _scrollController = ScrollController();
   double _speed = 30.0;
+  double _fontSize = 14.5;
   Timer? _scrollTimer;
 
   @override
@@ -1032,6 +1044,15 @@ class _PrayerExpandedModalState extends State<_PrayerExpandedModal> {
                       style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: widget.darkColor, letterSpacing: 0.8),
                     ),
                   ),
+                  GestureDetector(
+                    onTap: () => setState(() => _fontSize = (_fontSize - 1).clamp(10.0, 26.0)),
+                    child: Icon(Icons.zoom_out_rounded, color: widget.accentColor, size: 22),
+                  ),
+                  const SizedBox(width: 8),
+                  GestureDetector(
+                    onTap: () => setState(() => _fontSize = (_fontSize + 1).clamp(10.0, 26.0)),
+                    child: Icon(Icons.zoom_in_rounded, color: widget.accentColor, size: 24),
+                  ),
                   IconButton(
                     onPressed: () => Navigator.of(context).pop(),
                     icon: Icon(Icons.close_rounded, color: widget.darkColor.withOpacity(0.6), size: 22),
@@ -1048,7 +1069,7 @@ class _PrayerExpandedModalState extends State<_PrayerExpandedModal> {
                 child: Text(
                   widget.prayer,
                   style: TextStyle(
-                    fontSize: 14.5,
+                    fontSize: _fontSize,
                     fontWeight: FontWeight.w400,
                     color: const Color(0xFF222222).withOpacity(0.90),
                     height: 1.8,
