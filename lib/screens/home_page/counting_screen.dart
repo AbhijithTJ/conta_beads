@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:async';
+import 'dart:math';
 import 'dart:ui';
 import '../../colors/colors.dart';
 import '../../services/localization_service.dart';
+import '../../widgets/global_count_panel.dart';
 
 class CountingScreen extends StatefulWidget {
   final String userEmail;
@@ -61,6 +63,15 @@ class _CountingScreenState extends State<CountingScreen>
   late Animation<double> _ripple2Anim;
   late Animation<double> _ripple3Anim;
 
+  // ── Floating global-count button state ──
+  Offset _fabPosition = const Offset(20, 200);
+  bool _showGlobalPanel = false;
+  late List<Map<String, dynamic>> _leaderboardData;
+  Timer? _leaderboardTimer;
+  late AnimationController _blinkController;
+  late Animation<double> _blinkAnimation;
+  final _random = Random();
+
   // Prayer text for the scrollable box
   static const String _rosaryPrayer =
       'The Apostles\' Creed\n\nI believe in God, the Father Almighty, Creator of Heaven and earth; and in Jesus Christ, His only Son, Our Lord, Who was conceived by the Holy Spirit, born of the Virgin Mary, suffered under Pontius Pilate, was crucified, died, and was buried. He descended into Hell; the third day He rose again from the dead; He ascended into Heaven, and sitteth at the right hand of God, the Father Almighty; from thence He shall come to judge the living and the dead.\n\nI believe in the Holy Spirit, the holy Catholic Church, the communion of saints, the forgiveness of sins, the resurrection of the body, and life everlasting. Amen.\n\nOur Father\n\nOur Father, Who art in heaven, hallowed be Thy name; Thy kingdom come; Thy will be done on earth as it is in heaven. Give us this day our daily bread; and forgive us our trespasses as we forgive those who trespass against us; and lead us not into temptation, but deliver us from evil. Amen.\n\nHail Mary\n\nHail Mary, full of grace, the Lord is with thee; blessed art thou among women, and blessed is the fruit of thy womb, Jesus. Holy Mary, Mother of God, pray for us sinners, now and at the hour of our death. Amen.\n\nGlory Be\n\nGlory be to the Father, and to the Son, and to the Holy Spirit. As it was in the beginning, is now, and ever shall be, world without end. Amen.';
@@ -113,6 +124,34 @@ class _CountingScreenState extends State<CountingScreen>
       CurvedAnimation(parent: _ripple3Controller, curve: Curves.easeOut),
     );
 
+    // ── Floating leaderboard ──
+    _blinkController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 700),
+    )..repeat(reverse: true);
+    _blinkAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _blinkController, curve: Curves.easeInOut),
+    );
+
+    _leaderboardData = [
+      {'name': 'Emma',    'count': 56, 'isYou': false},
+      {'name': 'Rachel',  'count': 42, 'isYou': false},
+      {'name': 'James T.','count': 38, 'isYou': false},
+      {'name': 'You',     'count': 245,'isYou': true},
+    ];
+
+    _leaderboardTimer = Timer.periodic(const Duration(seconds: 3), (_) {
+      if (!mounted) return;
+      setState(() {
+        final nonYou = _leaderboardData.where((e) => !(e['isYou'] as bool)).toList();
+        if (nonYou.isNotEmpty) {
+          final pick = nonYou[_random.nextInt(nonYou.length)];
+          pick['count'] = (pick['count'] as int) + _random.nextInt(3) + 1;
+        }
+        _leaderboardData.sort((a, b) => (b['count'] as int).compareTo(a['count'] as int));
+      });
+    });
+
   }
 
   @override
@@ -123,6 +162,8 @@ class _CountingScreenState extends State<CountingScreen>
     _ripple1Controller.dispose();
     _ripple2Controller.dispose();
     _ripple3Controller.dispose();
+    _blinkController.dispose();
+    _leaderboardTimer?.cancel();
     _noteController.dispose();
     super.dispose();
   }
@@ -265,7 +306,63 @@ class _CountingScreenState extends State<CountingScreen>
                 ),
               ),
             ),
+            // ── Global-count panel overlay ──
+            if (_showGlobalPanel)
+              GestureDetector(
+                onTap: () => setState(() => _showGlobalPanel = false),
+                child: Container(color: Colors.black.withOpacity(0.35)),
+              ),
+            if (_showGlobalPanel)
+              Positioned(
+                left: 16,
+                right: 16,
+                bottom: 90,
+                child: GlobalCountPanel(
+                  leaderboardData: _leaderboardData,
+                  blinkAnimation: _blinkAnimation,
+                  onClose: () => setState(() => _showGlobalPanel = false),
+                ),
+              ),
+            // ── Draggable floating button ──
+            _buildDraggableFab(size),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDraggableFab(Size size) {
+    return Positioned(
+      left: _fabPosition.dx,
+      top: _fabPosition.dy,
+      child: GestureDetector(
+        onPanUpdate: (d) {
+          setState(() {
+            final nx = (_fabPosition.dx + d.delta.dx).clamp(0.0, size.width - 56.0);
+            final ny = (_fabPosition.dy + d.delta.dy).clamp(0.0, size.height - 56.0);
+            _fabPosition = Offset(nx, ny);
+          });
+        },
+        onTap: () {
+          HapticFeedback.lightImpact();
+          setState(() => _showGlobalPanel = !_showGlobalPanel);
+        },
+        child: Container(
+          width: 52,
+          height: 52,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            gradient: const LinearGradient(
+              colors: [AppColors.goldPrimary, AppColors.goldDark],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            boxShadow: [
+              BoxShadow(color: AppColors.goldDark.withOpacity(0.5), blurRadius: 14, offset: const Offset(0, 5)),
+            ],
+            border: Border.all(color: Colors.white.withOpacity(0.4), width: 2),
+          ),
+          child: const Icon(Icons.public_rounded, color: Colors.white, size: 26),
         ),
       ),
     );
