@@ -585,71 +585,19 @@ class _CountingScreenState extends State<CountingScreen>
           opacity: anim,
           child: Stack(
             children: [
-              // blurred background
               BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
                 child: Container(color: _bgBottom.withOpacity(0.75)),
               ),
-              // modal card
               Center(
                 child: ScaleTransition(
                   scale: CurvedAnimation(parent: anim, curve: Curves.easeOutBack),
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 80),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(24),
-                      boxShadow: [
-                        BoxShadow(color: _bgBottom.withOpacity(0.40), blurRadius: 40, offset: const Offset(0, 12)),
-                      ],
-                    ),
-                    child: Column(
-                      children: [
-                        // header
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(20, 20, 12, 12),
-                          child: Row(
-                            children: [
-                              Icon(Icons.menu_book_rounded, color: _dark, size: 18),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: Text(
-                                  title,
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w800,
-                                    color: _dark,
-                                    letterSpacing: 0.8,
-                                  ),
-                                ),
-                              ),
-                              IconButton(
-                                onPressed: () => Navigator.of(ctx).pop(),
-                                icon: Icon(Icons.close_rounded, color: _dark.withOpacity(0.6), size: 22),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Divider(color: _accent.withOpacity(0.20), height: 1, indent: 20, endIndent: 20),
-                        // scrollable content
-                        Expanded(
-                          child: SingleChildScrollView(
-                            padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
-                            physics: const BouncingScrollPhysics(),
-                            child: Text(
-                              prayer,
-                              style: TextStyle(
-                                fontSize: 14.5,
-                                fontWeight: FontWeight.w400,
-                                color: const Color(0xFF222222).withOpacity(0.90),
-                                height: 1.8,
-                                letterSpacing: 0.2,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                  child: _PrayerExpandedModal(
+                    title: title,
+                    prayer: prayer,
+                    accentColor: _accent,
+                    darkColor: _dark,
+                    bgBottom: _bgBottom,
                   ),
                 ),
               ),
@@ -897,6 +845,162 @@ class _CircleActionButton extends StatelessWidget {
           border: Border.all(color: Colors.white.withOpacity(0.35), width: 2),
         ),
         child: Icon(icon, color: Colors.white, size: iconSize),
+      ),
+    );
+  }
+}
+
+// ── Prayer expanded modal with auto-scroll ────────────────────────────────────
+class _PrayerExpandedModal extends StatefulWidget {
+  final String title;
+  final String prayer;
+  final Color accentColor;
+  final Color darkColor;
+  final Color bgBottom;
+
+  const _PrayerExpandedModal({
+    required this.title,
+    required this.prayer,
+    required this.accentColor,
+    required this.darkColor,
+    required this.bgBottom,
+  });
+
+  @override
+  State<_PrayerExpandedModal> createState() => _PrayerExpandedModalState();
+}
+
+class _PrayerExpandedModalState extends State<_PrayerExpandedModal> {
+  final ScrollController _scrollController = ScrollController();
+  double _speed = 30.0;
+  Timer? _scrollTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _startScroll());
+  }
+
+  void _startScroll() {
+    _scrollTimer?.cancel();
+    if (_speed == 0) return;
+    _scrollTimer = Timer.periodic(const Duration(milliseconds: 16), (_) {
+      if (!mounted) return;
+      final pos = _scrollController.offset;
+      final max = _scrollController.position.maxScrollExtent;
+      if (pos >= max) return;
+      _scrollController.jumpTo((pos + _speed / 60).clamp(0, max));
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollTimer?.cancel();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 80),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(color: widget.bgBottom.withOpacity(0.40), blurRadius: 40, offset: const Offset(0, 12)),
+          ],
+        ),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 12, 12),
+              child: Row(
+                children: [
+                  Icon(Icons.menu_book_rounded, color: widget.darkColor, size: 18),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      widget.title,
+                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: widget.darkColor, letterSpacing: 0.8),
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    icon: Icon(Icons.close_rounded, color: widget.darkColor.withOpacity(0.6), size: 22),
+                  ),
+                ],
+              ),
+            ),
+            Divider(color: widget.accentColor.withOpacity(0.20), height: 1, indent: 20, endIndent: 20),
+            Expanded(
+              child: SingleChildScrollView(
+                controller: _scrollController,
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+                physics: const BouncingScrollPhysics(),
+                child: Text(
+                  widget.prayer,
+                  style: TextStyle(
+                    fontSize: 14.5,
+                    fontWeight: FontWeight.w400,
+                    color: const Color(0xFF222222).withOpacity(0.90),
+                    height: 1.8,
+                    letterSpacing: 0.2,
+                  ),
+                ),
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: const BorderRadius.vertical(bottom: Radius.circular(24)),
+                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8, offset: const Offset(0, -2))],
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.speed_rounded, color: widget.accentColor, size: 16),
+                      const SizedBox(width: 8),
+                      Text('Scroll Speed', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: widget.darkColor)),
+                      const Spacer(),
+                      Text(
+                        _speed == 0 ? 'Stopped' : '${_speed.toInt()}',
+                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: widget.accentColor),
+                      ),
+                    ],
+                  ),
+                  SliderTheme(
+                    data: SliderThemeData(
+                      activeTrackColor: widget.accentColor,
+                      inactiveTrackColor: widget.accentColor.withOpacity(0.20),
+                      thumbColor: widget.darkColor,
+                      overlayColor: widget.accentColor.withOpacity(0.15),
+                      trackHeight: 3,
+                      thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 7),
+                    ),
+                    child: Slider(
+                      value: _speed,
+                      min: 0,
+                      max: 120,
+                      onChanged: (v) {
+                        setState(() => _speed = v);
+                        if (v == 0) {
+                          _scrollTimer?.cancel();
+                        } else {
+                          _startScroll();
+                        }
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
