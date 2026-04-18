@@ -305,32 +305,10 @@ class _LoginScreenState extends State<LoginScreen>
     return Column(
       children: [
         // Logo with gold glow ring
-        Container(
-          width: 84,
-          height: 84,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.goldPrimary.withOpacity(0.40),
-                blurRadius: 28,
-                spreadRadius: 4,
-              ),
-              BoxShadow(
-                color: AppColors.plumMid.withOpacity(0.20),
-                blurRadius: 14,
-                spreadRadius: -2,
-              ),
-            ],
-            border: Border.all(
-              color: AppColors.goldPrimary.withOpacity(0.35),
-              width: 2.5,
-            ),
-          ),
-          child: ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: Image.asset('assets/splash/upper_room.png', fit: BoxFit.cover),
-            ),
+        Image.asset(
+          'assets/splash/ur_logo.png',
+          width: 140,
+          height: 140,
         ),
         const SizedBox(height: 18),
         const Text(

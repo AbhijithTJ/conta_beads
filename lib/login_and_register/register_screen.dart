@@ -279,53 +279,24 @@ class _RegisterScreenState extends State<RegisterScreen>
   Widget _buildHeader() {
     return Column(
       children: [
-        Container(
-          width: 84,
-          height: 84,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.goldPrimary.withOpacity(0.40),
-                blurRadius: 28,
-                spreadRadius: 4,
-              ),
-              BoxShadow(
-                color: AppColors.plumMid.withOpacity(0.20),
-                blurRadius: 14,
-                spreadRadius: -2,
-              ),
-            ],
-            border: Border.all(
-              color: AppColors.goldPrimary.withOpacity(0.35),
-              width: 2.5,
-            ),
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(16),
-            child: Image.asset('assets/splash/upper_room.png', fit: BoxFit.cover),
-          ),
+        Image.asset(
+          'assets/splash/ur_logo.png',
+          width: 140,
+          height: 140,
         ),
         const SizedBox(height: 18),
-        ShaderMask(
-          shaderCallback: (bounds) => const LinearGradient(
-            colors: [AppColors.goldDark, AppColors.goldPrimary, AppColors.authLavender],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ).createShader(bounds),
-          child: const Text(
-            'Upper Room',
-            style: TextStyle(
-              fontSize: 32,
-              fontWeight: FontWeight.w800,
-              color: Colors.white,
-              letterSpacing: 1.5,
-            ),
+        const Text(
+          'Upper Room',
+          style: TextStyle(
+            fontSize: 32,
+            fontWeight: FontWeight.w800,
+            color: Colors.white,
+            letterSpacing: 1.5,
           ),
         ),
         const SizedBox(height: 6),
         Text(
-          'Join the community of prayer.',
+          'Every bead of the rosary counts.',
           style: TextStyle(
             fontSize: 12,
             letterSpacing: 1.2,
@@ -663,8 +634,8 @@ class _RegisterScreenState extends State<RegisterScreen>
           child: const Text(
             'Sign In',
             style: TextStyle(
-              color: AppColors.authPurpleLight,
-              fontWeight: FontWeight.w700,
+              color: Colors.white,
+              fontWeight: FontWeight.w800,
               fontSize: 13,
             ),
           ),
