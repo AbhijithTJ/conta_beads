@@ -349,6 +349,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               Navigator.of(context).push(MaterialPageRoute(
                 builder: (_) => CountingScreen(userEmail: widget.userEmail),
               ));
+            } else if (i == 1) {
+              Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) => CountingScreen(userEmail: widget.userEmail, startWithChaplet: true),
+              ));
             }
           },
           child: ClipRRect(

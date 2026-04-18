@@ -6,10 +6,12 @@ import '../../services/localization_service.dart';
 
 class CountingScreen extends StatefulWidget {
   final String userEmail;
+  final bool startWithChaplet;
 
   const CountingScreen({
     super.key,
     required this.userEmail,
+    this.startWithChaplet = false,
   });
 
   @override
@@ -89,6 +91,7 @@ class _CountingScreenState extends State<CountingScreen>
   @override
   void initState() {
     super.initState();
+    _isRosary = !widget.startWithChaplet;
 
     _pulseController = AnimationController(
       vsync: this,
