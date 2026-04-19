@@ -31,12 +31,12 @@ class AppColors {
   static const Color textPrimary = Color(0xFF4A1F4A);    // deep plum
   static const Color textSecondary = Color(0xFF9B6B8A);  // muted mauve
 
-  // Login / Register screen — Deep Purple palette
-  static const Color authBgTop = Color(0xFF5B2D8E);
-  static const Color authBgMid = Color(0xFF4A1A7A);
-  static const Color authBgBottom = Color(0xFF3A1060);
-  static const Color authPurple = Color(0xFF7B3FBE);
-  static const Color authPurpleLight = Color(0xFF9B5FD8);
+  // Login / Register screen — Deep Maroon palette
+  static const Color authBgTop = Color(0xFF6B1A5A);
+  static const Color authBgMid = Color(0xFF4A1045);
+  static const Color authBgBottom = Color(0xFF2E0A3A);
+  static const Color authPurple = Color(0xFF7B1F6A);
+  static const Color authPurpleLight = Color(0xFF9B2F7E);
   static const Color authLavender = Color(0xFFD4B8F0);
 
   // Chaplet screen — Deep Teal palette

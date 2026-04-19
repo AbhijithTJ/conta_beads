@@ -20,16 +20,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   Timer? _quoteTimer;
   int _currentQuoteIndex = 0;
 
-  // Orb animations
-  late AnimationController _orb1Controller;
-  late AnimationController _orb2Controller;
-  late AnimationController _orb3Controller;
-  late AnimationController _orb4Controller;
-  late Animation<double> _orb1Anim;
-  late Animation<double> _orb2Anim;
-  late Animation<double> _orb3Anim;
-  late Animation<double> _orb4Anim;
-
   // Quick count drag handle
   double _dragOffset = 0;
   bool _dragging = false;
@@ -69,16 +59,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
     _quoteController.forward();
 
-    _orb1Controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 4200))..repeat(reverse: true);
-    _orb2Controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 5800))..repeat(reverse: true);
-    _orb3Controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 3600))..repeat(reverse: true);
-    _orb4Controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 6400))..repeat(reverse: true);
-
-    _orb1Anim = Tween<double>(begin: 0, end: 1).animate(CurvedAnimation(parent: _orb1Controller, curve: Curves.easeInOut));
-    _orb2Anim = Tween<double>(begin: 0, end: 1).animate(CurvedAnimation(parent: _orb2Controller, curve: Curves.easeInOut));
-    _orb3Anim = Tween<double>(begin: 0, end: 1).animate(CurvedAnimation(parent: _orb3Controller, curve: Curves.easeInOut));
-    _orb4Anim = Tween<double>(begin: 0, end: 1).animate(CurvedAnimation(parent: _orb4Controller, curve: Curves.easeInOut));
-
     _quoteTimer = Timer.periodic(const Duration(seconds: 5), (_) => _nextQuote());
   }
 
@@ -94,10 +74,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   void dispose() {
     _quoteTimer?.cancel();
     _quoteController.dispose();
-    _orb1Controller.dispose();
-    _orb2Controller.dispose();
-    _orb3Controller.dispose();
-    _orb4Controller.dispose();
     super.dispose();
   }
 
@@ -187,15 +163,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         width: double.infinity,
         height: double.infinity,
         decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [AppColors.authBgTop, AppColors.authBgMid, AppColors.authBgBottom],
-          ),
+          color: Color(0xFF560737),
         ),
         child: Stack(
           children: [
-            _buildOrbs(size),
             SafeArea(
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
@@ -302,22 +273,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildOrbs(Size size) {
-    return AnimatedBuilder(
-      animation: Listenable.merge([_orb1Anim, _orb2Anim, _orb3Anim, _orb4Anim]),
-      builder: (context, _) => Stack(children: [
-        _Orb(left: size.width * 0.2, top: -size.height * 0.08 + _orb1Anim.value * 28, size: size.width * 0.72,
-          colors: [AppColors.authPurple.withOpacity(0.55), AppColors.authBgTop.withOpacity(0.30)]),
-        _Orb(left: -size.width * 0.22, top: size.height * 0.28 + _orb2Anim.value * -22, size: size.width * 0.65,
-          colors: [AppColors.authPurpleLight.withOpacity(0.45), AppColors.authPurple.withOpacity(0.25)]),
-        _Orb(left: size.width * 0.55, top: size.height * 0.38 + _orb3Anim.value * 18, size: size.width * 0.60,
-          colors: [AppColors.authBgMid.withOpacity(0.70), AppColors.authBgBottom.withOpacity(0.40)]),
-        _Orb(left: size.width * 0.1, top: size.height * 0.72 + _orb4Anim.value * -16, size: size.width * 0.55,
-          colors: [AppColors.authPurpleLight.withOpacity(0.20), AppColors.authPurple.withOpacity(0.25)]),
-      ]),
     );
   }
 
@@ -489,27 +444,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           ),
         );
       },
-    );
-  }
-}
-
-class _Orb extends StatelessWidget {
-  final double left, top, size;
-  final List<Color> colors;
-  const _Orb({required this.left, required this.top, required this.size, required this.colors});
-
-  @override
-  Widget build(BuildContext context) {
-    return Positioned(
-      left: left, top: top,
-      child: Container(
-        width: size, height: size,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          gradient: RadialGradient(center: const Alignment(-0.3, -0.3), radius: 0.85, colors: colors, stops: const [0.0, 1.0]),
-          boxShadow: [BoxShadow(color: colors[0].withOpacity(0.25), blurRadius: size * 0.35, spreadRadius: size * 0.05)],
-        ),
-      ),
     );
   }
 }
