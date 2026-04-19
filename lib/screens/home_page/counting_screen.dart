@@ -36,12 +36,12 @@ class _CountingScreenState extends State<CountingScreen>
   static const _rosaryAccent   = AppColors.authPurpleLight;
   static const _rosaryDark     = AppColors.authPurple;
 
-  // Chaplet palette — deep teal/indigo
-  static const _chapletBgTop    = AppColors.chapletBgTop;
-  static const _chapletBgMid    = AppColors.chapletBgMid;
-  static const _chapletBgBottom = AppColors.chapletBgBottom;
-  static const _chapletAccent   = AppColors.chapletAccent;
-  static const _chapletDark     = AppColors.chapletDark;
+  // Chaplet palette — Divine Mercy (red, white, blue)
+  static const _chapletBgTop    = Color(0xFF8B0000);  // deep red
+  static const _chapletBgMid    = Color(0xFFB22222);  // crimson
+  static const _chapletBgBottom = Color(0xFF1A3A6B);  // deep blue
+  static const _chapletAccent   = Color(0xFF4A90D9);  // bright blue
+  static const _chapletDark     = Color(0xFFCC2200);  // dark red
 
   Color get _bgTop    => _isRosary ? _rosaryBgTop    : _chapletBgTop;
   Color get _bgMid    => _isRosary ? _rosaryBgMid    : _chapletBgMid;
@@ -262,12 +262,20 @@ class _CountingScreenState extends State<CountingScreen>
         width: double.infinity,
         height: double.infinity,
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [_bgTop, _bgMid, _bgBottom],
-            stops: const [0.0, 0.5, 1.0],
-          ),
+          gradient: _isRosary
+              ? const LinearGradient(colors: [AppColors.homeBg, AppColors.homeBg])
+              : const LinearGradient(
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                  colors: [
+                    Color(0xFF8B0000),
+                    Color(0xFFCC2222),
+                    Color(0xFFFFFFFF),
+                    Color(0xFF4A90D9),
+                    Color(0xFF1A3A6B),
+                  ],
+                  stops: [0.0, 0.25, 0.5, 0.75, 1.0],
+                ),
         ),
         child: Stack(
           children: [
@@ -487,7 +495,7 @@ class _CountingScreenState extends State<CountingScreen>
     return Container(
       height: 48,
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.15),
+      color: _isRosary ? Colors.white.withOpacity(0.15) : Colors.black.withOpacity(0.35),
         borderRadius: BorderRadius.circular(30),
       ),
       child: Row(
@@ -664,7 +672,7 @@ class _CountingScreenState extends State<CountingScreen>
               height: 210,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.white.withOpacity(0.12),
+                color: _isRosary ? Colors.white.withOpacity(0.12) : Colors.black.withOpacity(0.40),
                 boxShadow: [
                   BoxShadow(color: _bgBottom.withOpacity(0.35), blurRadius: 36, spreadRadius: 4, offset: const Offset(0, 8)),
                   BoxShadow(color: Colors.white.withOpacity(0.08), blurRadius: 16, spreadRadius: -4, offset: const Offset(-4, -4)),
@@ -721,8 +729,8 @@ class _CountingScreenState extends State<CountingScreen>
           builder: (context, child) => Transform.scale(scale: _decrementScaleAnim.value, child: child),
           child: _CircleActionButton(
             onTap: _decrement,
-            color: AppColors.greyButton,
-            darkColor: AppColors.greyDark,
+            color: _isRosary ? AppColors.greyButton : const Color(0xFF8B0000),
+            darkColor: _isRosary ? AppColors.greyDark : const Color(0xFF5C0000),
             icon: Icons.remove_rounded,
             size: 76,
             iconSize: 36,
@@ -734,8 +742,8 @@ class _CountingScreenState extends State<CountingScreen>
           builder: (context, child) => Transform.scale(scale: _incrementScaleAnim.value, child: child),
           child: _CircleActionButton(
             onTap: _increment,
-            color: AppColors.greenButton,
-            darkColor: AppColors.greenDark,
+            color: _isRosary ? AppColors.greenButton : const Color(0xFF1A4A8B),
+            darkColor: _isRosary ? AppColors.greenDark : const Color(0xFF0A1F4A),
             icon: Icons.add_rounded,
             size: 88,
             iconSize: 44,
@@ -748,7 +756,7 @@ class _CountingScreenState extends State<CountingScreen>
   Widget _buildNoteInput() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.10),
+        color: _isRosary ? Colors.white.withOpacity(0.10) : Colors.black.withOpacity(0.35),
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: _accent.withOpacity(0.35), width: 1.5),
         boxShadow: [
@@ -969,12 +977,12 @@ class _PrayerInlineCardState extends State<_PrayerInlineCard> {
                 ),
                 GestureDetector(
                   onTap: () => setState(() => _fontSize = (_fontSize - 1).clamp(10.0, 24.0)),
-                  child: Icon(Icons.zoom_out_rounded, color: widget.accentColor, size: 20),
+                  child: const Icon(Icons.zoom_out_rounded, color: Colors.grey, size: 20),
                 ),
                 const SizedBox(width: 6),
                 GestureDetector(
                   onTap: () => setState(() => _fontSize = (_fontSize + 1).clamp(10.0, 24.0)),
-                  child: Icon(Icons.zoom_in_rounded, color: widget.accentColor, size: 22),
+                  child: const Icon(Icons.zoom_in_rounded, color: Colors.grey, size: 22),
                 ),
                 const SizedBox(width: 8),
                 GestureDetector(
