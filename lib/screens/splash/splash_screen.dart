@@ -119,12 +119,14 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
             child: AnimatedBuilder(
               animation: _fadeAnimation,
               builder: (context, child) => Opacity(
-                opacity: _fadeAnimation.value * 0.35,
+                opacity: _fadeAnimation.value * 0.85,
                 child: child,
               ),
-              child: CustomPaint(
-                size: Size(MediaQuery.of(context).size.width, 120),
-                painter: _CrowdPainter(),
+              child: Image.asset(
+                'assets/splash/splash_bottom.png',
+                width: double.infinity,
+                fit: BoxFit.fitWidth,
+                alignment: Alignment.bottomCenter,
               ),
             ),
           ),
@@ -135,48 +137,3 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   }
 }
 
-class _CrowdPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = const Color(0xFFD4A843)
-      ..style = PaintingStyle.fill;
-
-    // Draw a row of simple person silhouettes
-    final double personWidth = size.width / 14;
-    for (int i = 0; i < 14; i++) {
-      final double cx = personWidth * i + personWidth / 2;
-      final double baseY = size.height;
-      final double heightVariation = (i % 3 == 0) ? 0.0 : (i % 3 == 1 ? 8.0 : -5.0);
-      final double bodyH = 55 + heightVariation;
-      final double headR = 7.0;
-
-      // Head
-      canvas.drawCircle(Offset(cx, baseY - bodyH - headR), headR, paint);
-
-      // Body
-      final path = Path();
-      path.moveTo(cx - 8, baseY - bodyH);
-      path.lineTo(cx + 8, baseY - bodyH);
-      path.lineTo(cx + 12, baseY);
-      path.lineTo(cx - 12, baseY);
-      path.close();
-      canvas.drawPath(path, paint);
-
-      // Arms
-      canvas.drawLine(
-        Offset(cx - 8, baseY - bodyH + 10),
-        Offset(cx - 18, baseY - bodyH + 28),
-        paint..strokeWidth = 3,
-      );
-      canvas.drawLine(
-        Offset(cx + 8, baseY - bodyH + 10),
-        Offset(cx + 18, baseY - bodyH + 28),
-        paint..strokeWidth = 3,
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(_CrowdPainter oldDelegate) => false;
-}
