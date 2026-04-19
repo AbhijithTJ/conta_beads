@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../../colors/colors.dart';
@@ -10,23 +11,47 @@ class IntentionsScreen extends StatefulWidget {
   State<IntentionsScreen> createState() => _IntentionsScreenState();
 }
 
-class _IntentionsScreenState extends State<IntentionsScreen> {
+class _IntentionsScreenState extends State<IntentionsScreen> with TickerProviderStateMixin {
   final TextEditingController _intentionController = TextEditingController();
 
-  final String quote =
-      '"Prayer joined to sacrifice constitutes the most powerful force in human history."';
-  final String quoteAuthor = '— St. John Paul II';
+  late AnimationController _quoteFadeController;
+  late Animation<double> _quoteFadeAnim;
+  Timer? _quoteTimer;
+  int _currentQuoteIndex = 0;
+
+  final List<Map<String, String>> _quotes = [
+    {'text': '"Prayer joined to sacrifice constitutes the most powerful force in human history."', 'author': '— St. John Paul II'},
+    {'text': '"The rosary is the most excellent form of prayer."', 'author': 'Pope Paul VI'},
+    {'text': '"To pray is to let Jesus into our lives."', 'author': 'Ole Hallesby'},
+    {'text': '"Prayer is the key of the morning and the bolt of the evening."', 'author': 'Mahatma Gandhi'},
+    {'text': '"With God, all things are possible."', 'author': 'Matthew 19:26'},
+  ];
+
   final String todayIntention = 'For the Healing of the Sick';
   final int prayerRequests = 23;
 
   @override
   void initState() {
     super.initState();
+    _quoteFadeController = AnimationController(vsync: this, duration: const Duration(milliseconds: 600));
+    _quoteFadeAnim = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _quoteFadeController, curve: Curves.easeInOut),
+    );
+    _quoteFadeController.forward();
+    _quoteTimer = Timer.periodic(const Duration(seconds: 5), (_) {
+      _quoteFadeController.reverse().then((_) {
+        if (!mounted) return;
+        setState(() => _currentQuoteIndex = (_currentQuoteIndex + 1) % _quotes.length);
+        _quoteFadeController.forward();
+      });
+    });
   }
 
   @override
   void dispose() {
     _intentionController.dispose();
+    _quoteTimer?.cancel();
+    _quoteFadeController.dispose();
     super.dispose();
   }
 
@@ -107,45 +132,72 @@ class _IntentionsScreenState extends State<IntentionsScreen> {
   }
 
   Widget _buildQuoteCard() {
-    return _GlassCard(
-      child: Column(
-        children: [
-          Text(
-            '\u275D',
-            style: TextStyle(
-              fontSize: 32,
-              color: AppColors.authPurple.withOpacity(0.3),
-              height: 1.0,
-            ),
+    final q = _quotes[_currentQuoteIndex];
+    return GestureDetector(
+      onHorizontalDragEnd: (details) {
+        if (details.primaryVelocity == null) return;
+        _quoteFadeController.reverse().then((_) {
+          if (!mounted) return;
+          setState(() {
+            if (details.primaryVelocity! < 0) {
+              _currentQuoteIndex = (_currentQuoteIndex + 1) % _quotes.length;
+            } else {
+              _currentQuoteIndex = (_currentQuoteIndex - 1 + _quotes.length) % _quotes.length;
+            }
+          });
+          _quoteFadeController.forward();
+        });
+      },
+      child: FadeTransition(
+        opacity: _quoteFadeAnim,
+        child: Container(
+          width: double.infinity,
+          height: 160,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(color: AppColors.authPurpleLight.withOpacity(0.30), width: 1.5),
+            boxShadow: [
+              BoxShadow(color: AppColors.authBgBottom.withOpacity(0.20), blurRadius: 20, offset: const Offset(0, 6)),
+            ],
           ),
-          const SizedBox(height: 8),
-          Text(
-            quote,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w500,
-              color: AppColors.authBgMid,
-              fontStyle: FontStyle.italic,
-              height: 1.6,
-            ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text('\u275D', style: TextStyle(fontSize: 20, color: AppColors.authPurple.withOpacity(0.45), height: 1.0)),
+              const SizedBox(height: 6),
+              Text(
+                q['text']!,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w500, color: Color(0xFF333333), fontStyle: FontStyle.italic, height: 1.5, letterSpacing: 0.2),
+              ),
+              const SizedBox(height: 8),
+              Text(q['author']!, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.authPurple, letterSpacing: 1.2)),
+              const SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(_quotes.length, (i) {
+                  return AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    width: i == _currentQuoteIndex ? 18 : 6,
+                    height: 6,
+                    margin: const EdgeInsets.symmetric(horizontal: 3),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(3),
+                      color: i == _currentQuoteIndex ? AppColors.authPurple : AppColors.authPurple.withOpacity(0.25),
+                    ),
+                  );
+                }),
+              ),
+            ],
           ),
-          const SizedBox(height: 12),
-          Text(
-            quoteAuthor.toUpperCase(),
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w800,
-              color: AppColors.authPurple.withOpacity(0.7),
-              letterSpacing: 1.5,
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
-
   Widget _buildTodayIntentionCard() {
     return _GlassCard(
       child: Row(
