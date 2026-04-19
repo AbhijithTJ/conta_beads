@@ -82,7 +82,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                     width: 160,
                     height: 160,
                   ),
-                  const SizedBox(height: 28),
+                 // const SizedBox(height: 8),
                   // App name
                   const Text(
                     'Upper Room',

@@ -194,7 +194,7 @@ class _LoginScreenState extends State<LoginScreen> {
           width: 140,
           height: 140,
         ),
-        const SizedBox(height: 18),
+        //const SizedBox(height: 1),
         const Text(
           'Upper Room',
           style: TextStyle(
