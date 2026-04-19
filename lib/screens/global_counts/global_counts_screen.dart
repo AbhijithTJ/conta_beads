@@ -77,7 +77,7 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
         width: double.infinity,
         height: double.infinity,
         decoration: const BoxDecoration(
-          color: Color(0xFF560737),
+          color: AppColors.homeBg,
         ),
         child: SafeArea(
           child: SingleChildScrollView(

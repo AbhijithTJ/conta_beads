@@ -12,8 +12,7 @@ class RegisterScreen extends StatefulWidget {
   State<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _RegisterScreenState extends State<RegisterScreen>
-    with TickerProviderStateMixin {
+class _RegisterScreenState extends State<RegisterScreen> {
   late TextEditingController _emailController;
   late TextEditingController _phoneController;
   late TextEditingController _passwordController;
@@ -24,16 +23,6 @@ class _RegisterScreenState extends State<RegisterScreen>
   bool _obscureConfirmPassword = true;
   bool _isLoading = false;
 
-  // Orb animations — same as login
-  late AnimationController _orb1Controller;
-  late AnimationController _orb2Controller;
-  late AnimationController _orb3Controller;
-  late AnimationController _orb4Controller;
-  late Animation<double> _orb1Anim;
-  late Animation<double> _orb2Anim;
-  late Animation<double> _orb3Anim;
-  late Animation<double> _orb4Anim;
-
   @override
   void initState() {
     super.initState();
@@ -41,39 +30,6 @@ class _RegisterScreenState extends State<RegisterScreen>
     _phoneController = TextEditingController();
     _passwordController = TextEditingController();
     _confirmPasswordController = TextEditingController();
-    _initOrbAnimations();
-  }
-
-  void _initOrbAnimations() {
-    _orb1Controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 4200),
-    )..repeat(reverse: true);
-    _orb2Controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 5800),
-    )..repeat(reverse: true);
-    _orb3Controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 3600),
-    )..repeat(reverse: true);
-    _orb4Controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 6400),
-    )..repeat(reverse: true);
-
-    _orb1Anim = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _orb1Controller, curve: Curves.easeInOut),
-    );
-    _orb2Anim = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _orb2Controller, curve: Curves.easeInOut),
-    );
-    _orb3Anim = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _orb3Controller, curve: Curves.easeInOut),
-    );
-    _orb4Anim = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _orb4Controller, curve: Curves.easeInOut),
-    );
   }
 
   @override
@@ -82,10 +38,6 @@ class _RegisterScreenState extends State<RegisterScreen>
     _phoneController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
-    _orb1Controller.dispose();
-    _orb2Controller.dispose();
-    _orb3Controller.dispose();
-    _orb4Controller.dispose();
     super.dispose();
   }
 
@@ -141,8 +93,6 @@ class _RegisterScreenState extends State<RegisterScreen>
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-
     return WillPopScope(
       onWillPop: () async => false,
       child: Scaffold(
@@ -151,21 +101,10 @@ class _RegisterScreenState extends State<RegisterScreen>
           width: double.infinity,
           height: double.infinity,
           decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                AppColors.authBgTop,
-                AppColors.authBgMid,
-                AppColors.authBgBottom,
-              ],
-            ),
+            color: AppColors.homeBg,
           ),
           child: Stack(
             children: [
-              // ── Floating orbs ──
-              _buildOrbs(size),
-
               // ── Content ──
               SafeArea(
                 child: SingleChildScrollView(
@@ -222,56 +161,6 @@ class _RegisterScreenState extends State<RegisterScreen>
           ),
         ),
       ),
-    );
-  }
-
-  // ── Animated floating orbs ──────────────────────────────────────────────────
-  Widget _buildOrbs(Size size) {
-    return AnimatedBuilder(
-      animation:
-          Listenable.merge([_orb1Anim, _orb2Anim, _orb3Anim, _orb4Anim]),
-      builder: (context, _) {
-        return Stack(
-          children: [
-            _Orb(
-              left: size.width * 0.2,
-              top: -size.height * 0.08 + _orb1Anim.value * 28,
-              size: size.width * 0.72,
-              colors: [
-                AppColors.authPurple.withOpacity(0.55),
-                AppColors.authBgTop.withOpacity(0.30),
-              ],
-            ),
-            _Orb(
-              left: -size.width * 0.22,
-              top: size.height * 0.28 + _orb2Anim.value * -22,
-              size: size.width * 0.65,
-              colors: [
-                AppColors.authPurpleLight.withOpacity(0.45),
-                AppColors.authPurple.withOpacity(0.25),
-              ],
-            ),
-            _Orb(
-              left: size.width * 0.55,
-              top: size.height * 0.38 + _orb3Anim.value * 18,
-              size: size.width * 0.60,
-              colors: [
-                AppColors.authBgMid.withOpacity(0.70),
-                AppColors.authBgBottom.withOpacity(0.40),
-              ],
-            ),
-            _Orb(
-              left: size.width * 0.1,
-              top: size.height * 0.72 + _orb4Anim.value * -16,
-              size: size.width * 0.55,
-              colors: [
-                AppColors.goldPrimary.withOpacity(0.18),
-                AppColors.authPurple.withOpacity(0.25),
-              ],
-            ),
-          ],
-        );
-      },
     );
   }
 
@@ -567,12 +456,12 @@ class _RegisterScreenState extends State<RegisterScreen>
           gradient: LinearGradient(
             colors: _isLoading
                 ? [
-                    AppColors.authPurple.withOpacity(0.5),
-                    AppColors.authBgMid.withOpacity(0.5),
+                    AppColors.homeBg.withOpacity(0.5),
+                    AppColors.homeBg.withOpacity(0.5),
                   ]
                 : [
-                    AppColors.authPurpleLight,
-                    AppColors.authPurple,
+                    AppColors.homeBg,
+                    AppColors.homeBg,
                   ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
@@ -641,49 +530,6 @@ class _RegisterScreenState extends State<RegisterScreen>
           ),
         ),
       ],
-    );
-  }
-}
-
-// ── Orb widget (shared style) ──────────────────────────────────────────────────
-class _Orb extends StatelessWidget {
-  final double left;
-  final double top;
-  final double size;
-  final List<Color> colors;
-
-  const _Orb({
-    required this.left,
-    required this.top,
-    required this.size,
-    required this.colors,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Positioned(
-      left: left,
-      top: top,
-      child: Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          gradient: RadialGradient(
-            center: const Alignment(-0.3, -0.3),
-            radius: 0.85,
-            colors: colors,
-            stops: const [0.0, 1.0],
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: colors[0].withOpacity(0.25),
-              blurRadius: size * 0.35,
-              spreadRadius: size * 0.05,
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

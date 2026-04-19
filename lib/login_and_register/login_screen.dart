@@ -156,14 +156,7 @@ class _LoginScreenState extends State<LoginScreen> {
         width: double.infinity,
         height: double.infinity,
         decoration: const BoxDecoration(
-          gradient: RadialGradient(
-            center: Alignment.center,
-            radius: 1.0,
-            colors: [
-              Color(0xFF6B1A5A),
-              Color(0xFF2E0A3A),
-            ],
-          ),
+          color: AppColors.homeBg,
         ),
         child: Stack(
           children: [

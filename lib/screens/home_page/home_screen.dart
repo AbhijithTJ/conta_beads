@@ -163,7 +163,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         width: double.infinity,
         height: double.infinity,
         decoration: const BoxDecoration(
-          color: Color(0xFF560737),
+          color: AppColors.homeBg,
         ),
         child: Stack(
           children: [
@@ -287,16 +287,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             height: 40,
             padding: const EdgeInsets.symmetric(horizontal: 14),
             decoration: BoxDecoration(
-              color: AppColors.authBgMid,
+              color: Colors.white,
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: AppColors.authPurpleLight.withOpacity(0.5), width: 1.5),
+              border: Border.all(color: Colors.white, width: 1.5),
             ),
             child: Row(mainAxisSize: MainAxisSize.min, children: [
-              const Icon(Icons.language_rounded, color: AppColors.authPurpleLight, size: 16),
+              Icon(Icons.language_rounded, color: AppColors.homeBg, size: 16),
               const SizedBox(width: 6),
-              Text(_selectedLanguage, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.white)),
+              Text(_selectedLanguage, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.homeBg)),
               const SizedBox(width: 4),
-              Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.authPurpleLight.withOpacity(0.7), size: 16),
+              Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.homeBg.withOpacity(0.7), size: 16),
             ]),
           ),
         ),

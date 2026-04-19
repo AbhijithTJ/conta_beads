@@ -23,7 +23,7 @@ class CommonBottomNav extends StatelessWidget {
         Icon(Icons.group_rounded, size: 28, color: selectedIndex == 2 ? Colors.white : Colors.white60),
         Icon(Icons.person_rounded, size: 28, color: selectedIndex == 3 ? Colors.white : Colors.white60),
       ],
-      color: const Color(0xFF560737),
+      color: AppColors.homeBg,
       buttonBackgroundColor: const Color(0xFF8B1A5A),
       backgroundColor: Colors.transparent,
       animationCurve: Curves.easeInOut,

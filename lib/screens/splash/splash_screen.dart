@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../colors/colors.dart';
 import '../../login_and_register/login_screen.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -57,7 +58,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
-          color: Color(0xFF560737),
+          color: AppColors.homeBg,
         ),
         child: Stack(
         children: [
