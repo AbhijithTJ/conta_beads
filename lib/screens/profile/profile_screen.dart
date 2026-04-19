@@ -102,7 +102,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           height: 110,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: const Color(0xFFEDE0ED),
+            color: AppColors.cardLavender,
             boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.15), blurRadius: 25, spreadRadius: 2)],
           ),
           padding: const EdgeInsets.all(4),
@@ -113,7 +113,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: Container(
                 decoration: const BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Color(0xFFEDE0ED),
+                  color: AppColors.cardLavender,
                 ),
                 child: const Center(
                   child: Text('JD', style: TextStyle(fontSize: 36, fontWeight: FontWeight.w900, color: Color(0xFF3D0227), letterSpacing: -1)),
@@ -130,7 +130,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             height: 32,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              gradient: const LinearGradient(colors: [Color(0xFFEDE0ED), Color(0xFFEDE0ED)], begin: Alignment.topLeft, end: Alignment.bottomRight),
+              gradient: LinearGradient(colors: [AppColors.cardLavender, AppColors.cardLavender], begin: Alignment.topLeft, end: Alignment.bottomRight),
               border: Border.all(color: AppColors.homeBg, width: 2.5),
               boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.15), blurRadius: 8, offset: const Offset(0, 4))],
             ),

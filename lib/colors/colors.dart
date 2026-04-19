@@ -6,6 +6,7 @@ class AppColors {
   static const Color primaryBgCenter = Color(0xFF6B1A5A);
   static const Color primaryBgEdge = Color(0xFF2E0A3A);
   static const Color homeBg = Color(0xFF3D0227);
+  static const Color cardLavender = Color(0xFFEDE0ED);
 
   // Gold Palette — must remain in design
   static const Color goldPrimary = Color(0xFFD4A843);
