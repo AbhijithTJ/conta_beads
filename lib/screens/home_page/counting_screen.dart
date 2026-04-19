@@ -30,9 +30,9 @@ class _CountingScreenState extends State<CountingScreen>
   int get _activeCount => _isRosary ? _count : _chapletCount;
 
   // Rosary palette
-  static const _rosaryBgTop    = AppColors.authBgTop;
-  static const _rosaryBgMid    = AppColors.authBgMid;
-  static const _rosaryBgBottom = AppColors.authBgBottom;
+  static const _rosaryBgTop    = AppColors.homeBg;
+  static const _rosaryBgMid    = AppColors.homeBg;
+  static const _rosaryBgBottom = AppColors.homeBg;
   static const _rosaryAccent   = AppColors.authPurpleLight;
   static const _rosaryDark     = AppColors.authPurple;
 
@@ -271,15 +271,6 @@ class _CountingScreenState extends State<CountingScreen>
         ),
         child: Stack(
           children: [
-            // ── Static orb bubbles ──
-            _Orb(left: size.width * 0.2, top: -size.height * 0.08, size: size.width * 0.72,
-              colors: [_dark.withOpacity(0.55), _bgTop.withOpacity(0.30)]),
-            _Orb(left: -size.width * 0.22, top: size.height * 0.28, size: size.width * 0.65,
-              colors: [_accent.withOpacity(0.45), _dark.withOpacity(0.25)]),
-            _Orb(left: size.width * 0.55, top: size.height * 0.38, size: size.width * 0.60,
-              colors: [_bgMid.withOpacity(0.70), _bgBottom.withOpacity(0.40)]),
-            _Orb(left: size.width * 0.1, top: size.height * 0.72, size: size.width * 0.55,
-              colors: [_accent.withOpacity(0.20), _dark.withOpacity(0.25)]),
             // ── Content ──
             SafeArea(
               child: SingleChildScrollView(
@@ -575,27 +566,24 @@ class _CountingScreenState extends State<CountingScreen>
             height: 40,
             padding: const EdgeInsets.symmetric(horizontal: 14),
             decoration: BoxDecoration(
-              color: AppColors.authBgMid,
+              color: Colors.white,
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: AppColors.authPurpleLight.withOpacity(0.5), width: 1.5),
-              boxShadow: [
-                BoxShadow(color: AppColors.authBgBottom.withOpacity(0.25), blurRadius: 10, offset: const Offset(0, 3)),
-              ],
+              border: Border.all(color: Colors.white, width: 1.5),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.language_rounded, color: AppColors.authPurpleLight, size: 16),
+                Icon(Icons.language_rounded, color: AppColors.homeBg, size: 16),
                 const SizedBox(width: 6),
                 Text(
                   _selectedLanguage,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12, fontWeight: FontWeight.w700,
-                    color: Colors.white, letterSpacing: 0.3,
+                    color: AppColors.homeBg, letterSpacing: 0.3,
                   ),
                 ),
                 const SizedBox(width: 4),
-                Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.authPurpleLight.withOpacity(0.7), size: 16),
+                Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.homeBg.withOpacity(0.7), size: 16),
               ],
             ),
           ),
@@ -956,7 +944,7 @@ class _PrayerInlineCardState extends State<_PrayerInlineCard> {
       width: double.infinity,
       height: 220,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.cardLavender,
         borderRadius: BorderRadius.circular(22),
         border: Border.all(color: widget.accentColor.withOpacity(0.30), width: 1.5),
         boxShadow: [
@@ -1233,45 +1221,4 @@ class _PrayerExpandedModalState extends State<_PrayerExpandedModal> {
   }
 }
 
-// ── Orb bubble widget ─────────────────────────────────────────────────────────
-class _Orb extends StatelessWidget {
-  final double left;
-  final double top;
-  final double size;
-  final List<Color> colors;
 
-  const _Orb({
-    required this.left,
-    required this.top,
-    required this.size,
-    required this.colors,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Positioned(
-      left: left,
-      top: top,
-      child: Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          gradient: RadialGradient(
-            center: const Alignment(-0.3, -0.3),
-            radius: 0.85,
-            colors: colors,
-            stops: const [0.0, 1.0],
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: colors[0].withOpacity(0.25),
-              blurRadius: size * 0.35,
-              spreadRadius: size * 0.05,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
