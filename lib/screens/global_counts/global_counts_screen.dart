@@ -23,11 +23,21 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
   late List<Map<String, dynamic>> communityData;
   late AnimationController _blinkController;
   late Animation<double> _blinkAnimation;
+  late AnimationController _quoteFadeController;
+  late Animation<double> _quoteFadeAnim;
 
   Timer? _shuffleTimer;
+  Timer? _quoteTimer;
+  int _currentQuotePage = 0;
   final _random = Random();
   final int goalCount = 150000000;
-  final String quote = 'Every bead is a whisper of love to heaven.';
+  final List<Map<String, String>> quotes = [
+    {'text': 'Every bead is a whisper of love to heaven.', 'author': ''},
+    {'text': '"The rosary is the most excellent form of prayer."', 'author': 'Pope Paul VI'},
+    {'text': '"To pray is to let Jesus into our lives."', 'author': 'Ole Hallesby'},
+    {'text': '"Prayer is the key of the morning and the bolt of the evening."', 'author': 'Mahatma Gandhi'},
+    {'text': '"With God, all things are possible."', 'author': 'Matthew 19:26'},
+  ];
 
   @override
   void initState() {
@@ -40,6 +50,12 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
     _blinkAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _blinkController, curve: Curves.easeInOut),
     );
+
+    _quoteFadeController = AnimationController(vsync: this, duration: const Duration(milliseconds: 600));
+    _quoteFadeAnim = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _quoteFadeController, curve: Curves.easeInOut),
+    );
+    _quoteFadeController.forward();
 
     communityData = [
       {'name': 'Emma', 'count': 56, 'isYou': false},
@@ -61,11 +77,22 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
         communityData.sort((a, b) => (b['count'] as int).compareTo(a['count'] as int));
       });
     });
+
+    _quoteTimer = Timer.periodic(const Duration(seconds: 5), (_) {
+      if (!mounted) return;
+      _quoteFadeController.reverse().then((_) {
+        if (!mounted) return;
+        setState(() => _currentQuotePage = (_currentQuotePage + 1) % quotes.length);
+        _quoteFadeController.forward();
+      });
+    });
   }
 
   @override
   void dispose() {
     _shuffleTimer?.cancel();
+    _quoteTimer?.cancel();
+    _quoteFadeController.dispose();
     _blinkController.dispose();
     super.dispose();
   }
@@ -265,37 +292,93 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
   }
 
   Widget _buildQuoteCard() {
-    return _GlassCard(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            '“',
-            style: TextStyle(
-              fontSize: 32,
-              color: AppColors.authPurple.withOpacity(0.3),
-              height: 1.0,
-            ),
+    final quote = quotes[_currentQuotePage];
+    return GestureDetector(
+      onHorizontalDragEnd: (details) {
+        if (details.primaryVelocity == null) return;
+        _quoteFadeController.reverse().then((_) {
+          if (!mounted) return;
+          setState(() {
+            if (details.primaryVelocity! < 0) {
+              _currentQuotePage = (_currentQuotePage + 1) % quotes.length;
+            } else {
+              _currentQuotePage = (_currentQuotePage - 1 + quotes.length) % quotes.length;
+            }
+          });
+          _quoteFadeController.forward();
+        });
+      },
+      child: FadeTransition(
+        opacity: _quoteFadeAnim,
+        child: Container(
+          width: double.infinity,
+          height: 160,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(color: AppColors.authPurpleLight.withOpacity(0.30), width: 1.5),
+            boxShadow: [
+              BoxShadow(color: AppColors.authBgBottom.withOpacity(0.20), blurRadius: 20, offset: const Offset(0, 6)),
+            ],
           ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              quote,
-              style: TextStyle(
-                fontSize: 14,
-                color: AppColors.authBgMid.withOpacity(0.8),
-                fontStyle: FontStyle.italic,
-                height: 1.5,
-                fontWeight: FontWeight.w500,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                '\u275D',
+                style: TextStyle(fontSize: 20, color: AppColors.authPurple.withOpacity(0.45), height: 1.0),
               ),
-            ),
+              const SizedBox(height: 6),
+              Text(
+                quote['text']!,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 14.5,
+                  fontWeight: FontWeight.w500,
+                  color: Color(0xFF333333),
+                  fontStyle: FontStyle.italic,
+                  height: 1.5,
+                  letterSpacing: 0.2,
+                ),
+              ),
+              const SizedBox(height: 8),
+              if (quote['author']!.isNotEmpty)
+                Text(
+                  quote['author']!,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.authPurple,
+                    letterSpacing: 1.2,
+                  ),
+                ),
+              const SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(quotes.length, (i) {
+                  return AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    width: i == _currentQuotePage ? 18 : 6,
+                    height: 6,
+                    margin: const EdgeInsets.symmetric(horizontal: 3),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(3),
+                      color: i == _currentQuotePage
+                          ? AppColors.authPurple
+                          : AppColors.authPurple.withOpacity(0.25),
+                    ),
+                  );
+                }),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
-
   Widget _buildTopOfferingsCard() {
     return _GlassCard(
       padding: const EdgeInsets.all(24),
