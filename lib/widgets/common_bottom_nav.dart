@@ -19,7 +19,7 @@ class CommonBottomNav extends StatelessWidget {
       valueListenable: themeNotifier,
       builder: (_, isDark, __) {
         final navBg = isDark ? AppColors.homeBg : const Color(0xFFEDE0ED);
-        final iconColor = isDark ? Colors.white : AppColors.homeBg;
+        final iconColor = Colors.white;
         final iconDimColor = isDark ? Colors.white60 : AppColors.homeBg.withOpacity(0.4);
         final btnBg = isDark ? const Color(0xFF8B1A5A) : AppColors.authPurple;
 

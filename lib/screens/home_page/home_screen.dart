@@ -295,7 +295,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Image.asset('assets/splash/ur_logo.png', width: 52, height: 52),
+        Image.asset(isDark ? 'assets/splash/ur_logo.png' : 'assets/splash/ur_logo_light.png', width: 52, height: 52),
         GestureDetector(
           onTap: _showLanguagePicker,
           child: Container(
