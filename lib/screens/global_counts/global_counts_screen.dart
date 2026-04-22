@@ -3,6 +3,7 @@ import 'dart:math';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../../colors/colors.dart';
+import '../../theme/theme_notifier.dart';
 
 class GlobalCountsScreen extends StatefulWidget {
   final int personalCount;
@@ -99,78 +100,67 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: const BoxDecoration(
-          color: AppColors.homeBg,
-        ),
-        child: SafeArea(
-          child: SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Column(
-              children: [
-                const SizedBox(height: 24),
-                _buildHeader(),
-                const SizedBox(height: 32),
-                _buildGlobalCountCard(),
-                const SizedBox(height: 16),
-                _buildStatsRow(),
-                const SizedBox(height: 16),
-                _buildQuoteCard(),
-                const SizedBox(height: 16),
-                _buildTopOfferingsCard(),
-                const SizedBox(height: 40),
-              ],
+    return ValueListenableBuilder<bool>(
+      valueListenable: themeNotifier,
+      builder: (_, isDark, __) {
+        final bgColor = isDark ? AppColors.homeBg : const Color(0xFFF0EBF0);
+        return Scaffold(
+          body: Container(
+            width: double.infinity,
+            height: double.infinity,
+            decoration: BoxDecoration(color: bgColor),
+            child: SafeArea(
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 24),
+                    _buildHeader(isDark),
+                    const SizedBox(height: 32),
+                    _buildGlobalCountCard(),
+                    const SizedBox(height: 16),
+                    _buildStatsRow(),
+                    const SizedBox(height: 16),
+                    _buildQuoteCard(isDark),
+                    const SizedBox(height: 16),
+                    _buildTopOfferingsCard(),
+                    const SizedBox(height: 40),
+                  ],
+                ),
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(bool isDark) {
+    final badgeBg = isDark ? Colors.white.withOpacity(0.1) : AppColors.authPurple.withOpacity(0.08);
+    final badgeBorder = isDark ? Colors.white.withOpacity(0.15) : AppColors.authPurple.withOpacity(0.2);
+    final badgeText = isDark ? AppColors.goldLight : AppColors.goldDark;
+    final titleColor = isDark ? Colors.white : AppColors.authBgBottom;
+    final subColor = isDark ? Colors.white.withOpacity(0.5) : AppColors.authBgMid.withOpacity(0.5);
+
     return Column(
       children: [
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.1),
+            color: badgeBg,
             borderRadius: BorderRadius.circular(30),
-            border: Border.all(color: Colors.white.withOpacity(0.15)),
+            border: Border.all(color: badgeBorder),
           ),
-          child: const Text(
-            'COMMUNITY PRAYER',
-            style: TextStyle(
-              fontSize: 10,
-              letterSpacing: 2,
-              fontWeight: FontWeight.w800,
-              color: AppColors.goldLight,
-            ),
-          ),
+          child: Text('COMMUNITY PRAYER',
+              style: TextStyle(fontSize: 10, letterSpacing: 2, fontWeight: FontWeight.w800, color: badgeText)),
         ),
         const SizedBox(height: 18),
-        const Text(
-          'Global Count',
-          style: TextStyle(
-            fontSize: 36,
-            fontWeight: FontWeight.w900,
-            color: Colors.white,
-            letterSpacing: -1,
-          ),
-        ),
+        Text('Global Count',
+            style: TextStyle(fontSize: 36, fontWeight: FontWeight.w900, color: titleColor, letterSpacing: -1)),
         const SizedBox(height: 6),
-        Text(
-          'UNITED IN SPIRIT AND FAITH',
-          style: TextStyle(
-            fontSize: 10,
-            letterSpacing: 1.5,
-            fontWeight: FontWeight.w600,
-            color: Colors.white.withOpacity(0.5),
-          ),
-        ),
+        Text('UNITED IN SPIRIT AND FAITH',
+            style: TextStyle(fontSize: 10, letterSpacing: 1.5, fontWeight: FontWeight.w600, color: subColor)),
       ],
     );
   }
@@ -291,8 +281,11 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
     );
   }
 
-  Widget _buildQuoteCard() {
+  Widget _buildQuoteCard(bool isDark) {
     final quote = quotes[_currentQuotePage];
+    final quoteTextColor = isDark ? const Color(0xFF333333) : AppColors.authBgBottom;
+    final shadowColor = isDark ? AppColors.authBgBottom.withOpacity(0.20) : AppColors.authPurple.withOpacity(0.10);
+
     return GestureDetector(
       onHorizontalDragEnd: (details) {
         if (details.primaryVelocity == null) return;
@@ -318,43 +311,22 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
             color: Colors.white,
             borderRadius: BorderRadius.circular(22),
             border: Border.all(color: AppColors.authPurpleLight.withOpacity(0.30), width: 1.5),
-            boxShadow: [
-              BoxShadow(color: AppColors.authBgBottom.withOpacity(0.20), blurRadius: 20, offset: const Offset(0, 6)),
-            ],
+            boxShadow: [BoxShadow(color: shadowColor, blurRadius: 20, offset: const Offset(0, 6))],
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
-                '\u275D',
-                style: TextStyle(fontSize: 20, color: AppColors.authPurple.withOpacity(0.45), height: 1.0),
-              ),
+              Text('\u275D', style: TextStyle(fontSize: 20, color: AppColors.authPurple.withOpacity(0.45), height: 1.0)),
               const SizedBox(height: 6),
-              Text(
-                quote['text']!,
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 14.5,
-                  fontWeight: FontWeight.w500,
-                  color: Color(0xFF333333),
-                  fontStyle: FontStyle.italic,
-                  height: 1.5,
-                  letterSpacing: 0.2,
-                ),
-              ),
+              Text(quote['text']!,
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w500, color: quoteTextColor, fontStyle: FontStyle.italic, height: 1.5, letterSpacing: 0.2)),
               const SizedBox(height: 8),
               if (quote['author']!.isNotEmpty)
-                Text(
-                  quote['author']!,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.authPurple,
-                    letterSpacing: 1.2,
-                  ),
-                ),
+                Text(quote['author']!,
+                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.authPurple, letterSpacing: 1.2)),
               const SizedBox(height: 10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -366,9 +338,7 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
                     margin: const EdgeInsets.symmetric(horizontal: 3),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(3),
-                      color: i == _currentQuotePage
-                          ? AppColors.authPurple
-                          : AppColors.authPurple.withOpacity(0.25),
+                      color: i == _currentQuotePage ? AppColors.authPurple : AppColors.authPurple.withOpacity(0.25),
                     ),
                   );
                 }),

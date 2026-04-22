@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 import '../colors/colors.dart';
 import '../screens/bottom_nav_wrapper.dart';
+import '../theme/theme_notifier.dart';
 import 'login_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -93,6 +94,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = themeNotifier.isDark;
+    final bgColor = isDark ? AppColors.homeBg : const Color(0xFFF0EBF0);
+    final logoAsset = isDark ? 'assets/splash/ur_logo.png' : 'assets/splash/ur_logo_light.png';
+    final titleColor = isDark ? Colors.white : AppColors.authBgBottom;
+    final subColor = isDark ? Colors.white.withOpacity(0.65) : AppColors.authBgMid.withOpacity(0.6);
+    final backIconColor = isDark ? Colors.white : AppColors.authPurple;
+    final backBg = isDark ? Colors.white.withOpacity(0.35) : AppColors.authPurple.withOpacity(0.08);
+    final backBorder = isDark ? Colors.white.withOpacity(0.55) : AppColors.authPurple.withOpacity(0.25);
+    final linkTextColor = isDark ? Colors.white.withOpacity(0.75) : AppColors.authBgMid.withOpacity(0.7);
+    final linkColor = isDark ? Colors.white : AppColors.authPurple;
+
     return WillPopScope(
       onWillPop: () async => false,
       child: Scaffold(
@@ -100,12 +112,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
         body: Container(
           width: double.infinity,
           height: double.infinity,
-          decoration: const BoxDecoration(
-            color: AppColors.homeBg,
-          ),
+          decoration: BoxDecoration(color: bgColor),
           child: Stack(
             children: [
-              // ── Content ──
               SafeArea(
                 child: SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
@@ -113,18 +122,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   child: Column(
                     children: [
                       const SizedBox(height: 48),
-                      _buildHeader(),
+                      _buildHeader(logoAsset, titleColor, subColor),
                       const SizedBox(height: 36),
-                      _buildGlassCard(),
+                      _buildGlassCard(isDark),
                       const SizedBox(height: 24),
-                      _buildLoginLink(),
+                      _buildLoginLink(linkTextColor, linkColor),
                       const SizedBox(height: 40),
                     ],
                   ),
                 ),
               ),
-
-              // ── Back button ──
               SafeArea(
                 child: Padding(
                   padding: const EdgeInsets.only(left: 16, top: 12),
@@ -139,18 +146,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           width: 40,
                           height: 40,
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.35),
+                            color: backBg,
                             shape: BoxShape.circle,
-                            border: Border.all(
-                              color: Colors.white.withOpacity(0.55),
-                              width: 1,
-                            ),
+                            border: Border.all(color: backBorder, width: 1),
                           ),
-                          child: const Icon(
-                            Icons.arrow_back_rounded,
-                            color: Colors.white,
-                            size: 20,
-                          ),
+                          child: Icon(Icons.arrow_back_rounded, color: backIconColor, size: 20),
                         ),
                       ),
                     ),
@@ -164,56 +164,38 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  // ── Header ──────────────────────────────────────────────────────────────────
-  Widget _buildHeader() {
+  Widget _buildHeader(String logoAsset, Color titleColor, Color subColor) {
     return Column(
       children: [
-        Image.asset(
-          'assets/splash/ur_logo.png',
-          width: 140,
-          height: 140,
-        ),
+        Image.asset(logoAsset, width: 140, height: 140),
         const SizedBox(height: 18),
-        const Text(
-          'Upper Room',
-          style: TextStyle(
-            fontSize: 32,
-            fontWeight: FontWeight.w800,
-            color: Colors.white,
-            letterSpacing: 1.5,
-          ),
-        ),
+        Text('Upper Room',
+            style: TextStyle(fontSize: 32, fontWeight: FontWeight.w800, color: titleColor, letterSpacing: 1.5)),
         const SizedBox(height: 6),
-        Text(
-          'Every bead of the rosary counts.',
-          style: TextStyle(
-            fontSize: 12,
-            letterSpacing: 1.2,
-            fontWeight: FontWeight.w500,
-            color: Colors.white.withOpacity(0.65),
-          ),
-        ),
+        Text('Every bead of the rosary counts.',
+            style: TextStyle(fontSize: 12, letterSpacing: 1.2, fontWeight: FontWeight.w500, color: subColor)),
       ],
     );
   }
 
   // ── Frosted glass card ───────────────────────────────────────────────────────
-  Widget _buildGlassCard() {
+  Widget _buildGlassCard(bool isDark) {
+    final cardBg = isDark ? Colors.white.withOpacity(0.92) : Colors.white;
+    final titleColor = isDark ? AppColors.authBgMid : AppColors.authBgBottom;
+    final subColor = isDark ? AppColors.authPurple.withOpacity(0.70) : AppColors.authBgMid.withOpacity(0.6);
+
     return ClipRRect(
       borderRadius: BorderRadius.circular(28),
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
         child: Container(
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.92),
+            color: cardBg,
             borderRadius: BorderRadius.circular(28),
-            border: Border.all(
-              color: Colors.white.withOpacity(0.95),
-              width: 1.5,
-            ),
+            border: Border.all(color: Colors.white.withOpacity(0.95), width: 1.5),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.20),
+                color: isDark ? Colors.black.withOpacity(0.20) : AppColors.authPurple.withOpacity(0.10),
                 blurRadius: 40,
                 spreadRadius: 2,
                 offset: const Offset(0, 12),
@@ -224,65 +206,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'CREATE ACCOUNT',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 3,
-                  color: AppColors.authBgMid,
-                ),
-              ),
+              Text('CREATE ACCOUNT',
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, letterSpacing: 3, color: titleColor)),
               const SizedBox(height: 4),
-              Text(
-                'Start your rosary journey today',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: AppColors.authPurple.withOpacity(0.70),
-                  letterSpacing: 0.3,
-                ),
-              ),
+              Text('Start your rosary journey today',
+                  style: TextStyle(fontSize: 12, color: subColor, letterSpacing: 0.3)),
               const SizedBox(height: 28),
-
-              // Email
-              _buildGlassField(
-                controller: _emailController,
-                label: 'Email address',
-                hint: 'Enter your email',
-                icon: Icons.email_outlined,
-              ),
+              _buildGlassField(controller: _emailController, label: 'Email address', hint: 'Enter your email', icon: Icons.email_outlined),
               const SizedBox(height: 18),
-
-              // Phone
               _buildPhoneField(),
               const SizedBox(height: 18),
-
-              // Password
-              _buildGlassField(
-                controller: _passwordController,
-                label: 'Password',
-                hint: 'Create a password',
-                icon: Icons.lock_outline_rounded,
-                isPassword: true,
-                obscure: _obscurePassword,
-                onToggle: () =>
-                    setState(() => _obscurePassword = !_obscurePassword),
-              ),
+              _buildGlassField(controller: _passwordController, label: 'Password', hint: 'Create a password', icon: Icons.lock_outline_rounded, isPassword: true, obscure: _obscurePassword, onToggle: () => setState(() => _obscurePassword = !_obscurePassword)),
               const SizedBox(height: 18),
-
-              // Confirm password
-              _buildGlassField(
-                controller: _confirmPasswordController,
-                label: 'Confirm Password',
-                hint: 'Repeat your password',
-                icon: Icons.lock_reset_rounded,
-                isPassword: true,
-                obscure: _obscureConfirmPassword,
-                onToggle: () => setState(
-                    () => _obscureConfirmPassword = !_obscureConfirmPassword),
-              ),
+              _buildGlassField(controller: _confirmPasswordController, label: 'Confirm Password', hint: 'Repeat your password', icon: Icons.lock_reset_rounded, isPassword: true, obscure: _obscureConfirmPassword, onToggle: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword)),
               const SizedBox(height: 28),
-
               _buildRegisterButton(),
             ],
           ),
@@ -505,29 +442,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   // ── Login link ───────────────────────────────────────────────────────────────
-  Widget _buildLoginLink() {
+  Widget _buildLoginLink(Color textColor, Color linkColor) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text(
-          'Already have an account? ',
-          style: TextStyle(
-            color: Colors.white.withOpacity(0.75),
-            fontSize: 13,
-          ),
-        ),
+        Text('Already have an account? ', style: TextStyle(color: textColor, fontSize: 13)),
         GestureDetector(
-          onTap: () => Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (_) => const LoginScreen()),
-          ),
-          child: const Text(
-            'Sign In',
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w800,
-              fontSize: 13,
-            ),
-          ),
+          onTap: () => Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const LoginScreen())),
+          child: Text('Sign In', style: TextStyle(color: linkColor, fontWeight: FontWeight.w800, fontSize: 13)),
         ),
       ],
     );

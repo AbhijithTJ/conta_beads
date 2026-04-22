@@ -45,20 +45,14 @@ class _OnboardingWrapperState extends State<OnboardingWrapper> {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(),
-            ),
+            body: Center(child: CircularProgressIndicator()),
           );
         }
 
         if (snapshot.data == true) {
-          // User has already seen onboarding, go directly to main app
           return BottomNavWrapper(userEmail: widget.userEmail);
         } else {
-          // Show onboarding first
-          return OnboardingScreen(
-            onComplete: _navigateToHome,
-          );
+          return OnboardingScreen(onComplete: _navigateToHome);
         }
       },
     );

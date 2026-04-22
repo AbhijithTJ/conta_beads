@@ -4,6 +4,7 @@ import 'package:local_auth/local_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../colors/colors.dart';
 import '../screens/onboarding/onboarding_wrapper.dart';
+import '../theme/theme_notifier.dart';
 import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -150,17 +151,22 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = themeNotifier.isDark;
+    final bgColor = isDark ? AppColors.homeBg : const Color(0xFFF0EBF0);
+    final logoAsset = isDark ? 'assets/splash/ur_logo.png' : 'assets/splash/ur_logo_light.png';
+    final titleColor = isDark ? Colors.white : AppColors.authBgBottom;
+    final subColor = isDark ? Colors.white.withOpacity(0.65) : AppColors.authBgMid.withOpacity(0.6);
+    final registerTextColor = isDark ? Colors.white.withOpacity(0.75) : AppColors.authBgMid.withOpacity(0.7);
+    final registerLinkColor = isDark ? Colors.white : AppColors.authPurple;
+
     return Scaffold(
       resizeToAvoidBottomInset: true,
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: const BoxDecoration(
-          color: AppColors.homeBg,
-        ),
+        decoration: BoxDecoration(color: bgColor),
         child: Stack(
           children: [
-            // ── Content ──
             SafeArea(
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
@@ -168,11 +174,11 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: Column(
                   children: [
                     const SizedBox(height: 60),
-                    _buildHeader(),
+                    _buildHeader(logoAsset, titleColor, subColor),
                     const SizedBox(height: 48),
-                    _buildGlassCard(),
+                    _buildGlassCard(isDark),
                     const SizedBox(height: 28),
-                    _buildRegisterLink(),
+                    _buildRegisterLink(registerTextColor, registerLinkColor),
                     const SizedBox(height: 40),
                   ],
                 ),
@@ -185,56 +191,47 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   // ── Header: logo + app name ─────────────────────────────────────────────────
-  Widget _buildHeader() {
+  Widget _buildHeader(String logoAsset, Color titleColor, Color subColor) {
     return Column(
       children: [
-        // Logo with gold glow ring
-        Image.asset(
-          'assets/splash/ur_logo.png',
-          width: 140,
-          height: 140,
-        ),
-        //const SizedBox(height: 1),
-        const Text(
-          'Upper Room',
-          style: TextStyle(
-            fontSize: 32,
-            fontWeight: FontWeight.w800,
-            color: Colors.white,
-            letterSpacing: 1.5,
-          ),
-        ),
+        Image.asset(logoAsset, width: 140, height: 140),
+        Text('Upper Room',
+            style: TextStyle(
+                fontSize: 32,
+                fontWeight: FontWeight.w800,
+                color: titleColor,
+                letterSpacing: 1.5)),
         const SizedBox(height: 6),
-        Text(
-          'One Prayer One Mission.',
-          style: TextStyle(
-            fontSize: 12,
-            letterSpacing: 1.2,
-            fontWeight: FontWeight.w500,
-            color: Colors.white.withOpacity(0.65),
-          ),
-        ),
+        Text('One Prayer One Mission.',
+            style: TextStyle(
+                fontSize: 12,
+                letterSpacing: 1.2,
+                fontWeight: FontWeight.w500,
+                color: subColor)),
       ],
     );
   }
 
   // ── Frosted glass login card ────────────────────────────────────────────────
-  Widget _buildGlassCard() {
+  Widget _buildGlassCard(bool isDark) {
+    final cardBg = isDark ? Colors.white.withOpacity(0.92) : Colors.white;
+    final signInColor = isDark ? AppColors.authBgMid : AppColors.authBgBottom;
+    final subTextColor = isDark ? AppColors.authPurple.withOpacity(0.70) : AppColors.authBgMid.withOpacity(0.6);
+
     return ClipRRect(
       borderRadius: BorderRadius.circular(28),
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
         child: Container(
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.92),
+            color: cardBg,
             borderRadius: BorderRadius.circular(28),
-            border: Border.all(
-              color: Colors.white.withOpacity(0.95),
-              width: 1.5,
-            ),
+            border: Border.all(color: Colors.white.withOpacity(0.95), width: 1.5),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.20),
+                color: isDark
+                    ? Colors.black.withOpacity(0.20)
+                    : AppColors.authPurple.withOpacity(0.10),
                 blurRadius: 40,
                 spreadRadius: 2,
                 offset: const Offset(0, 12),
@@ -245,28 +242,19 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Card title
-              Text(
-                'SIGN IN',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 3,
-                  color: AppColors.authBgMid,
-                ),
-              ),
+              Text('SIGN IN',
+                  style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 3,
+                      color: signInColor)),
               const SizedBox(height: 4),
-              Text(
-                'Welcome back, continue your prayer journey',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: AppColors.authPurple.withOpacity(0.70),
-                  letterSpacing: 0.3,
-                ),
-              ),
+              Text('Welcome back, continue your prayer journey',
+                  style: TextStyle(
+                      fontSize: 12,
+                      color: subTextColor,
+                      letterSpacing: 0.3)),
               const SizedBox(height: 28),
-
-              // Email field
               _buildGlassField(
                 controller: _emailController,
                 label: 'Email address',
@@ -274,8 +262,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 icon: Icons.email_outlined,
               ),
               const SizedBox(height: 18),
-
-              // Password field
               _buildGlassField(
                 controller: _passwordController,
                 label: 'Password',
@@ -284,26 +270,17 @@ class _LoginScreenState extends State<LoginScreen> {
                 isPassword: true,
               ),
               const SizedBox(height: 10),
-
-              // Forgot password row
               Align(
                 alignment: Alignment.centerRight,
-                child: Text(
-                  'Forgot password?',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.goldDark.withOpacity(0.85),
-                    letterSpacing: 0.2,
-                  ),
-                ),
+                child: Text('Forgot password?',
+                    style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.goldDark.withOpacity(0.85),
+                        letterSpacing: 0.2)),
               ),
               const SizedBox(height: 28),
-
-              // Login button
               _buildLoginButton(),
-
-              // Biometric
               if (_biometricAvailable && _biometricEnabled) ...[
                 const SizedBox(height: 14),
                 _buildBiometricButton(),
@@ -321,16 +298,13 @@ class _LoginScreenState extends State<LoginScreen> {
                       }
                       await _offerBiometricSetup(email);
                     },
-                    child: Text(
-                      'Set up biometric login',
-                      style: TextStyle(
-                        color: AppColors.authPurple,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 13,
-                        decoration: TextDecoration.underline,
-                        decorationColor: AppColors.authPurple,
-                      ),
-                    ),
+                    child: Text('Set up biometric login',
+                        style: TextStyle(
+                            color: AppColors.authPurple,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13,
+                            decoration: TextDecoration.underline,
+                            decorationColor: AppColors.authPurple)),
                   ),
                 ),
               ],
@@ -504,29 +478,21 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   // ── Register link ───────────────────────────────────────────────────────────
-  Widget _buildRegisterLink() {
+  Widget _buildRegisterLink(Color textColor, Color linkColor) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text(
-          "Don't have an account? ",
-          style: TextStyle(
-            color: Colors.white.withOpacity(0.75),
-            fontSize: 13,
-          ),
-        ),
+        Text("Don't have an account? ",
+            style: TextStyle(color: textColor, fontSize: 13)),
         GestureDetector(
           onTap: () => Navigator.of(context).pushReplacement(
             MaterialPageRoute(builder: (_) => const RegisterScreen()),
           ),
-          child: const Text(
-            'Register',
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w700,
-              fontSize: 13,
-            ),
-          ),
+          child: Text('Register',
+              style: TextStyle(
+                  color: linkColor,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 13)),
         ),
       ],
     );

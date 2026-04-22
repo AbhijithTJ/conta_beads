@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../colors/colors.dart';
+import '../../theme/theme_notifier.dart';
 import '../../login_and_register/login_screen.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -55,82 +56,67 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
   @override
   Widget build(BuildContext context) {
+    final isDark = themeNotifier.isDark;
+    final bgColor = isDark ? AppColors.homeBg : const Color(0xFFF0EBF0);
+    final logoAsset = isDark ? 'assets/splash/ur_logo.png' : 'assets/splash/ur_logo_light.png';
+    final bottomAsset = isDark ? 'assets/splash/splash_bottom.png' : 'assets/splash/splash_bottom_light.png';
+    final titleColor = isDark ? Colors.white : AppColors.authBgBottom;
+    final subColor = isDark ? Colors.white.withOpacity(0.80) : AppColors.authBgMid.withOpacity(0.6);
+
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
-          color: AppColors.homeBg,
-        ),
+        decoration: BoxDecoration(color: bgColor),
         child: Stack(
-        children: [
-          // Main centered content
-          Center(
-            child: AnimatedBuilder(
-              animation: _controller,
-              builder: (context, child) => FadeTransition(
-                opacity: _fadeAnimation,
-                child: Transform.scale(
-                  scale: _scaleAnimation.value,
-                  child: child,
+          children: [
+            Center(
+              child: AnimatedBuilder(
+                animation: _controller,
+                builder: (context, child) => FadeTransition(
+                  opacity: _fadeAnimation,
+                  child: Transform.scale(scale: _scaleAnimation.value, child: child),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Image.asset(logoAsset, width: 160, height: 160),
+                    Text('Upper Room',
+                        style: TextStyle(
+                            fontSize: 36,
+                            fontFamily: 'Georgia',
+                            fontWeight: FontWeight.w700,
+                            color: titleColor,
+                            letterSpacing: 1.5)),
+                    const SizedBox(height: 10),
+                    Text('One Prayer One Mission',
+                        style: TextStyle(
+                            fontSize: 14,
+                            fontFamily: 'Georgia',
+                            fontWeight: FontWeight.w400,
+                            color: subColor,
+                            letterSpacing: 0.5)),
+                  ],
                 ),
               ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // UR Logo
-                  Image.asset(
-                    'assets/splash/ur_logo.png',
-                    width: 160,
-                    height: 160,
-                  ),
-                 // const SizedBox(height: 8),
-                  // App name
-                  const Text(
-                    'Upper Room',
-                    style: TextStyle(
-                      fontSize: 36,
-                      fontFamily: 'Georgia',
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
-                      letterSpacing: 1.5,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  // Tagline
-                  Text(
-                    'One Prayer One Mission',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontFamily: 'Georgia',
-                      fontWeight: FontWeight.w400,
-                      color: Colors.white.withOpacity(0.80),
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                ],
+            ),
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: AnimatedBuilder(
+                animation: _fadeAnimation,
+                builder: (context, child) => Opacity(
+                  opacity: _fadeAnimation.value * 0.85,
+                  child: child,
+                ),
+                child: Image.asset(
+                  bottomAsset,
+                  width: double.infinity,
+                  fit: BoxFit.fitWidth,
+                  alignment: Alignment.bottomCenter,
+                ),
               ),
             ),
-          ),
-
-          // Bottom crowd silhouette
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: AnimatedBuilder(
-              animation: _fadeAnimation,
-              builder: (context, child) => Opacity(
-                opacity: _fadeAnimation.value * 0.85,
-                child: child,
-              ),
-              child: Image.asset(
-                'assets/splash/splash_bottom.png',
-                width: double.infinity,
-                fit: BoxFit.fitWidth,
-                alignment: Alignment.bottomCenter,
-              ),
-            ),
-          ),
-        ],
+          ],
         ),
       ),
     );

@@ -1,0 +1,322 @@
+import 'dart:ui';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../colors/colors.dart';
+import '../../theme/theme_notifier.dart';
+import '../splash/splash_screen.dart';
+
+class ThemeSelectScreen extends StatefulWidget {
+  final VoidCallback onComplete;
+  const ThemeSelectScreen({super.key, required this.onComplete});
+
+  @override
+  State<ThemeSelectScreen> createState() => _ThemeSelectScreenState();
+}
+
+class _ThemeSelectScreenState extends State<ThemeSelectScreen>
+    with SingleTickerProviderStateMixin {
+  bool? _selected = true; // dark selected by default
+  late AnimationController _fadeCtrl;
+  late Animation<double> _fadeAnim;
+
+  @override
+  void initState() {
+    super.initState();
+    _fadeCtrl = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 700));
+    _fadeAnim =
+        CurvedAnimation(parent: _fadeCtrl, curve: Curves.easeOut);
+    _fadeCtrl.forward();
+  }
+
+  @override
+  void dispose() {
+    _fadeCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _confirm() async {
+    if (_selected == null) return;
+    HapticFeedback.mediumImpact();
+    themeNotifier.setDark(_selected!);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isDarkTheme', _selected!);
+    if (!mounted) return;
+    Navigator.of(context).pushReplacement(
+      PageRouteBuilder(
+        pageBuilder: (_, __, ___) => const SplashScreen(),
+        transitionsBuilder: (_, anim, __, child) =>
+            FadeTransition(opacity: anim, child: child),
+        transitionDuration: const Duration(milliseconds: 600),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = _selected != false;
+    final bgColors = isDark
+        ? [const Color(0xFF2E0A3A), const Color(0xFF560737), const Color(0xFF3D0227)]
+        : [const Color(0xFFF0EBF0), const Color(0xFFF5EEF5), const Color(0xFFEDE0ED)];
+    final titleColor = isDark ? Colors.white : AppColors.authBgBottom;
+    final subColor = isDark ? Colors.white.withOpacity(0.50) : AppColors.authBgMid.withOpacity(0.6);
+    final badgeColor = isDark ? AppColors.goldLight : AppColors.goldDark;
+    final badgeBg = isDark ? AppColors.goldPrimary.withOpacity(0.12) : AppColors.goldPrimary.withOpacity(0.15);
+    final badgeBorder = isDark ? AppColors.goldLight.withOpacity(0.5) : AppColors.goldDark.withOpacity(0.4);
+
+    return Scaffold(
+      body: AnimatedContainer(
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeInOut,
+        width: double.infinity,
+        height: double.infinity,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: bgColors,
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: SafeArea(
+          child: FadeTransition(
+            opacity: _fadeAnim,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 28),
+              child: Column(
+                children: [
+                  const SizedBox(height: 48),
+                  // Badge
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: badgeBorder, width: 1),
+                      color: badgeBg,
+                    ),
+                    child: Row(mainAxisSize: MainAxisSize.min, children: [
+                      Icon(Icons.auto_awesome_rounded, color: badgeColor, size: 13),
+                      const SizedBox(width: 6),
+                      Text('PERSONALISE YOUR EXPERIENCE',
+                          style: TextStyle(
+                              fontSize: 9,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 1.8,
+                              color: badgeColor)),
+                    ]),
+                  ),
+                  const SizedBox(height: 28),
+                  Text(
+                    'Choose Your\nAppearance',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                        fontSize: 32,
+                        fontWeight: FontWeight.w900,
+                        color: titleColor,
+                        height: 1.2,
+                        letterSpacing: -0.5),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    'You can always change this later\nin your profile settings.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                        fontSize: 13,
+                        color: subColor,
+                        height: 1.5),
+                  ),
+                  const SizedBox(height: 40),
+                  // Cards row
+                  Row(
+                    children: [
+                      Expanded(child: _ThemeCard(
+                        isDarkOption: true,
+                        selected: _selected == true,
+                        onTap: () {
+                          HapticFeedback.selectionClick();
+                          setState(() => _selected = true);
+                        },
+                      )),
+                      const SizedBox(width: 16),
+                      Expanded(child: _ThemeCard(
+                        isDarkOption: false,
+                        selected: _selected == false,
+                        onTap: () {
+                          HapticFeedback.selectionClick();
+                          setState(() => _selected = false);
+                        },
+                      )),
+                    ],
+                  ),
+                  const Spacer(),
+                  // Continue button
+                  AnimatedOpacity(
+                    opacity: _selected != null ? 1.0 : 0.35,
+                    duration: const Duration(milliseconds: 300),
+                    child: GestureDetector(
+                      onTap: _confirm,
+                      child: Container(
+                        width: double.infinity,
+                        height: 56,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(30),
+                          gradient: LinearGradient(
+                            colors: isDark
+                                ? [AppColors.goldLight, AppColors.goldDark]
+                                : [AppColors.authPurple, AppColors.authBgBottom],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: isDark
+                                  ? AppColors.goldPrimary.withOpacity(0.40)
+                                  : AppColors.authPurple.withOpacity(0.30),
+                              blurRadius: 20,
+                              offset: const Offset(0, 8),
+                            ),
+                          ],
+                        ),
+                        child: Center(
+                          child: Text('CONTINUE',
+                              style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: 2.0,
+                                  color: isDark ? const Color(0xFF2E0A3A) : Colors.white)),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 36),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Theme Preview Card ────────────────────────────────────────────────────────
+class _ThemeCard extends StatelessWidget {
+  final bool isDarkOption;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _ThemeCard({
+    required this.isDarkOption,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final bg = isDarkOption ? const Color(0xFF3D0227) : const Color(0xFFF5EEF5);
+    final cardBg = isDarkOption ? const Color(0xFF560737) : Colors.white;
+    final textColor = isDarkOption ? Colors.white : const Color(0xFF3D0227);
+    final subColor = isDarkOption
+        ? Colors.white.withOpacity(0.45)
+        : const Color(0xFF3D0227).withOpacity(0.45);
+    final label = isDarkOption ? 'Dark' : 'Light';
+    final icon = isDarkOption ? Icons.dark_mode_rounded : Icons.light_mode_rounded;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeOut,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(
+            color: selected ? AppColors.goldPrimary : Colors.white.withOpacity(0.12),
+            width: selected ? 2.5 : 1.5,
+          ),
+          boxShadow: selected
+              ? [BoxShadow(color: AppColors.goldPrimary.withOpacity(0.30), blurRadius: 20, offset: const Offset(0, 8))]
+              : [],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(22),
+          child: Column(
+            children: [
+              // Preview area
+              Container(
+                height: 180,
+                color: bg,
+                padding: const EdgeInsets.all(14),
+                child: Column(
+                  children: [
+                    // Mini header
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Container(width: 28, height: 10, decoration: BoxDecoration(color: textColor.withOpacity(0.8), borderRadius: BorderRadius.circular(4))),
+                        Container(width: 40, height: 10, decoration: BoxDecoration(color: textColor.withOpacity(0.3), borderRadius: BorderRadius.circular(8))),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    // Mini quote card
+                    Container(
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: cardBg,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                      child: Row(children: [
+                        Container(width: 2, height: double.infinity, color: AppColors.authPurple.withOpacity(0.5)),
+                        const SizedBox(width: 6),
+                        Expanded(child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(height: 4, width: double.infinity, decoration: BoxDecoration(color: textColor.withOpacity(0.4), borderRadius: BorderRadius.circular(2))),
+                            const SizedBox(height: 4),
+                            Container(height: 4, width: 60, decoration: BoxDecoration(color: AppColors.authPurple.withOpacity(0.5), borderRadius: BorderRadius.circular(2))),
+                          ],
+                        )),
+                      ]),
+                    ),
+                    const SizedBox(height: 10),
+                    // Mini grid
+                    Row(children: [
+                      Expanded(child: Container(height: 52, decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(8)))),
+                      const SizedBox(width: 6),
+                      Expanded(child: Container(height: 52, decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(8)))),
+                    ]),
+                  ],
+                ),
+              ),
+              // Label area
+              Container(
+                color: selected ? AppColors.goldPrimary : Colors.white.withOpacity(0.08),
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(icon,
+                        size: 16,
+                        color: selected ? const Color(0xFF2E0A3A) : Colors.white.withOpacity(0.7)),
+                    const SizedBox(width: 8),
+                    Text(label,
+                        style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w800,
+                            color: selected ? const Color(0xFF2E0A3A) : Colors.white.withOpacity(0.7),
+                            letterSpacing: 0.5)),
+                    if (selected) ...[
+                      const SizedBox(width: 6),
+                      const Icon(Icons.check_circle_rounded, size: 16, color: Color(0xFF2E0A3A)),
+                    ]
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
