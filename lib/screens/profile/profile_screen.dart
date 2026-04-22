@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../../colors/colors.dart';
 import '../../dialog_box/logout_alert_dialog.dart';
 import '../../login_and_register/login_screen.dart';
+import '../../theme/theme_notifier.dart';
 
 class ProfileScreen extends StatefulWidget {
   final String userEmail;
@@ -19,7 +20,7 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
 
-  bool _isDarkMode = true;
+  bool get _isDarkMode => themeNotifier.isDark;
 
   @override
   void initState() {
@@ -48,48 +49,53 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final headerColor = _isDarkMode ? Colors.white : AppColors.authBgBottom;
-    final subColor = _isDarkMode ? Colors.white.withOpacity(0.50) : AppColors.authBgMid.withOpacity(0.6);
-    final sectionLabelColor = _isDarkMode ? AppColors.goldLight.withOpacity(0.9) : AppColors.goldDark;
+    return ValueListenableBuilder<bool>(
+      valueListenable: themeNotifier,
+      builder: (_, isDark, __) {
+        final headerColor = isDark ? Colors.white : AppColors.authBgBottom;
+        final subColor = isDark ? Colors.white.withOpacity(0.50) : AppColors.authBgMid.withOpacity(0.6);
+        final sectionLabelColor = isDark ? AppColors.goldLight.withOpacity(0.9) : AppColors.goldDark;
 
-    return Scaffold(
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        color: AppColors.homeBg,
-        child: SafeArea(
-          child: SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const SizedBox(height: 12),
-                Text('MY PROFILE', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 3.5, color: subColor)),
-                const SizedBox(height: 28),
-                _buildAvatar(),
-                const SizedBox(height: 16),
-                Text('John David', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: headerColor, letterSpacing: 0.5)),
-                const SizedBox(height: 6),
-                Text('MEMBER SINCE 2023', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, letterSpacing: 2.0, color: subColor)),
-                const SizedBox(height: 32),
-                _buildStatsRow(),
-                const SizedBox(height: 36),
-                _buildSectionLabel('Account Details', sectionLabelColor),
-                const SizedBox(height: 12),
-                _buildDetailsCard(),
-                const SizedBox(height: 28),
-                _buildSectionLabel('Settings', sectionLabelColor),
-                const SizedBox(height: 12),
-                _buildSettingsList(),
-                const SizedBox(height: 40),
-                _buildLogoutButton(context),
-                const SizedBox(height: 40),
-              ],
+        return Scaffold(
+          body: Container(
+            width: double.infinity,
+            height: double.infinity,
+            color: isDark ? AppColors.homeBg : const Color(0xFFF5EEF5),
+            child: SafeArea(
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const SizedBox(height: 12),
+                    Text('MY PROFILE', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 3.5, color: subColor)),
+                    const SizedBox(height: 28),
+                    _buildAvatar(),
+                    const SizedBox(height: 16),
+                    Text('John David', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: headerColor, letterSpacing: 0.5)),
+                    const SizedBox(height: 6),
+                    Text('MEMBER SINCE 2023', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, letterSpacing: 2.0, color: subColor)),
+                    const SizedBox(height: 32),
+                    _buildStatsRow(),
+                    const SizedBox(height: 36),
+                    _buildSectionLabel('Account Details', sectionLabelColor),
+                    const SizedBox(height: 12),
+                    _buildDetailsCard(),
+                    const SizedBox(height: 28),
+                    _buildSectionLabel('Settings', sectionLabelColor),
+                    const SizedBox(height: 12),
+                    _buildSettingsList(),
+                    const SizedBox(height: 40),
+                    _buildLogoutButton(context),
+                    const SizedBox(height: 40),
+                  ],
+                ),
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -207,7 +213,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     inactiveThumbColor: AppColors.authPurple.withOpacity(0.5),
                     inactiveTrackColor: AppColors.authPurple.withOpacity(0.1),
                     onChanged: (val) {
-                      setState(() => _isDarkMode = val);
+                      themeNotifier.setDark(val);
                       HapticFeedback.selectionClick();
                     },
                   ),

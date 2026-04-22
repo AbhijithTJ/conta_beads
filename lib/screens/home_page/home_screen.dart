@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../colors/colors.dart';
 import '../../services/localization_service.dart';
+import '../../theme/theme_notifier.dart';
 import 'counting_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -158,12 +159,22 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    return ValueListenableBuilder<bool>(
+      valueListenable: themeNotifier,
+      builder: (_, isDark, __) {
+        final bgColor = isDark ? AppColors.homeBg : const Color(0xFFF5EEF5);
+        return _buildScaffold(context, size, isDark, bgColor);
+      },
+    );
+  }
+
+  Widget _buildScaffold(BuildContext context, Size size, bool isDark, Color bgColor) {
     return Scaffold(
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: const BoxDecoration(
-          color: AppColors.homeBg,
+        decoration: BoxDecoration(
+          color: bgColor,
         ),
         child: Stack(
           children: [
@@ -277,6 +288,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   Widget _buildHeader() {
+    final isDark = themeNotifier.isDark;
+    final langBg = isDark ? Colors.white : AppColors.authPurple.withOpacity(0.08);
+    final langText = isDark ? AppColors.homeBg : AppColors.authPurple;
+    final borderColor = isDark ? Colors.white : AppColors.authPurple.withOpacity(0.25);
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -287,16 +302,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             height: 40,
             padding: const EdgeInsets.symmetric(horizontal: 14),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: langBg,
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Colors.white, width: 1.5),
+              border: Border.all(color: borderColor, width: 1.5),
             ),
             child: Row(mainAxisSize: MainAxisSize.min, children: [
-              Icon(Icons.language_rounded, color: AppColors.homeBg, size: 16),
+              Icon(Icons.language_rounded, color: langText, size: 16),
               const SizedBox(width: 6),
-              Text(_selectedLanguage, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.homeBg)),
+              Text(_selectedLanguage, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: langText)),
               const SizedBox(width: 4),
-              Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.homeBg.withOpacity(0.7), size: 16),
+              Icon(Icons.keyboard_arrow_down_rounded, color: langText.withOpacity(0.7), size: 16),
             ]),
           ),
         ),
@@ -305,7 +320,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   Widget _buildQuoteCard() {
+    final isDark = themeNotifier.isDark;
     final quote = _quotes[_currentQuoteIndex];
+    final cardBg = isDark ? Colors.white : Colors.white;
+    final quoteTextColor = isDark ? const Color(0xFF333333) : AppColors.authBgBottom;
+    final refColor = isDark ? AppColors.authPurple : AppColors.authPurple;
     return FadeTransition(
       opacity: _quoteFadeAnim,
       child: Container(
@@ -313,11 +332,17 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         height: 160,
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: cardBg,
           borderRadius: BorderRadius.circular(22),
           border: Border.all(color: AppColors.authPurpleLight.withOpacity(0.30), width: 1.5),
           boxShadow: [
-            BoxShadow(color: AppColors.authBgBottom.withOpacity(0.20), blurRadius: 20, offset: const Offset(0, 6)),
+            BoxShadow(
+              color: isDark
+                  ? AppColors.authBgBottom.withOpacity(0.20)
+                  : AppColors.authPurple.withOpacity(0.10),
+              blurRadius: 20,
+              offset: const Offset(0, 6),
+            ),
           ],
         ),
         child: Column(
@@ -333,10 +358,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               textAlign: TextAlign.center,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14.5,
                 fontWeight: FontWeight.w500,
-                color: Color(0xFF333333),
+                color: quoteTextColor,
                 fontStyle: FontStyle.italic,
                 height: 1.5,
                 letterSpacing: 0.2,
@@ -345,10 +370,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             const SizedBox(height: 8),
             Text(
               quote['reference']!,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
-                color: AppColors.authPurple,
+                color: refColor,
                 letterSpacing: 1.2,
               ),
             ),

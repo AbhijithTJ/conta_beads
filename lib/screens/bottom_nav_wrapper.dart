@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../colors/colors.dart';
+import '../theme/theme_notifier.dart';
 import '../widgets/common_bottom_nav.dart';
 import 'home_page/home_screen.dart';
 import 'global_counts/global_counts_screen.dart';
@@ -85,15 +87,22 @@ class _BottomNavWrapperState extends State<BottomNavWrapper> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: _onWillPop,
-      child: Scaffold(
-        body: _screens[_selectedIndex],
-        bottomNavigationBar: CommonBottomNav(
-          selectedIndex: _selectedIndex,
-          onTap: _onNavTap,
-        ),
-      ),
+    return ValueListenableBuilder<bool>(
+      valueListenable: themeNotifier,
+      builder: (_, isDark, __) {
+        final bgColor = isDark ? Colors.white : const Color(0xFFEDE0ED);
+        return WillPopScope(
+          onWillPop: _onWillPop,
+          child: Scaffold(
+            backgroundColor: bgColor,
+            body: _screens[_selectedIndex],
+            bottomNavigationBar: CommonBottomNav(
+              selectedIndex: _selectedIndex,
+              onTap: _onNavTap,
+            ),
+          ),
+        );
+      },
     );
   }
 }
