@@ -172,7 +172,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         Text('Upper Room',
             style: TextStyle(fontSize: 32, fontWeight: FontWeight.w800, color: titleColor, letterSpacing: 1.5)),
         const SizedBox(height: 6),
-        Text('Every bead of the rosary counts.',
+        Text('Hearts United in Prayer.',
             style: TextStyle(fontSize: 12, letterSpacing: 1.2, fontWeight: FontWeight.w500, color: subColor)),
       ],
     );

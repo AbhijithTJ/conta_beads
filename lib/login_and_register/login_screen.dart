@@ -202,7 +202,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 color: titleColor,
                 letterSpacing: 1.5)),
         const SizedBox(height: 6),
-        Text('One Prayer One Mission.',
+        Text('Hearts United in Prayer.',
             style: TextStyle(
                 fontSize: 12,
                 letterSpacing: 1.2,

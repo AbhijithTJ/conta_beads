@@ -81,7 +81,8 @@ class _ThemeSelectScreenState extends State<ThemeSelectScreen>
         child: SafeArea(
           child: FadeTransition(
             opacity: _fadeAnim,
-            child: Padding(
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
               padding: const EdgeInsets.symmetric(horizontal: 28),
               child: Column(
                 children: [
@@ -117,15 +118,7 @@ class _ThemeSelectScreenState extends State<ThemeSelectScreen>
                         letterSpacing: -0.5),
                   ),
                   const SizedBox(height: 10),
-                  Text(
-                    'You can always change this later\nin your profile settings.',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        fontSize: 13,
-                        color: subColor,
-                        height: 1.5),
-                  ),
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 28),
                   // Cards row
                   Row(
                     children: [
@@ -148,7 +141,46 @@ class _ThemeSelectScreenState extends State<ThemeSelectScreen>
                       )),
                     ],
                   ),
-                  const Spacer(),
+                  const SizedBox(height: 24),
+                  _ProfilePreviewTutorial(isDark: isDark),
+                  const SizedBox(height: 16),
+                  // Future note
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? Colors.white.withOpacity(0.06)
+                          : AppColors.authPurple.withOpacity(0.06),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: isDark
+                            ? Colors.white.withOpacity(0.10)
+                            : AppColors.authPurple.withOpacity(0.15),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.info_outline_rounded,
+                            size: 16,
+                            color: isDark
+                                ? Colors.white.withOpacity(0.45)
+                                : AppColors.authPurple.withOpacity(0.55)),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            'You can change this anytime from your Profile → Settings inside the app.',
+                            style: TextStyle(
+                                fontSize: 11,
+                                height: 1.5,
+                                color: isDark
+                                    ? Colors.white.withOpacity(0.45)
+                                    : AppColors.authBgMid.withOpacity(0.6)),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
                   // Continue button
                   AnimatedOpacity(
                     opacity: _selected != null ? 1.0 : 0.35,
@@ -316,6 +348,233 @@ class _ThemeCard extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+// ── Profile Preview Tutorial ──────────────────────────────────────────────────
+class _ProfilePreviewTutorial extends StatefulWidget {
+  final bool isDark;
+  const _ProfilePreviewTutorial({required this.isDark});
+
+  @override
+  State<_ProfilePreviewTutorial> createState() => _ProfilePreviewTutorialState();
+}
+
+class _ProfilePreviewTutorialState extends State<_ProfilePreviewTutorial>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _switchCtrl;
+  late Animation<double> _pulseAnim;
+  bool _demoToggle = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _switchCtrl = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 900))
+      ..repeat(reverse: true);
+    _pulseAnim = Tween<double>(begin: 0.85, end: 1.0).animate(
+        CurvedAnimation(parent: _switchCtrl, curve: Curves.easeInOut));
+
+    // Auto-animate the demo toggle every 2s
+    Future.delayed(const Duration(milliseconds: 1200), _autoToggle);
+  }
+
+  void _autoToggle() {
+    if (!mounted) return;
+    setState(() => _demoToggle = !_demoToggle);
+    Future.delayed(const Duration(milliseconds: 2000), _autoToggle);
+  }
+
+  @override
+  void dispose() {
+    _switchCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = widget.isDark;
+    final cardBg = isDark ? const Color(0xFF560737) : Colors.white;
+    final profileBg = isDark ? const Color(0xFF3D0227) : const Color(0xFFF0EBF0);
+    final textColor = isDark ? Colors.white : AppColors.authBgBottom;
+    final subColor = isDark ? Colors.white.withOpacity(0.45) : AppColors.authBgMid.withOpacity(0.5);
+    final highlightColor = AppColors.goldPrimary;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Tutorial label
+        Row(
+          children: [
+            Icon(Icons.touch_app_rounded, size: 14,
+                color: isDark ? AppColors.goldLight : AppColors.goldDark),
+            const SizedBox(width: 6),
+            Text(
+              'CHANGE ANYTIME IN PROFILE',
+              style: TextStyle(
+                  fontSize: 9,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 1.6,
+                  color: isDark ? AppColors.goldLight : AppColors.goldDark),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        // Mini profile screen mockup
+        Container(
+          decoration: BoxDecoration(
+            color: profileBg,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: isDark ? Colors.white.withOpacity(0.08) : AppColors.authPurple.withOpacity(0.12),
+            ),
+          ),
+          padding: const EdgeInsets.all(14),
+          child: Column(
+            children: [
+              // Mini avatar + name row
+              Row(
+                children: [
+                  Container(
+                    width: 32, height: 32,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: AppColors.cardLavender,
+                    ),
+                    child: Center(
+                      child: Text('JD',
+                          style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w900,
+                              color: AppColors.authBgBottom)),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(width: 70, height: 7,
+                          decoration: BoxDecoration(color: textColor.withOpacity(0.7), borderRadius: BorderRadius.circular(4))),
+                      const SizedBox(height: 4),
+                      Container(width: 45, height: 5,
+                          decoration: BoxDecoration(color: subColor, borderRadius: BorderRadius.circular(4))),
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              // Settings section label
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Container(width: 50, height: 5,
+                    decoration: BoxDecoration(
+                        color: isDark ? AppColors.goldLight.withOpacity(0.5) : AppColors.goldDark.withOpacity(0.5),
+                        borderRadius: BorderRadius.circular(4))),
+              ),
+              const SizedBox(height: 8),
+              // Highlighted dark mode row
+              AnimatedBuilder(
+                animation: _pulseAnim,
+                builder: (_, __) => Transform.scale(
+                  scale: _pulseAnim.value,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: cardBg,
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: highlightColor, width: 1.8),
+                      boxShadow: [
+                        BoxShadow(
+                            color: highlightColor.withOpacity(0.35),
+                            blurRadius: 10,
+                            spreadRadius: 1),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 28, height: 28,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                            color: AppColors.authPurple.withOpacity(0.10),
+                          ),
+                          child: Icon(Icons.dark_mode_rounded,
+                              color: AppColors.authPurple, size: 14),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text('Dark Mode',
+                              style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  color: textColor)),
+                        ),
+                        // Animated demo switch
+                        AnimatedContainer(
+                          duration: const Duration(milliseconds: 350),
+                          curve: Curves.easeInOut,
+                          width: 36,
+                          height: 20,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            color: _demoToggle
+                                ? AppColors.goldPrimary
+                                : AppColors.authPurple.withOpacity(0.25),
+                          ),
+                          child: AnimatedAlign(
+                            duration: const Duration(milliseconds: 350),
+                            curve: Curves.easeInOut,
+                            alignment: _demoToggle
+                                ? Alignment.centerRight
+                                : Alignment.centerLeft,
+                            child: Container(
+                              width: 16, height: 16,
+                              margin: const EdgeInsets.symmetric(horizontal: 2),
+                              decoration: const BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              // Two dummy setting rows
+              _miniSettingRow(textColor, subColor, cardBg),
+              const SizedBox(height: 6),
+              _miniSettingRow(textColor, subColor, cardBg),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _miniSettingRow(Color textColor, Color subColor, Color cardBg) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: cardBg.withOpacity(0.5),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(
+        children: [
+          Container(width: 20, height: 20,
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(6),
+                  color: AppColors.authPurple.withOpacity(0.08))),
+          const SizedBox(width: 8),
+          Container(width: 80, height: 6,
+              decoration: BoxDecoration(color: textColor.withOpacity(0.3), borderRadius: BorderRadius.circular(4))),
+          const Spacer(),
+          Icon(Icons.chevron_right_rounded, size: 14, color: subColor),
+        ],
       ),
     );
   }

@@ -87,7 +87,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                             color: titleColor,
                             letterSpacing: 1.5)),
                     const SizedBox(height: 10),
-                    Text('One Prayer One Mission',
+                    Text('Hearts United in Prayer',
                         style: TextStyle(
                             fontSize: 14,
                             fontFamily: 'Georgia',
