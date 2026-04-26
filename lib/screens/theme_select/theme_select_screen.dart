@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../colors/colors.dart';
 import '../../theme/theme_notifier.dart';
@@ -56,9 +57,7 @@ class _ThemeSelectScreenState extends State<ThemeSelectScreen>
   @override
   Widget build(BuildContext context) {
     final isDark = _selected != false;
-    final bgColors = isDark
-        ? [const Color(0xFF2E0A3A), const Color(0xFF560737), const Color(0xFF3D0227)]
-        : [const Color(0xFFF0EBF0), const Color(0xFFF5EEF5), const Color(0xFFEDE0ED)];
+    final bgColors = [const Color(0xFF22014D), const Color(0xFF22014D), const Color(0xFF22014D)];
     final titleColor = isDark ? Colors.white : AppColors.authBgBottom;
     final subColor = isDark ? Colors.white.withOpacity(0.50) : AppColors.authBgMid.withOpacity(0.6);
     final badgeColor = isDark ? AppColors.goldLight : AppColors.goldDark;
@@ -99,23 +98,16 @@ class _ThemeSelectScreenState extends State<ThemeSelectScreen>
                       Icon(Icons.auto_awesome_rounded, color: badgeColor, size: 13),
                       const SizedBox(width: 6),
                       Text('PERSONALISE YOUR EXPERIENCE',
-                          style: TextStyle(
-                              fontSize: 9,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: 1.8,
-                              color: badgeColor)),
+                          style: GoogleFonts.poppins(fontSize: 9, fontWeight: FontWeight.w800, letterSpacing: 1.8, color: badgeColor)),
                     ]),
                   ),
                   const SizedBox(height: 28),
                   Text(
                     'Choose Your\nAppearance',
                     textAlign: TextAlign.center,
-                    style: TextStyle(
-                        fontSize: 32,
-                        fontWeight: FontWeight.w900,
-                        color: titleColor,
-                        height: 1.2,
-                        letterSpacing: -0.5),
+                    style: GoogleFonts.poppins(
+                        fontSize: 32, fontWeight: FontWeight.w900,
+                        color: Colors.white, height: 1.2, letterSpacing: -0.5),
                   ),
                   const SizedBox(height: 10),
                   const SizedBox(height: 28),
@@ -123,20 +115,20 @@ class _ThemeSelectScreenState extends State<ThemeSelectScreen>
                   Row(
                     children: [
                       Expanded(child: _ThemeCard(
-                        isDarkOption: true,
-                        selected: _selected == true,
-                        onTap: () {
-                          HapticFeedback.selectionClick();
-                          setState(() => _selected = true);
-                        },
-                      )),
-                      const SizedBox(width: 16),
-                      Expanded(child: _ThemeCard(
                         isDarkOption: false,
                         selected: _selected == false,
                         onTap: () {
                           HapticFeedback.selectionClick();
                           setState(() => _selected = false);
+                        },
+                      )),
+                      const SizedBox(width: 16),
+                      Expanded(child: _ThemeCard(
+                        isDarkOption: true,
+                        selected: _selected == true,
+                        onTap: () {
+                          HapticFeedback.selectionClick();
+                          setState(() => _selected = true);
                         },
                       )),
                     ],
@@ -148,33 +140,18 @@ class _ThemeSelectScreenState extends State<ThemeSelectScreen>
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     decoration: BoxDecoration(
-                      color: isDark
-                          ? Colors.white.withOpacity(0.06)
-                          : AppColors.authPurple.withOpacity(0.06),
+                      color: Colors.white.withOpacity(0.06),
                       borderRadius: BorderRadius.circular(14),
-                      border: Border.all(
-                        color: isDark
-                            ? Colors.white.withOpacity(0.10)
-                            : AppColors.authPurple.withOpacity(0.15),
-                      ),
+                      border: Border.all(color: Colors.white.withOpacity(0.10)),
                     ),
                     child: Row(
                       children: [
-                        Icon(Icons.info_outline_rounded,
-                            size: 16,
-                            color: isDark
-                                ? Colors.white.withOpacity(0.45)
-                                : AppColors.authPurple.withOpacity(0.55)),
+                        Icon(Icons.info_outline_rounded, size: 16, color: Colors.white.withOpacity(0.45)),
                         const SizedBox(width: 10),
                         Expanded(
                           child: Text(
                             'You can change this anytime from your Profile → Settings inside the app.',
-                            style: TextStyle(
-                                fontSize: 11,
-                                height: 1.5,
-                                color: isDark
-                                    ? Colors.white.withOpacity(0.45)
-                                    : AppColors.authBgMid.withOpacity(0.6)),
+                            style: GoogleFonts.poppins(fontSize: 11, height: 1.5, color: Colors.white.withOpacity(0.45)),
                           ),
                         ),
                       ],
@@ -193,17 +170,13 @@ class _ThemeSelectScreenState extends State<ThemeSelectScreen>
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(30),
                           gradient: LinearGradient(
-                            colors: isDark
-                                ? [AppColors.goldLight, AppColors.goldDark]
-                                : [AppColors.authPurple, AppColors.authBgBottom],
+                            colors: [const Color(0xFF7B55A8), const Color(0xFF624294)],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: isDark
-                                  ? AppColors.goldPrimary.withOpacity(0.40)
-                                  : AppColors.authPurple.withOpacity(0.30),
+                              color: const Color(0xFF624294).withOpacity(0.40),
                               blurRadius: 20,
                               offset: const Offset(0, 8),
                             ),
@@ -211,11 +184,7 @@ class _ThemeSelectScreenState extends State<ThemeSelectScreen>
                         ),
                         child: Center(
                           child: Text('CONTINUE',
-                              style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w900,
-                                  letterSpacing: 2.0,
-                                  color: isDark ? const Color(0xFF2E0A3A) : Colors.white)),
+                              style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w900, letterSpacing: 2.0, color: Colors.white)),
                         ),
                       ),
                     ),
@@ -245,8 +214,8 @@ class _ThemeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bg = isDarkOption ? const Color(0xFF3D0227) : const Color(0xFFF5EEF5);
-    final cardBg = isDarkOption ? const Color(0xFF560737) : Colors.white;
+    final bg = isDarkOption ? const Color(0xFF22014D) : const Color(0xFFF5EEF5);
+    final cardBg = isDarkOption ? const Color(0xFF2E0A5E) : Colors.white;
     final textColor = isDarkOption ? Colors.white : const Color(0xFF3D0227);
     final subColor = isDarkOption
         ? Colors.white.withOpacity(0.45)
@@ -298,7 +267,7 @@ class _ThemeCard extends StatelessWidget {
                       ),
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                       child: Row(children: [
-                        Container(width: 2, height: double.infinity, color: AppColors.authPurple.withOpacity(0.5)),
+                        Container(width: 2, height: double.infinity, color: const Color(0xFF22014D).withOpacity(0.5)),
                         const SizedBox(width: 6),
                         Expanded(child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -306,7 +275,7 @@ class _ThemeCard extends StatelessWidget {
                           children: [
                             Container(height: 4, width: double.infinity, decoration: BoxDecoration(color: textColor.withOpacity(0.4), borderRadius: BorderRadius.circular(2))),
                             const SizedBox(height: 4),
-                            Container(height: 4, width: 60, decoration: BoxDecoration(color: AppColors.authPurple.withOpacity(0.5), borderRadius: BorderRadius.circular(2))),
+                            Container(height: 4, width: 60, decoration: BoxDecoration(color: const Color(0xFF22014D).withOpacity(0.5), borderRadius: BorderRadius.circular(2))),
                           ],
                         )),
                       ]),
@@ -428,7 +397,7 @@ class _ProfilePreviewTutorialState extends State<_ProfilePreviewTutorial>
             color: profileBg,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: isDark ? Colors.white.withOpacity(0.08) : AppColors.authPurple.withOpacity(0.12),
+              color: isDark ? Colors.white.withOpacity(0.08) : const Color(0xFF22014D).withOpacity(0.12),
             ),
           ),
           padding: const EdgeInsets.all(14),
@@ -498,10 +467,9 @@ class _ProfilePreviewTutorialState extends State<_ProfilePreviewTutorial>
                           width: 28, height: 28,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(8),
-                            color: AppColors.authPurple.withOpacity(0.10),
+                            color: const Color(0xFF22014D).withOpacity(0.10),
                           ),
-                          child: Icon(Icons.dark_mode_rounded,
-                              color: AppColors.authPurple, size: 14),
+                          child: Icon(Icons.dark_mode_rounded, color: const Color(0xFF22014D), size: 14),
                         ),
                         const SizedBox(width: 10),
                         Expanded(
@@ -521,7 +489,7 @@ class _ProfilePreviewTutorialState extends State<_ProfilePreviewTutorial>
                             borderRadius: BorderRadius.circular(10),
                             color: _demoToggle
                                 ? AppColors.goldPrimary
-                                : AppColors.authPurple.withOpacity(0.25),
+                                : const Color(0xFF22014D).withOpacity(0.25),
                           ),
                           child: AnimatedAlign(
                             duration: const Duration(milliseconds: 350),
@@ -568,7 +536,7 @@ class _ProfilePreviewTutorialState extends State<_ProfilePreviewTutorial>
           Container(width: 20, height: 20,
               decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(6),
-                  color: AppColors.authPurple.withOpacity(0.08))),
+                  color: const Color(0xFF22014D).withOpacity(0.08))),
           const SizedBox(width: 8),
           Container(width: 80, height: 6,
               decoration: BoxDecoration(color: textColor.withOpacity(0.3), borderRadius: BorderRadius.circular(4))),
