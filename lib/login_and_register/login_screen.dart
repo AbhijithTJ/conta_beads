@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../colors/colors.dart';
@@ -198,12 +199,13 @@ class _LoginScreenState extends State<LoginScreen> {
         Text('Upper Room',
             style: TextStyle(
                 fontSize: 32,
+                fontFamily: 'Georgia',
                 fontWeight: FontWeight.w800,
                 color: titleColor,
                 letterSpacing: 1.5)),
         const SizedBox(height: 6),
         Text('Hearts United in Prayer.',
-            style: TextStyle(
+            style: GoogleFonts.poppins(
                 fontSize: 12,
                 letterSpacing: 1.2,
                 fontWeight: FontWeight.w500,
@@ -215,8 +217,8 @@ class _LoginScreenState extends State<LoginScreen> {
   // ── Frosted glass login card ────────────────────────────────────────────────
   Widget _buildGlassCard(bool isDark) {
     final cardBg = isDark ? Colors.white.withOpacity(0.92) : Colors.white;
-    final signInColor = isDark ? AppColors.authBgMid : AppColors.authBgBottom;
-    final subTextColor = isDark ? AppColors.authPurple.withOpacity(0.70) : AppColors.authBgMid.withOpacity(0.6);
+    final signInColor = const Color(0xFF22014D);
+    final subTextColor = const Color(0xFF22014D).withOpacity(0.60);
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(28),
@@ -243,14 +245,14 @@ class _LoginScreenState extends State<LoginScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text('SIGN IN',
-                  style: TextStyle(
+                  style: GoogleFonts.poppins(
                       fontSize: 22,
                       fontWeight: FontWeight.w800,
                       letterSpacing: 3,
                       color: signInColor)),
               const SizedBox(height: 4),
               Text('Welcome back, continue your prayer journey',
-                  style: TextStyle(
+                  style: GoogleFonts.poppins(
                       fontSize: 12,
                       color: subTextColor,
                       letterSpacing: 0.3)),
@@ -273,7 +275,7 @@ class _LoginScreenState extends State<LoginScreen> {
               Align(
                 alignment: Alignment.centerRight,
                 child: Text('Forgot password?',
-                    style: TextStyle(
+                    style: GoogleFonts.poppins(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
                         color: AppColors.goldDark.withOpacity(0.85),
@@ -328,10 +330,10 @@ class _LoginScreenState extends State<LoginScreen> {
       children: [
         Text(
           label,
-          style: TextStyle(
+          style: GoogleFonts.poppins(
             fontSize: 12,
             fontWeight: FontWeight.w600,
-            color: AppColors.authBgMid.withOpacity(0.80),
+            color: const Color(0xFF22014D).withOpacity(0.80),
             letterSpacing: 0.4,
           ),
         ),
@@ -343,24 +345,24 @@ class _LoginScreenState extends State<LoginScreen> {
             child: TextField(
               controller: controller,
               obscureText: isPassword ? _obscurePassword : false,
-              style: TextStyle(
-                color: AppColors.authBgBottom,
+              style: GoogleFonts.poppins(
+                color: const Color(0xFF22014D),
                 fontWeight: FontWeight.w500,
                 fontSize: 15,
               ),
               decoration: InputDecoration(
                 hintText: hint,
-                hintStyle: TextStyle(
-                  color: AppColors.authPurple.withOpacity(0.40),
+                hintStyle: GoogleFonts.poppins(
+                  color: const Color(0xFF22014D).withOpacity(0.40),
                   fontSize: 14,
                 ),
-                prefixIcon: Icon(icon, color: AppColors.authPurple.withOpacity(0.70), size: 20),
+                prefixIcon: Icon(icon, color: const Color(0xFF22014D).withOpacity(0.70), size: 20),
                 suffixIcon: isPassword
                     ? GestureDetector(
                         onTap: () => setState(() => _obscurePassword = !_obscurePassword),
                         child: Icon(
                           _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-                          color: AppColors.authPurple.withOpacity(0.60),
+                          color: const Color(0xFF22014D).withOpacity(0.60),
                           size: 20,
                         ),
                       )
@@ -452,9 +454,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     height: 22,
                     child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
                   )
-                : const Text(
+                : Text(
                     'Sign in',
-                    style: TextStyle(
+                    style: GoogleFonts.poppins(
                       color: Colors.white,
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
@@ -486,7 +488,7 @@ class _LoginScreenState extends State<LoginScreen> {
             const SizedBox(width: 8),
             Text(
               'Use biometric login',
-              style: TextStyle(
+              style: GoogleFonts.poppins(
                 color: const Color(0xFF22014D),
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
@@ -504,13 +506,13 @@ class _LoginScreenState extends State<LoginScreen> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text("Don't have an account? ",
-            style: TextStyle(color: textColor, fontSize: 13)),
+            style: GoogleFonts.poppins(color: textColor, fontSize: 13)),
         GestureDetector(
           onTap: () => Navigator.of(context).pushReplacement(
             MaterialPageRoute(builder: (_) => const RegisterScreen()),
           ),
           child: Text('Register',
-              style: TextStyle(
+              style: GoogleFonts.poppins(
                   color: linkColor,
                   fontWeight: FontWeight.w700,
                   fontSize: 13)),
