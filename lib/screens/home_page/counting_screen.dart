@@ -38,12 +38,12 @@ class _CountingScreenState extends State<CountingScreen>
   static const _rosaryAccent = Color(0xFFC9A8F5);
   static const _rosaryDark   = Color(0xFF6B3FA0);
 
-  // Chaplet palette — Divine Mercy (red, white, blue)
-  static const _chapletBgTop    = Color(0xFF8B0000);  // deep red
-  static const _chapletBgMid    = Color(0xFFB22222);  // crimson
-  static const _chapletBgBottom = Color(0xFF1A3A6B);  // deep blue
-  static const _chapletAccent   = Color(0xFF4A90D9);  // bright blue
-  static const _chapletDark     = Color(0xFFCC2200);  // dark red
+  // Chaplet palette — same as Rosary
+  static const _chapletBgTop    = Color(0xFF22014D);
+  static const _chapletBgMid    = Color(0xFF22014D);
+  static const _chapletBgBottom = Color(0xFF22014D);
+  static const _chapletAccent   = Color(0xFFC9A8F5);
+  static const _chapletDark     = Color(0xFF6B3FA0);
 
   Color get _bgTop    => _isRosary ? _rosaryBgTop    : _chapletBgTop;
   Color get _bgMid    => _isRosary ? _rosaryBgMid    : _chapletBgMid;
@@ -265,20 +265,7 @@ class _CountingScreenState extends State<CountingScreen>
         width: double.infinity,
         height: double.infinity,
         decoration: BoxDecoration(
-          gradient: _isRosary
-              ? LinearGradient(colors: [_bgTop, _bgTop])
-              : const LinearGradient(
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
-                  colors: [
-                    Color(0xFF8B0000),
-                    Color(0xFFCC2222),
-                    Color(0xFFFFFFFF),
-                    Color(0xFF4A90D9),
-                    Color(0xFF1A3A6B),
-                  ],
-                  stops: [0.0, 0.25, 0.5, 0.75, 1.0],
-                ),
+          gradient: LinearGradient(colors: [_bgTop, _bgTop]),
         ),
         child: Stack(
           children: [
@@ -300,7 +287,7 @@ class _CountingScreenState extends State<CountingScreen>
                 ).createShader(rect),
                 blendMode: BlendMode.dstIn,
                 child: Image.asset(
-                  'assets/demo/mathav.png',
+                  _isRosary ? 'assets/demo/mathav.png' : 'assets/demo/i trust you jesus.png',
                   width: double.infinity,
                   height: 395,
                   fit: BoxFit.cover,
@@ -999,9 +986,9 @@ class _PrayerInlineCardState extends State<_PrayerInlineCard> {
       width: double.infinity,
       height: 220,
       decoration: BoxDecoration(
-        color: AppColors.cardLavender,
+        color: const Color(0xFFFAF6FF),
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: widget.accentColor.withOpacity(0.30), width: 1.5),
+        border: Border.all(color: Colors.white, width: 2.0),
         boxShadow: [
           BoxShadow(color: widget.bgBottom.withOpacity(0.20), blurRadius: 20, offset: const Offset(0, 6)),
         ],
