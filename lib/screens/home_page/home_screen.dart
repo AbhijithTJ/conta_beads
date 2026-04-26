@@ -46,10 +46,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   ];
 
   final List<Map<String, dynamic>> _features = [
-    {'title': 'Count Your', 'subtitle': 'Rosary', 'image': 'assets/demo/1.jpg'},
-    {'title': 'Divine Mercy', 'subtitle': 'Chaplet', 'image': 'assets/demo/jesus.jpg'},
-    {'title': 'Adopt a', 'subtitle': 'Priest', 'image': 'assets/demo/2.jpg'},
-    {'title': 'Every Day', 'subtitle': 'Prayers', 'image': 'assets/demo/1.jpg'},
+    {'title': 'Count Your', 'subtitle': 'Rosary', 'image': 'assets/demo/mathav.png'},
+    {'title': 'Divine Mercy', 'subtitle': 'Chaplet', 'image': 'assets/demo/i trust you jesus.png'},
+    {'title': 'Adopt a', 'subtitle': 'Priest', 'image': 'assets/demo/adopt a priest.png'},
+    {'title': 'Every Day', 'subtitle': 'Prayers', 'image': 'assets/demo/every day.png'},
   ];
 
   @override

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../colors/colors.dart';
 import '../../theme/theme_notifier.dart';
 
@@ -103,7 +104,7 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
     return ValueListenableBuilder<bool>(
       valueListenable: themeNotifier,
       builder: (_, isDark, __) {
-        final bgColor = isDark ? AppColors.homeBg : const Color(0xFFF0EBF0);
+        final bgColor = isDark ? const Color(0xFF22014D) : const Color(0xFFF0EBF0);
         return Scaffold(
           body: Container(
             width: double.infinity,
@@ -117,12 +118,12 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
                   children: [
                     const SizedBox(height: 24),
                     _buildHeader(isDark),
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 16),
+                    _buildQuoteCard(isDark),
+                    const SizedBox(height: 16),
                     _buildGlobalCountCard(),
                     const SizedBox(height: 16),
                     _buildStatsRow(),
-                    const SizedBox(height: 16),
-                    _buildQuoteCard(isDark),
                     const SizedBox(height: 16),
                     _buildTopOfferingsCard(),
                     const SizedBox(height: 40),
@@ -153,14 +154,14 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
             border: Border.all(color: badgeBorder),
           ),
           child: Text('COMMUNITY PRAYER',
-              style: TextStyle(fontSize: 10, letterSpacing: 2, fontWeight: FontWeight.w800, color: badgeText)),
+              style: GoogleFonts.poppins(fontSize: 10, letterSpacing: 2, fontWeight: FontWeight.w800, color: badgeText)),
         ),
         const SizedBox(height: 18),
         Text('Global Count',
-            style: TextStyle(fontSize: 36, fontWeight: FontWeight.w900, color: titleColor, letterSpacing: -1)),
+            style: GoogleFonts.poppins(fontSize: 36, fontWeight: FontWeight.w900, color: titleColor, letterSpacing: -1)),
         const SizedBox(height: 6),
         Text('UNITED IN SPIRIT AND FAITH',
-            style: TextStyle(fontSize: 10, letterSpacing: 1.5, fontWeight: FontWeight.w600, color: subColor)),
+            style: GoogleFonts.poppins(fontSize: 10, letterSpacing: 1.5, fontWeight: FontWeight.w600, color: subColor)),
       ],
     );
   }
@@ -173,12 +174,7 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
         children: [
           Text(
             'TOTAL ROSARIES OFFERED',
-            style: TextStyle(
-              fontSize: 10,
-              letterSpacing: 2,
-              color: AppColors.authBgMid.withOpacity(0.5),
-              fontWeight: FontWeight.w800,
-            ),
+            style: GoogleFonts.poppins(fontSize: 10, letterSpacing: 2, color: AppColors.authBgMid.withOpacity(0.5), fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 12),
           Text(
@@ -197,19 +193,11 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
             children: [
               Text(
                 'Goal: ${_formatNumber(goalCount)}',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: AppColors.authBgMid.withOpacity(0.5),
-                  fontWeight: FontWeight.w700,
-                ),
+                style: GoogleFonts.poppins(fontSize: 12, color: AppColors.authBgMid.withOpacity(0.5), fontWeight: FontWeight.w700),
               ),
               Text(
                 '${percentage.toStringAsFixed(1)}%',
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: AppColors.goldDark,
-                  fontWeight: FontWeight.w800,
-                ),
+                style: GoogleFonts.poppins(fontSize: 12, color: AppColors.goldDark, fontWeight: FontWeight.w800),
               ),
             ],
           ),
@@ -226,12 +214,7 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
           const SizedBox(height: 18),
           Text(
             'Together, we are building a river of prayer',
-            style: TextStyle(
-              fontSize: 13,
-              color: AppColors.authBgMid.withOpacity(0.6),
-              fontStyle: FontStyle.italic,
-              fontWeight: FontWeight.w500,
-            ),
+            style: GoogleFonts.poppins(fontSize: 13, color: AppColors.authBgMid.withOpacity(0.6), fontStyle: FontStyle.italic, fontWeight: FontWeight.w500),
           ),
         ],
       ),
@@ -244,12 +227,7 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
         children: [
           Text(
             'YOUR TOTAL',
-            style: TextStyle(
-              fontSize: 10,
-              letterSpacing: 2,
-              color: AppColors.authBgMid.withOpacity(0.5),
-              fontWeight: FontWeight.w800,
-            ),
+            style: GoogleFonts.poppins(fontSize: 10, letterSpacing: 2, color: AppColors.authBgMid.withOpacity(0.5), fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 8),
           Row(
@@ -268,11 +246,7 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
               const SizedBox(width: 8),
               Text(
                 'rosaries',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.authBgMid.withOpacity(0.5),
-                ),
+                style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.authBgMid.withOpacity(0.5)),
               ),
             ],
           ),
@@ -310,7 +284,7 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(22),
-            border: Border.all(color: AppColors.authPurpleLight.withOpacity(0.30), width: 1.5),
+            border: Border.all(color: Colors.white, width: 2.0),
             boxShadow: [BoxShadow(color: shadowColor, blurRadius: 20, offset: const Offset(0, 6))],
           ),
           child: Column(
@@ -322,11 +296,11 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
                   textAlign: TextAlign.center,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w500, color: quoteTextColor, fontStyle: FontStyle.italic, height: 1.5, letterSpacing: 0.2)),
+                  style: GoogleFonts.poppins(fontSize: 14.5, fontWeight: FontWeight.w500, color: quoteTextColor, fontStyle: FontStyle.italic, height: 1.5, letterSpacing: 0.2)),
               const SizedBox(height: 8),
               if (quote['author']!.isNotEmpty)
                 Text(quote['author']!,
-                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.authPurple, letterSpacing: 1.2)),
+                    style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.authPurple, letterSpacing: 1.2)),
               const SizedBox(height: 10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -357,13 +331,9 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
+              Text(
                 'Top Offerings',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w900,
-                  color: AppColors.authBgBottom,
-                ),
+                style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.authBgBottom),
               ),
               _buildLiveBadge(),
             ],
@@ -413,12 +383,7 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
           const SizedBox(width: 6),
           const Text(
             'LIVE',
-            style: TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w900,
-              color: Colors.red,
-              letterSpacing: 1,
-            ),
+            style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: Colors.red, letterSpacing: 1),
           ),
         ],
       ),
@@ -473,11 +438,7 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
                     children: [
                       Text(
                         name,
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w800,
-                          color: isYou ? AppColors.goldDark : AppColors.authBgBottom,
-                        ),
+                        style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w800, color: isYou ? AppColors.goldDark : AppColors.authBgBottom),
                       ),
                       if (isYou) ...[
                         const SizedBox(width: 8),
@@ -489,26 +450,14 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
                             ),
                             borderRadius: BorderRadius.circular(6),
                           ),
-                          child: const Text(
-                            'YOU',
-                            style: TextStyle(
-                              fontSize: 8,
-                              fontWeight: FontWeight.w900,
-                              color: Colors.white,
-                              letterSpacing: 0.5,
-                            ),
-                          ),
+                          child: const Text('YOU', style: TextStyle(fontSize: 8, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 0.5)),
                         ),
                       ],
                     ],
                   ),
                   Text(
                     'rosaries offered today',
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: isYou ? AppColors.goldDark.withOpacity(0.6) : AppColors.authBgMid.withOpacity(0.4),
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: GoogleFonts.poppins(fontSize: 11, color: isYou ? AppColors.goldDark.withOpacity(0.6) : AppColors.authBgMid.withOpacity(0.4), fontWeight: FontWeight.w600),
                   ),
                 ],
               ),
