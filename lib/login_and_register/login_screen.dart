@@ -152,7 +152,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = themeNotifier.isDark;
-    final bgColor = isDark ? AppColors.homeBg : const Color(0xFFF0EBF0);
+    final bgColor = const Color(0xFF22014D);
     final logoAsset = isDark ? 'assets/splash/ur_logo.png' : 'assets/splash/ur_logo_light.png';
     final titleColor = isDark ? Colors.white : AppColors.authBgBottom;
     final subColor = isDark ? Colors.white.withOpacity(0.65) : AppColors.authBgMid.withOpacity(0.6);
@@ -226,7 +226,7 @@ class _LoginScreenState extends State<LoginScreen> {
           decoration: BoxDecoration(
             color: cardBg,
             borderRadius: BorderRadius.circular(28),
-            border: Border.all(color: Colors.white.withOpacity(0.95), width: 1.5),
+            border: Border.all(color: Colors.white, width: 2.0),
             boxShadow: [
               BoxShadow(
                 color: isDark
@@ -370,11 +370,11 @@ class _LoginScreenState extends State<LoginScreen> {
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
-                  borderSide: BorderSide(color: AppColors.authPurple.withOpacity(0.25)),
+                  borderSide: BorderSide(color: Colors.white, width: 2.0),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
-                  borderSide: BorderSide(color: AppColors.authPurple.withOpacity(0.25)),
+                  borderSide: BorderSide(color: Colors.white, width: 2.0),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
@@ -389,58 +389,79 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   // ── Login button ────────────────────────────────────────────────────────────
+  bool _isPressed = false;
+
   Widget _buildLoginButton() {
     return GestureDetector(
       onTap: _isLoading ? null : _handleLogin,
-      child: Container(
+      onTapDown: (_) => setState(() => _isPressed = true),
+      onTapUp: (_) => setState(() => _isPressed = false),
+      onTapCancel: () => setState(() => _isPressed = false),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 100),
         width: double.infinity,
         height: 54,
+        transform: Matrix4.translationValues(0, _isPressed ? 4 : 0, 0),
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: _isLoading
-                ? [
-                    Color(0xFF560737).withOpacity(0.5),
-                    Color(0xFF560737).withOpacity(0.5),
-                  ]
-                : [
-                    Color(0xFF560737),
-                    Color(0xFF560737),
-                  ],
+                ? [Color(0xFF624294).withOpacity(0.5), Color(0xFF7B55A8).withOpacity(0.5)]
+                : [Color(0xFF7B55A8), Color(0xFF624294)],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
           borderRadius: BorderRadius.circular(30),
-          boxShadow: _isLoading
+          boxShadow: _isPressed || _isLoading
               ? []
               : [
+                  // 3D bottom depth layer
                   BoxShadow(
-                    color: AppColors.authBgBottom.withOpacity(0.60),
+                    color: const Color(0xFF2A0A5E),
                     blurRadius: 0,
+                    spreadRadius: 0,
                     offset: const Offset(0, 5),
                   ),
+                  // soft outer glow
                   BoxShadow(
-                    color: AppColors.authPurple.withOpacity(0.35),
-                    blurRadius: 12,
+                    color: const Color(0xFF624294).withOpacity(0.45),
+                    blurRadius: 14,
                     offset: const Offset(0, 8),
                   ),
                 ],
+          border: Border.all(
+            color: _isPressed ? Colors.transparent : Colors.white.withOpacity(0.15),
+            width: 1,
+          ),
         ),
-        child: Center(
-          child: _isLoading
-              ? const SizedBox(
-                  width: 22,
-                  height: 22,
-                  child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
-                )
-              : const Text(
-                  'Sign in',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 0.5,
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(30),
+            gradient: LinearGradient(
+              colors: [
+                Colors.white.withOpacity(_isPressed ? 0.0 : 0.10),
+                Colors.transparent,
+              ],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
+          child: Center(
+            child: _isLoading
+                ? const SizedBox(
+                    width: 22,
+                    height: 22,
+                    child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
+                  )
+                : const Text(
+                    'Sign in',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.5,
+                    ),
                   ),
-                ),
+          ),
         ),
       ),
     );
@@ -456,17 +477,17 @@ class _LoginScreenState extends State<LoginScreen> {
         decoration: BoxDecoration(
           color: Colors.transparent,
           borderRadius: BorderRadius.circular(30),
-          border: Border.all(color: AppColors.authPurple.withOpacity(0.45), width: 1.5),
+          border: Border.all(color: const Color(0xFF22014D).withOpacity(0.45), width: 1.5),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.fingerprint, color: AppColors.authPurple, size: 22),
+            Icon(Icons.fingerprint, color: const Color(0xFF22014D), size: 22),
             const SizedBox(width: 8),
             Text(
               'Use biometric login',
               style: TextStyle(
-                color: AppColors.authBgMid,
+                color: const Color(0xFF22014D),
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
               ),
