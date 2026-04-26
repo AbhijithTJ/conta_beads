@@ -195,14 +195,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget _buildHeader(String logoAsset, Color titleColor, Color subColor) {
     return Column(
       children: [
-        Image.asset(logoAsset, width: 140, height: 140),
-        Text('Upper Room',
-            style: TextStyle(
-                fontSize: 32,
-                fontFamily: 'Georgia',
-                fontWeight: FontWeight.w800,
-                color: titleColor,
-                letterSpacing: 1.5)),
+        Image.asset('assets/demo/logo_image.png', width: 160, height: 160),
         const SizedBox(height: 6),
         Text('Hearts United in Prayer.',
             style: GoogleFonts.poppins(

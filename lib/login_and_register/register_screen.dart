@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 import '../colors/colors.dart';
 import '../screens/bottom_nav_wrapper.dart';
@@ -95,15 +96,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = themeNotifier.isDark;
-    final bgColor = isDark ? AppColors.homeBg : const Color(0xFFF0EBF0);
+    final bgColor = const Color(0xFF22014D);
     final logoAsset = isDark ? 'assets/splash/ur_logo.png' : 'assets/splash/ur_logo_light.png';
-    final titleColor = isDark ? Colors.white : AppColors.authBgBottom;
-    final subColor = isDark ? Colors.white.withOpacity(0.65) : AppColors.authBgMid.withOpacity(0.6);
-    final backIconColor = isDark ? Colors.white : AppColors.authPurple;
-    final backBg = isDark ? Colors.white.withOpacity(0.35) : AppColors.authPurple.withOpacity(0.08);
-    final backBorder = isDark ? Colors.white.withOpacity(0.55) : AppColors.authPurple.withOpacity(0.25);
-    final linkTextColor = isDark ? Colors.white.withOpacity(0.75) : AppColors.authBgMid.withOpacity(0.7);
-    final linkColor = isDark ? Colors.white : AppColors.authPurple;
+    final titleColor = Colors.white;
+    final subColor = Colors.white.withOpacity(0.65);
+    final backIconColor = Colors.white;
+    final backBg = Colors.white.withOpacity(0.15);
+    final backBorder = Colors.white.withOpacity(0.30);
+    final linkTextColor = Colors.white.withOpacity(0.75);
+    final linkColor = Colors.white;
 
     return WillPopScope(
       onWillPop: () async => false,
@@ -167,22 +168,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Widget _buildHeader(String logoAsset, Color titleColor, Color subColor) {
     return Column(
       children: [
-        Image.asset(logoAsset, width: 140, height: 140),
-        const SizedBox(height: 18),
-        Text('Upper Room',
-            style: TextStyle(fontSize: 32, fontWeight: FontWeight.w800, color: titleColor, letterSpacing: 1.5)),
+        Image.asset('assets/demo/logo_image.png', width: 160, height: 160),
         const SizedBox(height: 6),
         Text('Hearts United in Prayer.',
-            style: TextStyle(fontSize: 12, letterSpacing: 1.2, fontWeight: FontWeight.w500, color: subColor)),
+            style: GoogleFonts.poppins(fontSize: 12, letterSpacing: 1.2, fontWeight: FontWeight.w500, color: subColor)),
       ],
     );
   }
 
   // ── Frosted glass card ───────────────────────────────────────────────────────
   Widget _buildGlassCard(bool isDark) {
-    final cardBg = isDark ? Colors.white.withOpacity(0.92) : Colors.white;
-    final titleColor = isDark ? AppColors.authBgMid : AppColors.authBgBottom;
-    final subColor = isDark ? AppColors.authPurple.withOpacity(0.70) : AppColors.authBgMid.withOpacity(0.6);
+    final cardBg = Colors.white.withOpacity(0.92);
+    final titleColor = const Color(0xFF22014D);
+    final subColor = const Color(0xFF22014D).withOpacity(0.60);
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(28),
@@ -192,13 +190,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
           decoration: BoxDecoration(
             color: cardBg,
             borderRadius: BorderRadius.circular(28),
-            border: Border.all(color: Colors.white.withOpacity(0.95), width: 1.5),
+            border: Border.all(color: Colors.white, width: 2.0),
             boxShadow: [
               BoxShadow(
-                color: isDark ? Colors.black.withOpacity(0.20) : AppColors.authPurple.withOpacity(0.10),
-                blurRadius: 40,
-                spreadRadius: 2,
-                offset: const Offset(0, 12),
+                color: Colors.black.withOpacity(0.20),
+                blurRadius: 40, spreadRadius: 2, offset: const Offset(0, 12),
               ),
             ],
           ),
@@ -207,10 +203,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text('CREATE ACCOUNT',
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, letterSpacing: 3, color: titleColor)),
+                  style: GoogleFonts.poppins(fontSize: 22, fontWeight: FontWeight.w800, letterSpacing: 3, color: titleColor)),
               const SizedBox(height: 4),
               Text('Start your rosary journey today',
-                  style: TextStyle(fontSize: 12, color: subColor, letterSpacing: 0.3)),
+                  style: GoogleFonts.poppins(fontSize: 12, color: subColor, letterSpacing: 0.3)),
               const SizedBox(height: 28),
               _buildGlassField(controller: _emailController, label: 'Email address', hint: 'Enter your email', icon: Icons.email_outlined),
               const SizedBox(height: 18),
@@ -243,10 +239,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
       children: [
         Text(
           label,
-          style: TextStyle(
+          style: GoogleFonts.poppins(
             fontSize: 12,
             fontWeight: FontWeight.w600,
-            color: AppColors.authBgMid.withOpacity(0.80),
+            color: const Color(0xFF22014D).withOpacity(0.80),
             letterSpacing: 0.4,
           ),
         ),
@@ -258,50 +254,42 @@ class _RegisterScreenState extends State<RegisterScreen> {
             child: TextField(
               controller: controller,
               obscureText: isPassword ? obscure : false,
-              style: TextStyle(
-                color: AppColors.authBgBottom,
+              style: GoogleFonts.poppins(
+                color: const Color(0xFF22014D),
                 fontWeight: FontWeight.w500,
                 fontSize: 15,
               ),
               decoration: InputDecoration(
                 hintText: hint,
-                hintStyle: TextStyle(
-                  color: AppColors.authPurple.withOpacity(0.40),
+                hintStyle: GoogleFonts.poppins(
+                  color: const Color(0xFF22014D).withOpacity(0.40),
                   fontSize: 14,
                 ),
-                prefixIcon: Icon(icon,
-                    color: AppColors.authPurple.withOpacity(0.70), size: 20),
+                prefixIcon: Icon(icon, color: const Color(0xFF22014D).withOpacity(0.70), size: 20),
                 suffixIcon: isPassword
                     ? GestureDetector(
                         onTap: onToggle,
                         child: Icon(
-                          obscure
-                              ? Icons.visibility_off_outlined
-                              : Icons.visibility_outlined,
-                          color: AppColors.authPurple.withOpacity(0.60),
+                          obscure ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                          color: const Color(0xFF22014D).withOpacity(0.60),
                           size: 20,
                         ),
                       )
                     : null,
                 filled: true,
                 fillColor: Colors.white.withOpacity(0.80),
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
-                  borderSide:
-                      BorderSide(color: AppColors.authPurple.withOpacity(0.25)),
+                  borderSide: BorderSide(color: Colors.white, width: 2.0),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
-                  borderSide:
-                      BorderSide(color: AppColors.authPurple.withOpacity(0.25)),
+                  borderSide: BorderSide(color: Colors.white, width: 2.0),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
-                  borderSide: BorderSide(
-                      color: AppColors.goldPrimary.withOpacity(0.7),
-                      width: 1.5),
+                  borderSide: BorderSide(color: AppColors.goldPrimary.withOpacity(0.7), width: 1.5),
                 ),
               ),
             ),
@@ -318,10 +306,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
       children: [
         Text(
           'Phone number',
-          style: TextStyle(
+          style: GoogleFonts.poppins(
             fontSize: 12,
             fontWeight: FontWeight.w600,
-            color: AppColors.authBgMid.withOpacity(0.80),
+            color: const Color(0xFF22014D).withOpacity(0.80),
             letterSpacing: 0.4,
           ),
         ),
@@ -334,45 +322,36 @@ class _RegisterScreenState extends State<RegisterScreen> {
               controller: _phoneController,
               initialCountryCode: 'IN',
               onChanged: (phone) => _completePhoneNumber = phone.completeNumber,
-              style: TextStyle(
-                color: AppColors.authBgBottom,
+              style: GoogleFonts.poppins(
+                color: const Color(0xFF22014D),
                 fontWeight: FontWeight.w500,
                 fontSize: 15,
               ),
               dropdownIconPosition: IconPosition.trailing,
-              dropdownIcon: Icon(Icons.arrow_drop_down,
-                  color: AppColors.authPurple.withOpacity(0.70), size: 20),
-              dropdownTextStyle: TextStyle(
-                color: AppColors.authBgBottom,
+              dropdownIcon: Icon(Icons.arrow_drop_down, color: const Color(0xFF22014D).withOpacity(0.70), size: 20),
+              dropdownTextStyle: GoogleFonts.poppins(
+                color: const Color(0xFF22014D),
                 fontWeight: FontWeight.w600,
                 fontSize: 15,
               ),
               languageCode: 'en',
               decoration: InputDecoration(
                 hintText: 'Enter phone number',
-                hintStyle: TextStyle(
-                  color: AppColors.authPurple.withOpacity(0.40),
-                  fontSize: 14,
-                ),
+                hintStyle: GoogleFonts.poppins(color: const Color(0xFF22014D).withOpacity(0.40), fontSize: 14),
                 filled: true,
                 fillColor: Colors.white.withOpacity(0.80),
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
-                  borderSide:
-                      BorderSide(color: AppColors.authPurple.withOpacity(0.25)),
+                  borderSide: BorderSide(color: Colors.white, width: 2.0),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
-                  borderSide:
-                      BorderSide(color: AppColors.authPurple.withOpacity(0.25)),
+                  borderSide: BorderSide(color: Colors.white, width: 2.0),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
-                  borderSide: BorderSide(
-                      color: AppColors.goldPrimary.withOpacity(0.7),
-                      width: 1.5),
+                  borderSide: BorderSide(color: AppColors.goldPrimary.withOpacity(0.7), width: 1.5),
                 ),
               ),
             ),
@@ -392,50 +371,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: _isLoading
-                ? [
-                    AppColors.homeBg.withOpacity(0.5),
-                    AppColors.homeBg.withOpacity(0.5),
-                  ]
-                : [
-                    AppColors.homeBg,
-                    AppColors.homeBg,
-                  ],
+                ? [const Color(0xFF7B55A8).withOpacity(0.5), const Color(0xFF624294).withOpacity(0.5)]
+                : [const Color(0xFF7B55A8), const Color(0xFF624294)],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
           borderRadius: BorderRadius.circular(30),
-          boxShadow: _isLoading
-              ? []
-              : [
-                  BoxShadow(
-                    color: AppColors.authBgBottom.withOpacity(0.60),
-                    blurRadius: 0,
-                    offset: const Offset(0, 5),
-                  ),
-                  BoxShadow(
-                    color: AppColors.authPurple.withOpacity(0.35),
-                    blurRadius: 12,
-                    offset: const Offset(0, 8),
-                  ),
-                ],
+          boxShadow: _isLoading ? [] : [
+            BoxShadow(color: const Color(0xFF2A0A5E), blurRadius: 0, offset: const Offset(0, 5)),
+            BoxShadow(color: const Color(0xFF624294).withOpacity(0.45), blurRadius: 14, offset: const Offset(0, 8)),
+          ],
         ),
         child: Center(
           child: _isLoading
-              ? const SizedBox(
-                  width: 22,
-                  height: 22,
-                  child: CircularProgressIndicator(
-                      color: Colors.white, strokeWidth: 2.5),
-                )
-              : const Text(
-                  'Create account',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 0.5,
-                  ),
-                ),
+              ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5))
+              : Text('Create account', style: GoogleFonts.poppins(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700, letterSpacing: 0.5)),
         ),
       ),
     );
@@ -446,10 +396,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text('Already have an account? ', style: TextStyle(color: textColor, fontSize: 13)),
+        Text('Already have an account? ', style: GoogleFonts.poppins(color: textColor, fontSize: 13)),
         GestureDetector(
           onTap: () => Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const LoginScreen())),
-          child: Text('Sign In', style: TextStyle(color: linkColor, fontWeight: FontWeight.w800, fontSize: 13)),
+          child: Text('Sign In', style: GoogleFonts.poppins(color: linkColor, fontWeight: FontWeight.w800, fontSize: 13)),
         ),
       ],
     );
