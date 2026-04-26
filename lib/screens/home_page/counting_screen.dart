@@ -282,14 +282,40 @@ class _CountingScreenState extends State<CountingScreen>
         ),
         child: Stack(
           children: [
+            // ── Blended top image ──
+            Positioned(
+              top: -90,
+              left: 0,
+              right: 0,
+              child: ShaderMask(
+                shaderCallback: (rect) => LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.black,
+                    Colors.black,
+                    Colors.transparent,
+                  ],
+                  stops: const [0.0, 0.82, 1.0],
+                ).createShader(rect),
+                blendMode: BlendMode.dstIn,
+                child: Image.asset(
+                  'assets/demo/mathav.png',
+                  width: double.infinity,
+                  height: 395,
+                  fit: BoxFit.cover,
+                  alignment: Alignment.topCenter,
+                ),
+              ),
+            ),
             // ── Content ──
-            SafeArea(
+            Positioned.fill(
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: Column(
                   children: [
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 300),
                     _buildQuoteCard(),
                     const SizedBox(height: 24),
                     _buildModeToggle(),
