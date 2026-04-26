@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../colors/colors.dart';
 import '../../services/localization_service.dart';
 import '../../theme/theme_notifier.dart';
@@ -87,10 +88,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       builder: (ctx) => Padding(
         padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
         child: Container(
-          decoration: BoxDecoration(
-            color: AppColors.authBgMid,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-            border: Border.all(color: AppColors.authPurpleLight.withOpacity(0.3), width: 1.5),
+          decoration: const BoxDecoration(
+            color: Color(0xFF22014D),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
           ),
           padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
           child: Column(
@@ -99,15 +99,15 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               Container(
                 width: 40, height: 4,
                 decoration: BoxDecoration(
-                  color: AppColors.authPurpleLight.withOpacity(0.4),
+                  color: Colors.white.withOpacity(0.3),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
               const SizedBox(height: 20),
               Row(children: [
-                const Icon(Icons.language_rounded, color: AppColors.authPurpleLight, size: 20),
+                const Icon(Icons.language_rounded, color: Colors.white, size: 22),
                 const SizedBox(width: 10),
-                const Text('Select Language', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Colors.white)),
+                Text('Select Language', style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w700, color: Colors.white)),
               ]),
               const SizedBox(height: 16),
               Column(
@@ -121,29 +121,52 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       Navigator.pop(ctx);
                     },
                     child: Container(
-                      margin: const EdgeInsets.only(bottom: 8),
+                      margin: const EdgeInsets.only(bottom: 10),
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                       decoration: BoxDecoration(
-                        color: isSelected ? AppColors.authPurpleLight.withOpacity(0.15) : Colors.transparent,
-                        borderRadius: BorderRadius.circular(14),
+                        color: isSelected
+                            ? Colors.white.withOpacity(0.18)
+                            : Colors.white.withOpacity(0.08),
+                        borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: isSelected ? AppColors.authPurpleLight.withOpacity(0.5) : AppColors.authPurpleLight.withOpacity(0.15),
+                          color: isSelected
+                              ? Colors.white.withOpacity(0.55)
+                              : Colors.white.withOpacity(0.12),
                           width: 1.5,
                         ),
                       ),
                       child: Row(children: [
                         Container(
-                          width: 36, height: 36,
+                          width: 38, height: 28,
                           decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: isSelected ? AppColors.authPurpleLight.withOpacity(0.20) : AppColors.authBgTop.withOpacity(0.3),
-                            border: Border.all(color: AppColors.authPurpleLight.withOpacity(0.3)),
+                            color: Colors.white.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(8),
                           ),
-                          child: Center(child: Text(lang['code']!, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: isSelected ? Colors.white : AppColors.authLavender))),
+                          child: Center(
+                            child: Text(
+                              lang['code']!,
+                              style: GoogleFonts.poppins(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w800,
+                                color: Colors.white,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ),
                         ),
                         const SizedBox(width: 14),
-                        Expanded(child: Text(lang['name']!, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: isSelected ? Colors.white : Colors.white.withOpacity(0.70)))),
-                        if (isSelected) const Icon(Icons.check_rounded, color: AppColors.authPurpleLight, size: 20),
+                        Expanded(
+                          child: Text(
+                            lang['name']!,
+                            style: GoogleFonts.poppins(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                        if (isSelected)
+                          const Icon(Icons.check_rounded, color: Colors.white, size: 20),
                       ]),
                     ),
                   );
@@ -162,7 +185,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     return ValueListenableBuilder<bool>(
       valueListenable: themeNotifier,
       builder: (_, isDark, __) {
-        final bgColor = isDark ? AppColors.homeBg : const Color(0xFFF5EEF5);
+        final bgColor = isDark ? const Color(0xFF22014D) : const Color(0xFFF0EBF0);
         return _buildScaffold(context, size, isDark, bgColor);
       },
     );
@@ -269,7 +292,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       quarterTurns: 3,
                       child: Text(
                         'ROSARY',
-                        style: TextStyle(
+                        style: GoogleFonts.poppins(
                           color: Colors.white.withOpacity(0.90),
                           fontSize: 8,
                           fontWeight: FontWeight.w800,
@@ -289,13 +312,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   Widget _buildHeader() {
     final isDark = themeNotifier.isDark;
-    final langBg = isDark ? Colors.white : AppColors.authPurple.withOpacity(0.08);
-    final langText = isDark ? AppColors.homeBg : AppColors.authPurple;
-    final borderColor = isDark ? Colors.white : AppColors.authPurple.withOpacity(0.25);
+    final logoAsset = isDark ? 'assets/splash/ur_logo.png' : 'assets/splash/ur_logo_light.png';
+    final langBg = isDark ? Colors.white.withOpacity(0.12) : const Color(0xFF22014D).withOpacity(0.08);
+    final langText = isDark ? Colors.white : const Color(0xFF22014D);
+    final borderColor = isDark ? Colors.white.withOpacity(0.30) : const Color(0xFF22014D).withOpacity(0.25);
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Image.asset(isDark ? 'assets/splash/ur_logo.png' : 'assets/splash/ur_logo_light.png', width: 52, height: 52),
+        Image.asset(logoAsset, width: 52, height: 52),
         GestureDetector(
           onTap: _showLanguagePicker,
           child: Container(
@@ -309,7 +333,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             child: Row(mainAxisSize: MainAxisSize.min, children: [
               Icon(Icons.language_rounded, color: langText, size: 16),
               const SizedBox(width: 6),
-              Text(_selectedLanguage, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: langText)),
+              Text(_selectedLanguage, style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w700, color: langText)),
               const SizedBox(width: 4),
               Icon(Icons.keyboard_arrow_down_rounded, color: langText.withOpacity(0.7), size: 16),
             ]),
@@ -322,80 +346,70 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   Widget _buildQuoteCard() {
     final isDark = themeNotifier.isDark;
     final quote = _quotes[_currentQuoteIndex];
-    final cardBg = isDark ? Colors.white : Colors.white;
     final quoteTextColor = isDark ? const Color(0xFF333333) : AppColors.authBgBottom;
-    final refColor = isDark ? AppColors.authPurple : AppColors.authPurple;
-    return FadeTransition(
-      opacity: _quoteFadeAnim,
-      child: Container(
-        width: double.infinity,
-        height: 160,
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-        decoration: BoxDecoration(
-          color: cardBg,
-          borderRadius: BorderRadius.circular(22),
-          border: Border.all(color: AppColors.authPurpleLight.withOpacity(0.30), width: 1.5),
-          boxShadow: [
-            BoxShadow(
-              color: isDark
-                  ? AppColors.authBgBottom.withOpacity(0.20)
-                  : AppColors.authPurple.withOpacity(0.10),
-              blurRadius: 20,
-              offset: const Offset(0, 6),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              '\u275D',
-              style: TextStyle(fontSize: 20, color: AppColors.authPurple.withOpacity(0.45), height: 1.0),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              quote['text']!,
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: 14.5,
-                fontWeight: FontWeight.w500,
-                color: quoteTextColor,
-                fontStyle: FontStyle.italic,
-                height: 1.5,
-                letterSpacing: 0.2,
+    final shadowColor = isDark ? AppColors.authBgBottom.withOpacity(0.20) : AppColors.authPurple.withOpacity(0.10);
+
+    return GestureDetector(
+      onHorizontalDragEnd: (details) {
+        if (details.primaryVelocity == null) return;
+        _quoteController.reverse().then((_) {
+          if (!mounted) return;
+          setState(() {
+            if (details.primaryVelocity! < 0) {
+              _currentQuoteIndex = (_currentQuoteIndex + 1) % _quotes.length;
+            } else {
+              _currentQuoteIndex = (_currentQuoteIndex - 1 + _quotes.length) % _quotes.length;
+            }
+          });
+          _quoteController.forward();
+        });
+      },
+      child: FadeTransition(
+        opacity: _quoteFadeAnim,
+        child: Container(
+          width: double.infinity,
+          height: 160,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(color: Colors.white, width: 2.0),
+            boxShadow: [BoxShadow(color: shadowColor, blurRadius: 20, offset: const Offset(0, 6))],
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text('\u275D', style: TextStyle(fontSize: 20, color: AppColors.authPurple.withOpacity(0.45), height: 1.0)),
+              const SizedBox(height: 6),
+              Text(
+                quote['text']!,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w500, color: quoteTextColor, fontStyle: FontStyle.italic, height: 1.5, letterSpacing: 0.2),
               ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              quote['reference']!,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                color: refColor,
-                letterSpacing: 1.2,
+              const SizedBox(height: 8),
+              if (quote['reference']!.isNotEmpty)
+                Text(quote['reference']!,
+                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.authPurple, letterSpacing: 1.2)),
+              const SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(_quotes.length, (i) {
+                  return AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    width: i == _currentQuoteIndex ? 18 : 6,
+                    height: 6,
+                    margin: const EdgeInsets.symmetric(horizontal: 3),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(3),
+                      color: i == _currentQuoteIndex ? AppColors.authPurple : AppColors.authPurple.withOpacity(0.25),
+                    ),
+                  );
+                }),
               ),
-            ),
-            const SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(_quotes.length, (i) {
-                return AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
-                  width: i == _currentQuoteIndex ? 18 : 6,
-                  height: 6,
-                  margin: const EdgeInsets.symmetric(horizontal: 3),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(3),
-                    color: i == _currentQuoteIndex
-                        ? AppColors.authPurple
-                        : AppColors.authPurple.withOpacity(0.25),
-                  ),
-                );
-              }),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -410,7 +424,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         crossAxisCount: 2,
         crossAxisSpacing: 14,
         mainAxisSpacing: 14,
-        childAspectRatio: 0.85,
+        childAspectRatio: 0.72,
       ),
       itemBuilder: (context, i) {
         final item = _features[i];
@@ -426,46 +440,48 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               ));
             }
           },
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(16),
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                Image.asset(item['image']!, fit: BoxFit.cover),
-                // dark gradient overlay
-                Container(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Container(
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [Colors.transparent, Colors.black.withOpacity(0.65)],
-                    ),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.white, width: 2.0),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(14),
+                    child: Image.asset(item['image']!, fit: BoxFit.cover, width: double.infinity),
                   ),
                 ),
-                // title + heart
-                Positioned(
-                  left: 10,
-                  right: 10,
-                  bottom: 10,
+              ),
+              const SizedBox(height: 6),
+              SizedBox(
+                height: 44,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
                   child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(item['title']!, style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700)),
-                            Text(item['subtitle']!, style: TextStyle(color: Colors.white.withOpacity(0.85), fontSize: 13, fontWeight: FontWeight.w500)),
-                          ],
+                        child: Text(
+                          '${item['title']!} ${item['subtitle']!}',
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.poppins(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                            height: 1.3,
+                          ),
                         ),
                       ),
-                      const Icon(Icons.favorite_border_rounded, color: Colors.white, size: 20),
+                      const Icon(Icons.favorite_rounded, color: Colors.white, size: 20),
                     ],
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         );
       },

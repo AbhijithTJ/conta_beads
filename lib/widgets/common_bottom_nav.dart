@@ -18,10 +18,10 @@ class CommonBottomNav extends StatelessWidget {
     return ValueListenableBuilder<bool>(
       valueListenable: themeNotifier,
       builder: (_, isDark, __) {
-        final navBg = isDark ? AppColors.homeBg : const Color(0xFFEDE0ED);
+        final navBg = const Color(0xFF22014D);
         final iconColor = Colors.white;
-        final iconDimColor = isDark ? Colors.white60 : AppColors.homeBg.withOpacity(0.4);
-        final btnBg = isDark ? const Color(0xFF8B1A5A) : AppColors.authPurple;
+        final iconDimColor = Colors.white.withOpacity(0.45);
+        final btnBg = AppColors.goldPrimary;
 
         return CurvedNavigationBar(
           index: selectedIndex,
