@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'dart:async';
 import 'dart:math';
 import 'dart:ui';
+import 'package:google_fonts/google_fonts.dart';
 import '../../colors/colors.dart';
 import '../../services/localization_service.dart';
 import '../../theme/theme_notifier.dart';
@@ -31,11 +32,11 @@ class _CountingScreenState extends State<CountingScreen>
   int get _activeCount => _isRosary ? _count : _chapletCount;
 
   // Rosary palette — resolved at build time via themeNotifier
-  Color get _rosaryBgTop    => themeNotifier.isDark ? AppColors.homeBg : const Color(0xFFF0EBF0);
-  Color get _rosaryBgMid    => themeNotifier.isDark ? AppColors.homeBg : const Color(0xFFF0EBF0);
-  Color get _rosaryBgBottom => themeNotifier.isDark ? AppColors.homeBg : const Color(0xFFF0EBF0);
-  static const _rosaryAccent   = AppColors.authPurpleLight;
-  static const _rosaryDark     = AppColors.authPurple;
+  Color get _rosaryBgTop    => const Color(0xFF22014D);
+  Color get _rosaryBgMid    => const Color(0xFF22014D);
+  Color get _rosaryBgBottom => const Color(0xFF22014D);
+  static const _rosaryAccent = Color(0xFFC9A8F5);
+  static const _rosaryDark   = Color(0xFF6B3FA0);
 
   // Chaplet palette — Divine Mercy (red, white, blue)
   static const _chapletBgTop    = Color(0xFF8B0000);  // deep red
@@ -289,20 +290,18 @@ class _CountingScreenState extends State<CountingScreen>
                 child: Column(
                   children: [
                     const SizedBox(height: 24),
-                    _buildHeader(),
-                    const SizedBox(height: 24),
                     _buildQuoteCard(),
                     const SizedBox(height: 24),
                     _buildModeToggle(),
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 20),
                     _buildCountCard(),
-                    const SizedBox(height: 36),
+                    const SizedBox(height: 8),
                     _buildCountButtons(),
                     const SizedBox(height: 32),
                     _buildNoteInput(),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 12),
                     _buildSaveButton(),
-                    const SizedBox(height: 40),
+                    const SizedBox(height: 24),
                   ],
                 ),
               ),
@@ -514,8 +513,8 @@ class _CountingScreenState extends State<CountingScreen>
   Widget _toggleTab(String label, bool isRosary) {
     final isDark = themeNotifier.isDark;
     final selected = _isRosary == isRosary;
-    final selectedTextColor = isDark || !_isRosary ? AppColors.authBgMid : AppColors.authBgBottom;
-    final unselectedTextColor = isDark || !_isRosary ? Colors.white.withOpacity(0.55) : AppColors.authBgMid.withOpacity(0.5);
+    final selectedTextColor = AppColors.authBgMid;
+    final unselectedTextColor = Colors.white.withOpacity(0.55);
 
     return Expanded(
       child: GestureDetector(
@@ -529,7 +528,7 @@ class _CountingScreenState extends State<CountingScreen>
           ),
           alignment: Alignment.center,
           child: Text(label,
-              style: TextStyle(
+              style: GoogleFonts.poppins(
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
                   color: selected ? selectedTextColor : unselectedTextColor)),
@@ -540,11 +539,11 @@ class _CountingScreenState extends State<CountingScreen>
 
   Widget _buildHeader() {
     final isDark = themeNotifier.isDark;
-    final logoAsset = isDark || !_isRosary ? 'assets/splash/ur_logo.png' : 'assets/splash/ur_logo_light.png';
-    final titleColor = isDark || !_isRosary ? Colors.white : AppColors.authBgBottom;
-    final langBg = isDark || !_isRosary ? Colors.white : AppColors.authPurple.withOpacity(0.08);
-    final langText = isDark || !_isRosary ? AppColors.homeBg : AppColors.authPurple;
-    final langBorder = isDark || !_isRosary ? Colors.white : AppColors.authPurple.withOpacity(0.25);
+    final logoAsset = isDark || !_isRosary ? 'assets/splash/ur_logo.png' : 'assets/splash/ur_logo.png';
+    final titleColor = Colors.white;
+    final langBg = Colors.white.withOpacity(0.12);
+    final langText = Colors.white;
+    final langBorder = Colors.white.withOpacity(0.30);
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -566,7 +565,7 @@ class _CountingScreenState extends State<CountingScreen>
             ),
             const SizedBox(width: 10),
             Text('Upper Room',
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: titleColor, letterSpacing: 0.5)),
+                style: GoogleFonts.poppins(fontSize: 22, fontWeight: FontWeight.w900, color: titleColor, letterSpacing: 0.5)),
           ],
         ),
         GestureDetector(
@@ -582,7 +581,7 @@ class _CountingScreenState extends State<CountingScreen>
             child: Row(mainAxisSize: MainAxisSize.min, children: [
               Icon(Icons.language_rounded, color: langText, size: 16),
               const SizedBox(width: 6),
-              Text(_selectedLanguage, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: langText, letterSpacing: 0.3)),
+              Text(_selectedLanguage, style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w700, color: langText, letterSpacing: 0.3)),
               const SizedBox(width: 4),
               Icon(Icons.keyboard_arrow_down_rounded, color: langText.withOpacity(0.7), size: 16),
             ]),
@@ -644,28 +643,24 @@ class _CountingScreenState extends State<CountingScreen>
 
   Widget _buildCountCard() {
     return SizedBox(
-      width: 270,
-      height: 270,
+      width: 200,
+      height: 200,
       child: Stack(
         alignment: Alignment.center,
         children: [
-          // ripple ring 1
-          _RippleRing(animation: _ripple1Anim, baseSize: 210, color: _accent),
-          // ripple ring 2
-          _RippleRing(animation: _ripple2Anim, baseSize: 210, color: _accent),
-          // ripple ring 3
-          _RippleRing(animation: _ripple3Anim, baseSize: 210, color: _accent),
-          // main orb
+          _RippleRing(animation: _ripple1Anim, baseSize: 155, color: _accent),
+          _RippleRing(animation: _ripple2Anim, baseSize: 155, color: _accent),
+          _RippleRing(animation: _ripple3Anim, baseSize: 155, color: _accent),
           AnimatedBuilder(
             animation: _pulseAnimation,
             builder: (context, child) => Transform.scale(scale: _pulseAnimation.value, child: child),
             child: Container(
-              width: 210,
-              height: 210,
+              width: 155,
+              height: 155,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: _isRosary
-                  ? (themeNotifier.isDark ? Colors.white.withOpacity(0.12) : AppColors.authPurple.withOpacity(0.08))
+                  ? Colors.white.withOpacity(0.12)
                   : Colors.black.withOpacity(0.40),
                 boxShadow: [
                   BoxShadow(color: _bgBottom.withOpacity(0.35), blurRadius: 36, spreadRadius: 4, offset: const Offset(0, 8)),
@@ -678,32 +673,30 @@ class _CountingScreenState extends State<CountingScreen>
                 children: [
                   Text(
                     '$_activeCount',
-                    style: TextStyle(
-                      fontSize: 68,
+                    style: const TextStyle(
+                      fontSize: 52,
                       fontWeight: FontWeight.w900,
-                      color: (_isRosary && !themeNotifier.isDark) ? AppColors.authBgBottom : Colors.white,
+                      color: Colors.white,
                       height: 1.0,
                       letterSpacing: -2,
                     ),
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 4),
                   Container(
-                    width: 36,
+                    width: 28,
                     height: 2,
                     decoration: BoxDecoration(
                       gradient: LinearGradient(colors: [_accent, _dark]),
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 6),
                   Text(
                     _isRosary ? loc.tr('rosary_counted') : 'Chaplet Counted',
-                    style: TextStyle(
-                      fontSize: 11,
+                    style: GoogleFonts.poppins(
+                      fontSize: 10,
                       fontWeight: FontWeight.w500,
-                      color: (_isRosary && !themeNotifier.isDark)
-                          ? AppColors.authBgMid.withOpacity(0.6)
-                          : Colors.white.withOpacity(0.65),
+                      color: Colors.white.withOpacity(0.65),
                       letterSpacing: 1.5,
                     ),
                   ),
@@ -723,26 +716,18 @@ class _CountingScreenState extends State<CountingScreen>
         AnimatedBuilder(
           animation: _decrementScaleAnim,
           builder: (context, child) => Transform.scale(scale: _decrementScaleAnim.value, child: child),
-          child: _CircleActionButton(
+          child: GestureDetector(
             onTap: _decrement,
-            color: _isRosary ? AppColors.greyButton : const Color(0xFF8B0000),
-            darkColor: _isRosary ? AppColors.greyDark : const Color(0xFF5C0000),
-            icon: Icons.remove_rounded,
-            size: 76,
-            iconSize: 36,
+            child: const Icon(Icons.remove_rounded, color: Colors.white, size: 36),
           ),
         ),
-        const SizedBox(width: 44),
+        const SizedBox(width: 60),
         AnimatedBuilder(
           animation: _incrementScaleAnim,
           builder: (context, child) => Transform.scale(scale: _incrementScaleAnim.value, child: child),
-          child: _CircleActionButton(
+          child: GestureDetector(
             onTap: _increment,
-            color: _isRosary ? AppColors.greenButton : const Color(0xFF1A4A8B),
-            darkColor: _isRosary ? AppColors.greenDark : const Color(0xFF0A1F4A),
-            icon: Icons.add_rounded,
-            size: 88,
-            iconSize: 44,
+            child: const Icon(Icons.add_rounded, color: Colors.white, size: 40),
           ),
         ),
       ],
@@ -752,10 +737,10 @@ class _CountingScreenState extends State<CountingScreen>
   Widget _buildNoteInput() {
     final isDark = themeNotifier.isDark;
     final inputBg = _isRosary
-        ? (isDark ? Colors.white.withOpacity(0.10) : Colors.white.withOpacity(0.80))
+        ? Colors.white.withOpacity(0.10)
         : Colors.black.withOpacity(0.35);
-    final textColor = _isRosary && !isDark ? AppColors.authBgBottom : Colors.white;
-    final hintColor = _isRosary && !isDark ? AppColors.authPurple.withOpacity(0.35) : Colors.white.withOpacity(0.40);
+    final textColor = _isRosary ? Colors.white : Colors.white;
+    final hintColor = _isRosary ? Colors.white.withOpacity(0.40) : Colors.white.withOpacity(0.40);
 
     return Container(
       decoration: BoxDecoration(
@@ -766,13 +751,13 @@ class _CountingScreenState extends State<CountingScreen>
       ),
       child: TextField(
         controller: _noteController,
-        style: TextStyle(color: textColor, fontSize: 15, fontWeight: FontWeight.w500),
+        style: GoogleFonts.poppins(color: textColor, fontSize: 13, fontWeight: FontWeight.w500),
         decoration: InputDecoration(
           hintText: loc.tr('add_intentions'),
-          hintStyle: TextStyle(color: hintColor, fontSize: 14, fontWeight: FontWeight.w400),
-          prefixIcon: Icon(Icons.edit_note_rounded, color: _accent, size: 24),
+          hintStyle: GoogleFonts.poppins(color: hintColor, fontSize: 12, fontWeight: FontWeight.w400),
+          prefixIcon: Icon(Icons.edit_note_rounded, color: _accent, size: 20),
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(18),
             borderSide: BorderSide(color: _accent, width: 1.5),
@@ -783,32 +768,67 @@ class _CountingScreenState extends State<CountingScreen>
   }
 
   Widget _buildSaveButton() {
-    return GestureDetector(
-      onTap: _save,
-      child: Container(
-        height: 56,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [_accent, _dark],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-          borderRadius: BorderRadius.circular(18),
-          boxShadow: [
-            BoxShadow(color: _bgBottom.withOpacity(0.60), blurRadius: 0, offset: const Offset(0, 5)),
-            BoxShadow(color: _dark.withOpacity(0.35), blurRadius: 12, offset: const Offset(0, 8)),
-          ],
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.bookmark_rounded, color: Colors.white, size: 20),
-            const SizedBox(width: 8),
-            Text(
-              loc.tr('save'),
-              style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700, letterSpacing: 0.5),
+    bool _isSavePressed = false;
+    return StatefulBuilder(
+      builder: (context, setSaveState) => GestureDetector(
+        onTap: _save,
+        onTapDown: (_) => setSaveState(() => _isSavePressed = true),
+        onTapUp: (_) => setSaveState(() => _isSavePressed = false),
+        onTapCancel: () => setSaveState(() => _isSavePressed = false),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 100),
+          height: 46,
+          transform: Matrix4.translationValues(0, _isSavePressed ? 4 : 0, 0),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFF7B55A8), Color(0xFF624294)],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
             ),
-          ],
+            borderRadius: BorderRadius.circular(30),
+            boxShadow: _isSavePressed
+                ? []
+                : [
+                    BoxShadow(
+                      color: const Color(0xFF2A0A5E),
+                      blurRadius: 0,
+                      offset: const Offset(0, 5),
+                    ),
+                    BoxShadow(
+                      color: const Color(0xFF624294).withOpacity(0.45),
+                      blurRadius: 14,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+            border: Border.all(
+              color: _isSavePressed ? Colors.transparent : Colors.white.withOpacity(0.15),
+              width: 1,
+            ),
+          ),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(30),
+              gradient: LinearGradient(
+                colors: [
+                  Colors.white.withOpacity(_isSavePressed ? 0.0 : 0.10),
+                  Colors.transparent,
+                ],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.bookmark_rounded, color: Colors.white, size: 20),
+                const SizedBox(width: 8),
+                Text(
+                  loc.tr('save'),
+                  style: GoogleFonts.poppins(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w700, letterSpacing: 0.5),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
