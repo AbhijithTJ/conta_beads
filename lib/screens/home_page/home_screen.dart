@@ -6,6 +6,8 @@ import '../../colors/colors.dart';
 import '../../services/localization_service.dart';
 import '../../theme/theme_notifier.dart';
 import 'counting_screen.dart';
+import '../adopt_priest/adopt_priest_screen.dart';
+import '../everyday_prayers/everyday_prayers_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final String userEmail;
@@ -437,6 +439,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             } else if (i == 1) {
               Navigator.of(context).push(MaterialPageRoute(
                 builder: (_) => CountingScreen(userEmail: widget.userEmail, startWithChaplet: true),
+              ));
+            } else if (i == 2) {
+              Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) => const AdoptPriestScreen(),
+              ));
+            } else if (i == 3) {
+              Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) => const EverydayPrayersScreen(),
               ));
             }
           },

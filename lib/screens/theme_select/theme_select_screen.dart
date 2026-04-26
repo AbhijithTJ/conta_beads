@@ -214,8 +214,8 @@ class _ThemeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bg = isDarkOption ? const Color(0xFF22014D) : const Color(0xFFF5EEF5);
-    final cardBg = isDarkOption ? const Color(0xFF2E0A5E) : Colors.white;
+    final bg = isDarkOption ? const Color(0xFF3D0227) : const Color(0xFFF5EEF5);
+    final cardBg = isDarkOption ? const Color(0xFF560737) : Colors.white;
     final textColor = isDarkOption ? Colors.white : const Color(0xFF3D0227);
     final subColor = isDarkOption
         ? Colors.white.withOpacity(0.45)
