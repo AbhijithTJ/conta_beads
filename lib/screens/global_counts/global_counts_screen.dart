@@ -138,8 +138,8 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
   }
 
   Widget _buildHeader(bool isDark) {
-    final badgeBg = isDark ? Colors.white.withOpacity(0.1) : AppColors.authPurple.withOpacity(0.08);
-    final badgeBorder = isDark ? Colors.white.withOpacity(0.15) : AppColors.authPurple.withOpacity(0.2);
+    final badgeBg = isDark ? Colors.white.withOpacity(0.1) : const Color(0xFF22014D).withOpacity(0.08);
+    final badgeBorder = isDark ? Colors.white.withOpacity(0.15) : const Color(0xFF22014D).withOpacity(0.2);
     final badgeText = isDark ? AppColors.goldLight : AppColors.goldDark;
     final titleColor = isDark ? Colors.white : AppColors.authBgBottom;
     final subColor = isDark ? Colors.white.withOpacity(0.5) : AppColors.authBgMid.withOpacity(0.5);
@@ -207,7 +207,7 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
             child: LinearProgressIndicator(
               value: (percentage / 100).clamp(0.0, 1.0),
               minHeight: 8,
-              backgroundColor: AppColors.authPurple.withOpacity(0.1),
+              backgroundColor: const Color(0xFF22014D).withOpacity(0.1),
               valueColor: const AlwaysStoppedAnimation<Color>(AppColors.goldPrimary),
             ),
           ),
@@ -258,7 +258,7 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
   Widget _buildQuoteCard(bool isDark) {
     final quote = quotes[_currentQuotePage];
     final quoteTextColor = isDark ? const Color(0xFF333333) : AppColors.authBgBottom;
-    final shadowColor = isDark ? AppColors.authBgBottom.withOpacity(0.20) : AppColors.authPurple.withOpacity(0.10);
+    final shadowColor = isDark ? AppColors.authBgBottom.withOpacity(0.20) : const Color(0xFF22014D).withOpacity(0.10);
 
     return GestureDetector(
       onHorizontalDragEnd: (details) {
@@ -290,7 +290,7 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text('\u275D', style: TextStyle(fontSize: 20, color: AppColors.authPurple.withOpacity(0.45), height: 1.0)),
+              Text('\u275D', style: TextStyle(fontSize: 20, color: const Color(0xFF22014D).withOpacity(0.45), height: 1.0)),
               const SizedBox(height: 6),
               Text(quote['text']!,
                   textAlign: TextAlign.center,
@@ -300,7 +300,7 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
               const SizedBox(height: 8),
               if (quote['author']!.isNotEmpty)
                 Text(quote['author']!,
-                    style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.authPurple, letterSpacing: 1.2)),
+                    style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w700, color: const Color(0xFF22014D), letterSpacing: 1.2)),
               const SizedBox(height: 10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -312,7 +312,7 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
                     margin: const EdgeInsets.symmetric(horizontal: 3),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(3),
-                      color: i == _currentQuotePage ? AppColors.authPurple : AppColors.authPurple.withOpacity(0.25),
+                      color: i == _currentQuotePage ? const Color(0xFF22014D) : const Color(0xFF22014D).withOpacity(0.25),
                     ),
                   );
                 }),
@@ -477,8 +477,8 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
   }
 
   Widget _buildRankBadge(int rank, bool isYou) {
-    Color bg = AppColors.authPurple.withOpacity(0.05);
-    Color border = AppColors.authPurple.withOpacity(0.15);
+    Color bg = const Color(0xFF22014D).withOpacity(0.05);
+    Color border = const Color(0xFF22014D).withOpacity(0.15);
     Color text = AppColors.authBgBottom;
 
     if (rank == 1) {
@@ -535,10 +535,7 @@ class _GlassCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: Colors.white.withOpacity(0.92),
             borderRadius: BorderRadius.circular(28),
-            border: Border.all(
-              color: Colors.white.withOpacity(0.95),
-              width: 1.5,
-            ),
+            border: Border.all(color: Colors.white, width: 2.0),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.20),

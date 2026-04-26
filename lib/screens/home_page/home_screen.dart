@@ -347,7 +347,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     final isDark = themeNotifier.isDark;
     final quote = _quotes[_currentQuoteIndex];
     final quoteTextColor = isDark ? const Color(0xFF333333) : AppColors.authBgBottom;
-    final shadowColor = isDark ? AppColors.authBgBottom.withOpacity(0.20) : AppColors.authPurple.withOpacity(0.10);
+    final shadowColor = isDark ? AppColors.authBgBottom.withOpacity(0.20) : const Color(0xFF22014D).withOpacity(0.10);
 
     return GestureDetector(
       onHorizontalDragEnd: (details) {
@@ -379,7 +379,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text('\u275D', style: TextStyle(fontSize: 20, color: AppColors.authPurple.withOpacity(0.45), height: 1.0)),
+              Text('\u275D', style: TextStyle(fontSize: 20, color: const Color(0xFF22014D).withOpacity(0.45), height: 1.0)),
               const SizedBox(height: 6),
               Text(
                 quote['text']!,
@@ -391,7 +391,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               const SizedBox(height: 8),
               if (quote['reference']!.isNotEmpty)
                 Text(quote['reference']!,
-                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.authPurple, letterSpacing: 1.2)),
+                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Color(0xFF22014D), letterSpacing: 1.2)),
               const SizedBox(height: 10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -403,7 +403,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     margin: const EdgeInsets.symmetric(horizontal: 3),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(3),
-                      color: i == _currentQuoteIndex ? AppColors.authPurple : AppColors.authPurple.withOpacity(0.25),
+                      color: i == _currentQuoteIndex ? const Color(0xFF22014D) : const Color(0xFF22014D).withOpacity(0.25),
                     ),
                   );
                 }),

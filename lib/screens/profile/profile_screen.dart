@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../colors/colors.dart';
 import '../../dialog_box/logout_alert_dialog.dart';
 import '../../login_and_register/login_screen.dart';
@@ -60,7 +61,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           body: Container(
             width: double.infinity,
             height: double.infinity,
-            color: isDark ? AppColors.homeBg : const Color(0xFFF5EEF5),
+            color: isDark ? const Color(0xFF22014D) : const Color(0xFFF5EEF5),
             child: SafeArea(
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
@@ -69,13 +70,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     const SizedBox(height: 12),
-                    Text('MY PROFILE', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 3.5, color: subColor)),
+                    Text('MY PROFILE', style: GoogleFonts.poppins(fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 3.5, color: subColor)),
                     const SizedBox(height: 28),
                     _buildAvatar(),
                     const SizedBox(height: 16),
-                    Text('John David', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: headerColor, letterSpacing: 0.5)),
+                    Text('John David', style: GoogleFonts.poppins(fontSize: 28, fontWeight: FontWeight.w800, color: headerColor, letterSpacing: 0.5)),
                     const SizedBox(height: 6),
-                    Text('MEMBER SINCE 2023', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, letterSpacing: 2.0, color: subColor)),
+                    Text('MEMBER SINCE 2023', style: GoogleFonts.poppins(fontSize: 10, fontWeight: FontWeight.w600, letterSpacing: 2.0, color: subColor)),
                     const SizedBox(height: 32),
                     _buildStatsRow(),
                     const SizedBox(height: 36),
@@ -137,7 +138,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               gradient: LinearGradient(colors: [AppColors.cardLavender, AppColors.cardLavender], begin: Alignment.topLeft, end: Alignment.bottomRight),
-              border: Border.all(color: AppColors.homeBg, width: 2.5),
+              border: Border.all(color: const Color(0xFF22014D), width: 2.5),
               boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.15), blurRadius: 8, offset: const Offset(0, 4))],
             ),
             child: const Icon(Icons.camera_alt_rounded, size: 14, color: Color(0xFF3D0227)),
@@ -164,7 +165,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       alignment: Alignment.centerLeft,
       child: Text(
         text.toUpperCase(),
-        style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 2.0, color: color),
+        style: GoogleFonts.poppins(fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 2.0, color: color),
       ),
     );
   }
@@ -183,7 +184,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _divider() => Container(height: 1, margin: const EdgeInsets.symmetric(horizontal: 4), color: AppColors.authPurple.withOpacity(0.08));
+  Widget _divider() => Container(height: 1, margin: const EdgeInsets.symmetric(horizontal: 4), color: const Color(0xFF22014D).withOpacity(0.08));
 
   Widget _buildSettingsList() {
     return Column(
@@ -197,21 +198,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   width: 40, height: 40,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
-                    color: AppColors.authPurple.withOpacity(0.08),
-                    border: Border.all(color: AppColors.authPurple.withOpacity(0.15), width: 1),
+                    color: const Color(0xFF22014D).withOpacity(0.08),
+                    border: Border.all(color: const Color(0xFF22014D).withOpacity(0.15), width: 1),
                   ),
-                  child: Icon(Icons.dark_mode_rounded, color: AppColors.authPurple, size: 18),
+                  child: Icon(Icons.dark_mode_rounded, color: const Color(0xFF22014D), size: 18),
                 ),
                 const SizedBox(width: 16),
-                Expanded(child: Text('Dark Mode', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.authBgBottom))),
+                Expanded(child: Text('Dark Mode', style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.authBgBottom))),
                 Transform.scale(
                   scale: 0.8,
                   child: Switch.adaptive(
                     value: _isDarkMode,
                     activeColor: AppColors.goldPrimary,
                     activeTrackColor: AppColors.goldPrimary.withOpacity(0.3),
-                    inactiveThumbColor: AppColors.authPurple.withOpacity(0.5),
-                    inactiveTrackColor: AppColors.authPurple.withOpacity(0.1),
+                    inactiveThumbColor: const Color(0xFF22014D).withOpacity(0.5),
+                    inactiveTrackColor: const Color(0xFF22014D).withOpacity(0.1),
                     onChanged: (val) {
                       themeNotifier.setDark(val);
                       HapticFeedback.selectionClick();
@@ -243,9 +244,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           gradient: LinearGradient(colors: [Colors.redAccent.shade400, Colors.red.shade800], begin: Alignment.topCenter, end: Alignment.bottomCenter),
           boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.25), blurRadius: 15, offset: const Offset(0, 8))],
         ),
-        child: const Center(
-          child: Text('SIGN OUT', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, letterSpacing: 1.5, color: Colors.white)),
-        ),
+        child: const Center(child: Text('SIGN OUT', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, letterSpacing: 1.5, color: Colors.white))),
       ),
     );
   }
@@ -268,7 +267,7 @@ class _WhiteCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: Colors.white.withOpacity(0.92),
             borderRadius: BorderRadius.circular(28),
-            border: Border.all(color: Colors.white.withOpacity(0.95), width: 1.5),
+            border: Border.all(color: Colors.white, width: 2.0),
             boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.20), blurRadius: 40, spreadRadius: 2, offset: const Offset(0, 12))],
           ),
           child: child,
@@ -295,19 +294,19 @@ class _InfoRow extends StatelessWidget {
             width: 42, height: 42,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(14),
-              color: AppColors.authPurple.withOpacity(0.08),
-              border: Border.all(color: AppColors.authPurple.withOpacity(0.15), width: 1),
+              color: const Color(0xFF22014D).withOpacity(0.08),
+              border: Border.all(color: const Color(0xFF22014D).withOpacity(0.15), width: 1),
             ),
-            child: Icon(icon, color: AppColors.authPurple, size: 20),
+            child: Icon(icon, color: const Color(0xFF22014D), size: 20),
           ),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(label.toUpperCase(), style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 1.2, color: AppColors.authBgMid.withOpacity(0.6))),
+                Text(label.toUpperCase(), style: GoogleFonts.poppins(fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 1.2, color: AppColors.authBgMid.withOpacity(0.6))),
                 const SizedBox(height: 4),
-                Text(value, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.authBgBottom), overflow: TextOverflow.ellipsis),
+                Text(value, style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.authBgBottom), overflow: TextOverflow.ellipsis),
               ],
             ),
           ),
@@ -334,14 +333,14 @@ class _SettingRow extends StatelessWidget {
               width: 40, height: 40,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
-                color: AppColors.authPurple.withOpacity(0.08),
-                border: Border.all(color: AppColors.authPurple.withOpacity(0.15), width: 1),
+                color: const Color(0xFF22014D).withOpacity(0.08),
+                border: Border.all(color: const Color(0xFF22014D).withOpacity(0.15), width: 1),
               ),
-              child: Icon(icon, color: AppColors.authPurple, size: 18),
+              child: Icon(icon, color: const Color(0xFF22014D), size: 18),
             ),
             const SizedBox(width: 16),
-            Expanded(child: Text(title, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.authBgBottom))),
-            Icon(Icons.chevron_right_rounded, color: AppColors.authPurple.withOpacity(0.3), size: 24),
+            Expanded(child: Text(title, style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.authBgBottom))),
+            Icon(Icons.chevron_right_rounded, color: const Color(0xFF22014D).withOpacity(0.3), size: 24),
           ],
         ),
       ),
@@ -367,14 +366,14 @@ class _StatBox extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.white.withOpacity(0.92),
               borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: Colors.white.withOpacity(0.95), width: 1),
+              border: Border.all(color: Colors.white, width: 2.0),
               boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.12), blurRadius: 20, offset: const Offset(0, 8))],
             ),
             child: Column(
               children: [
                 Text(value, style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: AppColors.authBgMid, height: 1)),
                 const SizedBox(height: 6),
-                Text(label.toUpperCase(), style: TextStyle(fontSize: 9, fontWeight: FontWeight.w800, letterSpacing: 1.2, color: AppColors.authPurple.withOpacity(0.5))),
+                Text(label.toUpperCase(), style: GoogleFonts.poppins(fontSize: 9, fontWeight: FontWeight.w800, letterSpacing: 1.2, color: const Color(0xFF22014D).withOpacity(0.5))),
               ],
             ),
           ),
