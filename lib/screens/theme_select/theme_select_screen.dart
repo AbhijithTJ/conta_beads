@@ -214,12 +214,12 @@ class _ThemeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bg = isDarkOption ? const Color(0xFF3D0227) : const Color(0xFFF5EEF5);
-    final cardBg = isDarkOption ? const Color(0xFF560737) : Colors.white;
-    final textColor = isDarkOption ? Colors.white : const Color(0xFF3D0227);
+    final bg = isDarkOption ? const Color(0xFF22014D) : const Color(0xFFF5EEF5);
+    final cardBg = isDarkOption ? const Color(0xFFEDE0ED) : Colors.white;
+    final textColor = isDarkOption ? Colors.white : const Color(0xFF22014D);
     final subColor = isDarkOption
         ? Colors.white.withOpacity(0.45)
-        : const Color(0xFF3D0227).withOpacity(0.45);
+        : const Color(0xFF22014D).withOpacity(0.45);
     final label = isDarkOption ? 'Dark' : 'Light';
     final icon = isDarkOption ? Icons.dark_mode_rounded : Icons.light_mode_rounded;
 
@@ -365,10 +365,10 @@ class _ProfilePreviewTutorialState extends State<_ProfilePreviewTutorial>
   @override
   Widget build(BuildContext context) {
     final isDark = widget.isDark;
-    final cardBg = isDark ? const Color(0xFF560737) : Colors.white;
-    final profileBg = isDark ? const Color(0xFF3D0227) : const Color(0xFFF0EBF0);
-    final textColor = isDark ? Colors.white : AppColors.authBgBottom;
-    final subColor = isDark ? Colors.white.withOpacity(0.45) : AppColors.authBgMid.withOpacity(0.5);
+    final cardBg = isDark ? const Color(0xFFEDE0ED) : Colors.white;
+    final profileBg = isDark ? const Color(0xFF22014D) : const Color(0xFFF0EBF0);
+    final textColor = isDark ? const Color(0xFF22014D) : AppColors.authBgBottom;
+    final subColor = isDark ? const Color(0xFF22014D).withOpacity(0.5) : AppColors.authBgMid.withOpacity(0.5);
     final highlightColor = AppColors.goldPrimary;
 
     return Column(
@@ -397,7 +397,8 @@ class _ProfilePreviewTutorialState extends State<_ProfilePreviewTutorial>
             color: profileBg,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: isDark ? Colors.white.withOpacity(0.08) : const Color(0xFF22014D).withOpacity(0.12),
+              color: isDark ? Colors.white.withOpacity(0.15) : const Color(0xFF22014D).withOpacity(0.12),
+              width: 1.5,
             ),
           ),
           padding: const EdgeInsets.all(14),
@@ -467,9 +468,10 @@ class _ProfilePreviewTutorialState extends State<_ProfilePreviewTutorial>
                           width: 28, height: 28,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(8),
-                            color: const Color(0xFF22014D).withOpacity(0.10),
+                            color: Colors.white.withOpacity(0.15),
                           ),
-                          child: Icon(Icons.dark_mode_rounded, color: const Color(0xFF22014D), size: 14),
+                          child: Icon(Icons.dark_mode_rounded,
+                              color: const Color(0xFF22014D), size: 14),
                         ),
                         const SizedBox(width: 10),
                         Expanded(
