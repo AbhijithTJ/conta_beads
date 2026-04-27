@@ -15,6 +15,8 @@ class IntentionsScreen extends StatefulWidget {
 
 class _IntentionsScreenState extends State<IntentionsScreen> with TickerProviderStateMixin {
   final TextEditingController _intentionController = TextEditingController();
+  final TextEditingController _rosaryCountController = TextEditingController();
+  int _myTotal = 300; // user's rosary total
 
   late AnimationController _quoteFadeController;
   late Animation<double> _quoteFadeAnim;
@@ -52,6 +54,7 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
   @override
   void dispose() {
     _intentionController.dispose();
+    _rosaryCountController.dispose();
     _quoteTimer?.cancel();
     _quoteFadeController.dispose();
     super.dispose();
@@ -80,9 +83,13 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
                     const SizedBox(height: 32),
                     _buildQuoteCard(isDark),
                     const SizedBox(height: 16),
-                    _buildTodayIntentionCard(),
-                    const SizedBox(height: 16),
-                    _buildPrayerRequestsCard(),
+                    Row(
+                      children: [
+                        Expanded(child: _buildTodayIntentionCard()),
+                        const SizedBox(width: 12),
+                        Expanded(child: _buildPrayerRequestsCard()),
+                      ],
+                    ),
                     const SizedBox(height: 32),
                     _buildDivider(isDark),
                     const SizedBox(height: 32),
@@ -188,60 +195,82 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
     );
   }
   Widget _buildTodayIntentionCard() {
-    return _GlassCard(
-      child: Row(
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white, width: 2.0),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 12, offset: const Offset(0, 4))],
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _IconBox(icon: Icons.church_rounded),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "TODAY'S INTENTION",
-                  style: GoogleFonts.poppins(fontSize: 9, fontWeight: FontWeight.w800, color: AppColors.authBgMid.withOpacity(0.5), letterSpacing: 1.5),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 48, height: 48,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFB347),
+                  borderRadius: BorderRadius.circular(14),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  todayIntention,
-                  style: GoogleFonts.poppins(fontSize: 17, fontWeight: FontWeight.w800, color: AppColors.authBgBottom, letterSpacing: -0.3),
-                ),
-              ],
-            ),
+                child: const Icon(Icons.church_rounded, color: Colors.white, size: 26),
+              ),
+              const Spacer(),
+              Icon(Icons.chevron_right_rounded, color: const Color(0xFF22014D).withOpacity(0.35), size: 22),
+            ],
           ),
-          Icon(Icons.chevron_right_rounded, color: const Color(0xFF22014D).withOpacity(0.3), size: 24),
+          const SizedBox(height: 14),
+          Text(todayIntention,
+              style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w800, color: const Color(0xFF22014D))),
+          const SizedBox(height: 4),
+          Text("Today's Intention",
+              style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w500, color: const Color(0xFF22014D).withOpacity(0.5))),
         ],
       ),
     );
   }
 
   Widget _buildPrayerRequestsCard() {
-    return _GlassCard(
-      child: Row(
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white, width: 2.0),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 12, offset: const Offset(0, 4))],
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _IconBox(icon: Icons.people_alt_rounded),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Community Prayers',
-                  style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.authBgBottom, letterSpacing: -0.2),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 48, height: 48,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFB57BEA),
+                  borderRadius: BorderRadius.circular(14),
                 ),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    Container(width: 6, height: 6, decoration: const BoxDecoration(shape: BoxShape.circle, color: Colors.green)),
-                    const SizedBox(width: 6),
-                    Text('$prayerRequests active requests',
-                        style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.authBgMid.withOpacity(0.6))),
-                  ],
-                ),
-              ],
-            ),
+                child: const Icon(Icons.people_alt_rounded, color: Colors.white, size: 26),
+              ),
+              const Spacer(),
+              Icon(Icons.chevron_right_rounded, color: const Color(0xFF22014D).withOpacity(0.35), size: 22),
+            ],
           ),
-          Icon(Icons.chevron_right_rounded, color: const Color(0xFF22014D).withOpacity(0.3), size: 24),
+          const SizedBox(height: 14),
+          Text('Community Prayers',
+              style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w800, color: const Color(0xFF22014D))),
+          const SizedBox(height: 4),
+          Row(
+            children: [
+              Container(width: 6, height: 6, decoration: const BoxDecoration(shape: BoxShape.circle, color: Colors.green)),
+              const SizedBox(width: 6),
+              Text('$prayerRequests active requests',
+                  style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w500, color: const Color(0xFF22014D).withOpacity(0.5))),
+            ],
+          ),
         ],
       ),
     );
@@ -312,6 +341,61 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
             ),
           ),
           const SizedBox(height: 24),
+          // Rosary count row
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Rosaries to offer',
+                        style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w700, color: const Color(0xFF22014D).withOpacity(0.7))),
+                    const SizedBox(height: 6),
+                    TextField(
+                      controller: _rosaryCountController,
+                      keyboardType: TextInputType.number,
+                      style: GoogleFonts.poppins(fontSize: 15, color: const Color(0xFF22014D), fontWeight: FontWeight.w700),
+                      decoration: InputDecoration(
+                        hintText: 'e.g. 3',
+                        hintStyle: GoogleFonts.poppins(color: const Color(0xFF22014D).withOpacity(0.35), fontSize: 14),
+                        filled: true,
+                        fillColor: Colors.white.withOpacity(0.8),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: Colors.white, width: 2.0)),
+                        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: Colors.white, width: 2.0)),
+                        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: AppColors.goldPrimary.withOpacity(0.7), width: 1.5)),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 16),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text('Your Total',
+                      style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w700, color: const Color(0xFF22014D).withOpacity(0.7))),
+                  const SizedBox(height: 6),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                    decoration: BoxDecoration(
+                      color: _myTotal < 0 ? Colors.red.withOpacity(0.1) : const Color(0xFF22014D).withOpacity(0.08),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: _myTotal < 0 ? Colors.red.withOpacity(0.4) : Colors.white, width: 2.0),
+                    ),
+                    child: Text(
+                      '$_myTotal',
+                      style: GoogleFonts.poppins(
+                        fontSize: 22, fontWeight: FontWeight.w900,
+                        color: _myTotal < 0 ? Colors.red : const Color(0xFF22014D),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
           _buildSubmitButton(btnColor),
         ],
       ),
@@ -322,13 +406,16 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
     return GestureDetector(
       onTap: () {
         if (_intentionController.text.isNotEmpty) {
+          final count = int.tryParse(_rosaryCountController.text.trim()) ?? 0;
+          setState(() => _myTotal -= count);
           Navigator.of(context).push(MaterialPageRoute(
             builder: (context) => IntentionSuccessScreen(intention: _intentionController.text),
           ));
           _intentionController.clear();
+          _rosaryCountController.clear();
         } else {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: const Row(children: [
+            content: Row(children: const [
               Icon(Icons.info_outline, color: Colors.white, size: 20),
               SizedBox(width: 10),
               Text('Please write your intention', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
