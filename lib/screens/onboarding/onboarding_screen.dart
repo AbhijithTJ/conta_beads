@@ -22,32 +22,44 @@ const _pages = [
   OnboardingPage(
     icon: '📿',
     title: 'Welcome to Upper Room',
-    description: 'A sacred space to count your rosaries and join a global community of prayer.',
+    description: 'A sacred space to count your rosaries and join a global community united in prayer.',
     accentColor: Color(0xFFD4A843),
   ),
   OnboardingPage(
-    icon: '➕',
-    title: 'Count Your Rosaries',
-    description: 'Use the Home screen to count each rosary bead. Tap + to add and − to adjust. Save your count when done.',
+    icon: '⛪',
+    title: 'Count Your Rosary',
+    description: 'Use the Home screen to count each rosary bead with the Rosary or Divine Mercy Chaplet. Tap to count, save when done.',
     accentColor: Color(0xFF9B6B8A),
   ),
   OnboardingPage(
     icon: '🌍',
     title: 'Global Community',
-    description: 'See how many rosaries our community has offered together. Your prayers contribute to our collective goal.',
+    description: 'See how many rosaries our community has offered together worldwide. Your prayers contribute to our collective goal.',
     accentColor: Color(0xFF7B3F6E),
   ),
   OnboardingPage(
     icon: '🙏',
     title: 'Share Your Intentions',
-    description: 'Visit the Intentions screen to submit your prayer requests and share your spiritual intentions.',
+    description: 'Submit your personal prayer requests and share your spiritual intentions with the community.',
     accentColor: Color(0xFFD4A0A0),
+  ),
+  OnboardingPage(
+    icon: '✝️',
+    title: 'Adopt a Priest',
+    description: 'Spiritually support a priest through prayer. Select up to three priests for a personal spiritual partnership.',
+    accentColor: Color(0xFFB89AC8),
+  ),
+  OnboardingPage(
+    icon: '📖',
+    title: 'Everyday Prayers',
+    description: 'Access the Divine Mercy Chaplet, Way of the Cross, Novenas, and daily guides — all in one place.',
+    accentColor: Color(0xFFD4A843),
   ),
   OnboardingPage(
     icon: '👤',
     title: 'Your Profile',
-    description: 'Track your personal statistics and see your contribution to the global rosary count.',
-    accentColor: Color(0xFFB89AC8),
+    description: 'Track your personal prayer statistics, manage your account, and customise your experience.',
+    accentColor: Color(0xFF9B6B8A),
   ),
 ];
 
@@ -155,9 +167,9 @@ class _OnboardingScreenState extends State<OnboardingScreen>
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Color(0xFF0D0D2B), // deep midnight navy
-              Color(0xFF1A1040), // dark indigo
-              Color(0xFF2D1B5E), // deep violet
+              Color(0xFF22014D),
+              Color(0xFF3A0A6E),
+              Color(0xFF22014D),
             ],
           ),
         ),
@@ -191,13 +203,13 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       animation: Listenable.merge([_orb1, _orb2, _orb3, _orb4]),
       builder: (_, __) => Stack(children: [
         _OrbWidget(left: size.width * 0.2,  top: -size.height * 0.08 + _orb1.value * 28, size: size.width * 0.72,
-          colors: [const Color(0xFF3D2080).withOpacity(0.60), const Color(0xFF1A0A40).withOpacity(0.30)]),
+          colors: [const Color(0xFF5A0A8A).withOpacity(0.50), const Color(0xFF22014D).withOpacity(0.30)]),
         _OrbWidget(left: -size.width * 0.22, top: size.height * 0.28 + _orb2.value * -22, size: size.width * 0.65,
-          colors: [const Color(0xFF0A2A6E).withOpacity(0.65), const Color(0xFF0A1A4E).withOpacity(0.25)]),
+          colors: [const Color(0xFF3A0A6E).withOpacity(0.55), const Color(0xFF22014D).withOpacity(0.25)]),
         _OrbWidget(left: size.width * 0.55,  top: size.height * 0.38 + _orb3.value * 18, size: size.width * 0.60,
-          colors: [const Color(0xFF4A1080).withOpacity(0.55), const Color(0xFF2D0D5E).withOpacity(0.20)]),
+          colors: [const Color(0xFF6B1A8A).withOpacity(0.45), const Color(0xFF22014D).withOpacity(0.20)]),
         _OrbWidget(left: size.width * 0.1,   top: size.height * 0.72 + _orb4.value * -16, size: size.width * 0.55,
-          colors: [const Color(0xFFD4A843).withOpacity(0.18), const Color(0xFF6B3FA0).withOpacity(0.25)]),
+          colors: [const Color(0xFFD4A843).withOpacity(0.15), const Color(0xFF3A0A6E).withOpacity(0.25)]),
       ]),
     );
   }
@@ -310,7 +322,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                     borderRadius: BorderRadius.circular(28),
                     border: Border.all(color: Colors.white.withOpacity(0.15), width: 1.5),
                     boxShadow: [
-                      BoxShadow(color: const Color(0xFF3D2080).withOpacity(0.30), blurRadius: 40, offset: const Offset(0, 12)),
+                      BoxShadow(color: const Color(0xFF22014D).withOpacity(0.40), blurRadius: 40, offset: const Offset(0, 12)),
                     ],
                   ),
                   child: Column(children: [
