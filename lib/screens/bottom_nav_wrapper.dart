@@ -94,9 +94,16 @@ class _BottomNavWrapperState extends State<BottomNavWrapper> {
     return ValueListenableBuilder<bool>(
       valueListenable: themeNotifier,
       builder: (_, isDark, __) {
-        final bgColor = isDark ? Colors.white : const Color(0xFFEDE0ED);
-        return WillPopScope(
-          onWillPop: _onWillPop,
+        final bgColor = isDark ? const Color(0xFF22014D) : const Color(0xFFEDE0ED);
+        return PopScope(
+          canPop: false,
+          onPopInvoked: (didPop) async {
+            if (didPop) return;
+            final shouldPop = await _onWillPop();
+            if (shouldPop && context.mounted) {
+              SystemNavigator.pop();
+            }
+          },
           child: Scaffold(
             backgroundColor: bgColor,
             body: _screens[_selectedIndex],
