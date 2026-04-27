@@ -6,16 +6,21 @@ class EverydayPrayersScreen extends StatelessWidget {
   const EverydayPrayersScreen({super.key});
 
   static const List<Map<String, dynamic>> _prayers = [
-    {'title': 'Divine Mercy Chaplet',       'image': 'assets/demo/i trust you jesus.png'},
-    {'title': 'Divine Mercy Novena and Litany', 'image': 'assets/demo/mathav.png'},
-    {'title': 'Way of the Cross MCRC',      'image': 'assets/demo/adopt a priest.png'},
-    {'title': 'Prayer to be Merciful',      'image': 'assets/demo/mathav.png'},
-    {'title': 'Prayer to the Holy Face',    'image': 'assets/demo/i trust you jesus.png'},
+    {'title': 'Divine Mercy Chaplet',           'image': 'assets/demo/Divine Mercy Chaplet.png'},
+    {'title': 'Divine Mercy Novena and Litany', 'image': 'assets/demo/Novena and Litany.png'},
+    {'title': 'Way of the Cross MCRC',          'image': 'assets/demo/Way of the cross.png'},
+    {'title': 'Prayer to be Merciful',          'image': 'assets/demo/Prayers to be Merciful.png'},
+    {'title': 'Prayer to the Holy Face',        'image': 'assets/demo/Prayer-to-the-Holy-Face.jpg.jpeg'},
   ];
 
   static const List<String> _guides = [
     'Confession Assistant',
     'Living Divine Mercy A Daily Guide',
+  ];
+
+  static const List<String> _guideImages = [
+    'assets/demo/Confession Assistant.png',
+    'assets/demo/Divine Mercy Guide.png',
   ];
 
   @override
@@ -158,54 +163,47 @@ class EverydayPrayersScreen extends StatelessWidget {
                       IntrinsicHeight(
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: _guides.map((guide) {
-                          return Expanded(
-                            child: GestureDetector(
-                              onTap: () {},
-                              child: Container(
-                                margin: EdgeInsets.only(
-                                  right: guide == _guides.first ? 8 : 0,
-                                  left: guide == _guides.last ? 8 : 0,
-                                ),
-                                padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(color: Colors.white, width: 2.0),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.08),
-                                      blurRadius: 8,
-                                      offset: const Offset(0, 3),
-                                    ),
-                                  ],
-                                ),
-                                child: Column(
-                                  children: [
-                                    Icon(
-                                      guide.contains('Confession')
-                                          ? Icons.church_rounded
-                                          : Icons.menu_book_rounded,
-                                      color: const Color(0xFF22014D),
-                                      size: 28,
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Text(
-                                      guide,
-                                      textAlign: TextAlign.center,
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w700,
-                                        color: const Color(0xFF22014D),
-                                        height: 1.4,
+                          children: List.generate(_guides.length, (i) {
+                            return Expanded(
+                              child: GestureDetector(
+                                onTap: () {},
+                                child: Container(
+                                  margin: EdgeInsets.only(
+                                    right: i == 0 ? 8 : 0,
+                                    left: i == 1 ? 8 : 0,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(color: Colors.white, width: 2.0),
+                                    boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 8, offset: const Offset(0, 3))],
+                                  ),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(14),
+                                    child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Image.asset(
+                                          _guideImages[i],
+                                          height: 100,
+                                          width: double.infinity,
+                                          fit: BoxFit.cover,
+                                          alignment: Alignment.bottomCenter,
+                                        ),
+                                      Padding(
+                                        padding: const EdgeInsets.all(10),
+                                        child: Text(
+                                          _guides[i],
+                                          style: GoogleFonts.poppins(fontSize: 11, fontWeight: FontWeight.w700, color: const Color(0xFF22014D), height: 1.4),
+                                        ),
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
+                                  ),
                                 ),
                               ),
-                            ),
-                          );
-                        }).toList(),
+                            );
+                          }),
                         ),
                       ),
 
