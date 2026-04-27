@@ -68,7 +68,8 @@ class _AdoptPriestScreenState extends State<AdoptPriestScreen> {
                       ),
                     ),
                   ),
-                  // back button
+                  // back button — only show when pushed via navigation
+                  if (Navigator.of(context).canPop())
                   SafeArea(
                     child: Padding(
                       padding: const EdgeInsets.all(16),
