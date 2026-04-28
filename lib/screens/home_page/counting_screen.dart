@@ -264,8 +264,17 @@ class _CountingScreenState extends State<CountingScreen>
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(colors: [_bgTop, _bgTop]),
+        decoration: const BoxDecoration(
+          gradient: RadialGradient(
+            center: Alignment(0.0, -0.4),
+            radius: 0.85,
+            colors: [
+              Color(0xFF321060),
+              Color(0xFF220850),
+              Color(0xFF1c023d),
+            ],
+            stops: [0.0, 0.5, 1.0],
+          ),
         ),
         child: Stack(
           children: [
@@ -386,9 +395,6 @@ class _CountingScreenState extends State<CountingScreen>
   final List<Map<String, String>> _languages = [
     {'code': 'EN', 'name': 'English'},
     {'code': 'ML', 'name': 'Malayalam'},
-    {'code': 'HI', 'name': 'Hindi'},
-    {'code': 'TA', 'name': 'Tamil'},
-    {'code': 'LA', 'name': 'Latin'},
   ];
 
   void _showLanguagePicker() {

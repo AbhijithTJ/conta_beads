@@ -61,7 +61,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
           body: Container(
             width: double.infinity,
             height: double.infinity,
-            color: isDark ? const Color(0xFF22014D) : const Color(0xFFF5EEF5),
+            decoration: isDark
+                ? const BoxDecoration(
+                    gradient: RadialGradient(
+                      center: Alignment(0.0, -0.4),
+                      radius: 0.85,
+                      colors: [
+                        Color(0xFF321060),
+                        Color(0xFF220850),
+                        Color(0xFF1c023d),
+                      ],
+                      stops: [0.0, 0.5, 1.0],
+                    ),
+                  )
+                : const BoxDecoration(color: Color(0xFFF5EEF5)),
             child: SafeArea(
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),

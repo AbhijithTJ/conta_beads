@@ -63,14 +63,15 @@ class _IntentionSuccessScreenState extends State<IntentionSuccessScreen>
         width: double.infinity,
         height: double.infinity,
         decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+          gradient: RadialGradient(
+            center: Alignment(0.0, -0.4),
+            radius: 0.85,
             colors: [
-              AppColors.chapletBgTop,
-              AppColors.chapletBgMid,
-              AppColors.chapletBgBottom,
+              Color(0xFF321060),
+              Color(0xFF220850),
+              Color(0xFF1c023d),
             ],
+            stops: [0.0, 0.5, 1.0],
           ),
         ),
         child: SafeArea(

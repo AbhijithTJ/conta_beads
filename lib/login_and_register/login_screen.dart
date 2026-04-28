@@ -153,7 +153,6 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = themeNotifier.isDark;
-    final bgColor = const Color(0xFF22014D);
     final logoAsset = isDark ? 'assets/splash/ur_logo.png' : 'assets/splash/ur_logo_light.png';
     final titleColor = isDark ? Colors.white : AppColors.authBgBottom;
     final subColor = isDark ? Colors.white.withOpacity(0.65) : AppColors.authBgMid.withOpacity(0.6);
@@ -165,7 +164,18 @@ class _LoginScreenState extends State<LoginScreen> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: BoxDecoration(color: bgColor),
+        decoration: const BoxDecoration(
+          gradient: RadialGradient(
+            center: Alignment(0.0, -0.4),
+            radius: 0.85,
+            colors: [
+              Color(0xFF321060),
+              Color(0xFF220850),
+              Color(0xFF1c023d),
+            ],
+            stops: [0.0, 0.5, 1.0],
+          ),
+        ),
         child: Stack(
           children: [
             SafeArea(

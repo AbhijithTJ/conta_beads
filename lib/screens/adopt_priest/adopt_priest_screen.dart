@@ -35,7 +35,7 @@ class _AdoptPriestScreenState extends State<AdoptPriestScreen> {
     return ValueListenableBuilder<bool>(
       valueListenable: themeNotifier,
       builder: (_, isDark, __) {
-        final bgColor = isDark ? const Color(0xFF22014D) : const Color(0xFFF0EBF0);
+        final bgColor = isDark ? const Color(0xFF1c023d) : const Color(0xFFF0EBF0);
         final titleColor = isDark ? Colors.white : const Color(0xFF22014D);
         final subColor = isDark ? Colors.white.withOpacity(0.65) : const Color(0xFF22014D).withOpacity(0.6);
 
@@ -58,12 +58,17 @@ class _AdoptPriestScreenState extends State<AdoptPriestScreen> {
                   Positioned(
                     bottom: 0, left: 0, right: 0,
                     child: Container(
-                      height: 80,
-                      decoration: BoxDecoration(
+                      height: 120,
+                      decoration: const BoxDecoration(
                         gradient: LinearGradient(
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
-                          colors: [Colors.transparent, bgColor],
+                          colors: [
+                            Colors.transparent,
+                            Color(0xBB220850),
+                            Color(0xFF220850),
+                          ],
+                          stops: [0.0, 0.6, 1.0],
                         ),
                       ),
                     ),
@@ -90,9 +95,24 @@ class _AdoptPriestScreenState extends State<AdoptPriestScreen> {
                 ],
               ),
 
-              // Content
+              // Content with gradient background
               Expanded(
-                child: SingleChildScrollView(
+                child: Container(
+                  decoration: isDark
+                      ? const BoxDecoration(
+                          gradient: RadialGradient(
+                            center: Alignment(0.0, -0.4),
+                            radius: 0.85,
+                            colors: [
+                              Color(0xFF321060),
+                              Color(0xFF220850),
+                              Color(0xFF1c023d),
+                            ],
+                            stops: [0.0, 0.5, 1.0],
+                          ),
+                        )
+                      : const BoxDecoration(color: Color(0xFFF0EBF0)),
+                  child: SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
                   padding: const EdgeInsets.symmetric(horizontal: 24),
                   child: Column(
@@ -190,6 +210,7 @@ class _AdoptPriestScreenState extends State<AdoptPriestScreen> {
                       const SizedBox(height: 40),
                     ],
                   ),
+                ),
                 ),
               ),
             ],

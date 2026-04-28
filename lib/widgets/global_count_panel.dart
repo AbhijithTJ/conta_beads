@@ -35,12 +35,21 @@ class GlobalCountPanel extends StatelessWidget {
           filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
           child: Container(
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.93),
+              gradient: const RadialGradient(
+                center: Alignment(0.0, -0.5),
+                radius: 1.0,
+                colors: [
+                  Color(0xFF321060),
+                  Color(0xFF220850),
+                  Color(0xFF1c023d),
+                ],
+                stops: [0.0, 0.5, 1.0],
+              ),
               borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: Colors.white.withOpacity(0.9), width: 1.5),
+              border: Border.all(color: Colors.white.withOpacity(0.12), width: 1.5),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.22),
+                  color: Colors.black.withOpacity(0.40),
                   blurRadius: 32,
                   offset: const Offset(0, 10),
                 ),
@@ -53,14 +62,14 @@ class GlobalCountPanel extends StatelessWidget {
                 // ── Header ──
                 Row(
                   children: [
-                    const Icon(Icons.public_rounded, color: AppColors.authPurple, size: 18),
+                    const Icon(Icons.public_rounded, color: Colors.white, size: 18),
                     const SizedBox(width: 8),
                     const Text(
                       'Top Offerings',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w900,
-                        color: AppColors.authBgBottom,
+                        color: Colors.white,
                       ),
                     ),
                     const Spacer(),
@@ -70,7 +79,7 @@ class GlobalCountPanel extends StatelessWidget {
                       onTap: onClose,
                       child: Icon(
                         Icons.close_rounded,
-                        color: AppColors.authBgBottom.withOpacity(0.4),
+                        color: Colors.white.withOpacity(0.5),
                         size: 20,
                       ),
                     ),
@@ -268,7 +277,7 @@ class LeaderRow extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w900,
-                  color: isGold ? AppColors.goldDark : AppColors.authBgBottom,
+                  color: isGold ? AppColors.goldDark : Colors.white.withOpacity(0.8),
                 ),
               ),
             ),
@@ -283,7 +292,7 @@ class LeaderRow extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
-                    color: isYou ? AppColors.goldDark : AppColors.authBgBottom,
+                    color: isYou ? AppColors.goldDark : Colors.white.withOpacity(0.9),
                   ),
                 ),
                 if (isYou) ...[
@@ -316,7 +325,7 @@ class LeaderRow extends StatelessWidget {
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w900,
-              color: isYou ? AppColors.goldDark : AppColors.authBgBottom,
+              color: isYou ? AppColors.goldDark : Colors.white.withOpacity(0.9),
             ),
           ),
         ],

@@ -70,7 +70,20 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
           body: Container(
             width: double.infinity,
             height: double.infinity,
-            decoration: BoxDecoration(color: bgColor),
+            decoration: isDark
+                ? const BoxDecoration(
+                    gradient: RadialGradient(
+                      center: Alignment(0.0, -0.4),
+                      radius: 0.85,
+                      colors: [
+                        Color(0xFF321060),
+                        Color(0xFF220850),
+                        Color(0xFF1c023d),
+                      ],
+                      stops: [0.0, 0.5, 1.0],
+                    ),
+                  )
+                : const BoxDecoration(color: Color(0xFFF0EBF0)),
             child: SafeArea(
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
@@ -107,7 +120,7 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
 
   Widget _buildHeader(bool isDark) {
     final titleColor = isDark ? Colors.white : AppColors.authBgBottom;
-    final subColor = isDark ? Colors.white.withOpacity(0.6) : AppColors.authBgMid.withOpacity(0.5);
+    final subColor = isDark ? Colors.white.withOpacity(0.5) : AppColors.authBgMid.withOpacity(0.5);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

@@ -34,9 +34,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   final List<Map<String, String>> _languages = [
     {'code': 'EN', 'name': 'English'},
     {'code': 'ML', 'name': 'Malayalam'},
-    {'code': 'HI', 'name': 'Hindi'},
-    {'code': 'TA', 'name': 'Tamil'},
-    {'code': 'LA', 'name': 'Latin'},
   ];
 
   final List<Map<String, String>> _quotes = [
@@ -49,8 +46,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   final List<Map<String, dynamic>> _features = [
     {'title': 'Count Your', 'subtitle': 'Rosary', 'image': 'assets/demo/mathav.png'},
-    {'title': 'Divine Mercy', 'subtitle': 'Chaplet', 'image': 'assets/demo/i trust you jesus.png'},
     {'title': 'Adopt a', 'subtitle': 'Priest', 'image': 'assets/demo/adopt a priest.png'},
+    {'title': 'Divine Mercy', 'subtitle': 'Chaplet', 'image': 'assets/demo/i trust you jesus.png'},
     {'title': 'Every Day', 'subtitle': 'Prayers', 'image': 'assets/demo/every day.png'},
   ];
 
@@ -91,7 +88,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
         child: Container(
           decoration: const BoxDecoration(
-            color: Color(0xFF22014D),
+            gradient: RadialGradient(
+              center: Alignment(0.0, -0.5),
+              radius: 1.2,
+              colors: [
+                Color(0xFF321060),
+                Color(0xFF220850),
+                Color(0xFF1c023d),
+              ],
+              stops: [0.0, 0.5, 1.0],
+            ),
             borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
           ),
           padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
@@ -198,9 +204,20 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: BoxDecoration(
-          color: bgColor,
-        ),
+        decoration: isDark
+            ? const BoxDecoration(
+                gradient: RadialGradient(
+                  center: Alignment(0.0, -0.4),
+                  radius: 0.85,
+                  colors: [
+                    Color(0xFF321060),
+                    Color(0xFF220850),
+                    Color(0xFF1c023d),
+                  ],
+                  stops: [0.0, 0.5, 1.0],
+                ),
+              )
+            : BoxDecoration(color: bgColor),
         child: Stack(
           children: [
             SafeArea(
@@ -438,11 +455,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               ));
             } else if (i == 1) {
               Navigator.of(context).push(MaterialPageRoute(
-                builder: (_) => CountingScreen(userEmail: widget.userEmail, startWithChaplet: true),
+                builder: (_) => const AdoptPriestScreen(),
               ));
             } else if (i == 2) {
               Navigator.of(context).push(MaterialPageRoute(
-                builder: (_) => const AdoptPriestScreen(),
+                builder: (_) => CountingScreen(userEmail: widget.userEmail, startWithChaplet: true),
               ));
             } else if (i == 3) {
               Navigator.of(context).push(MaterialPageRoute(
@@ -454,15 +471,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.white, width: 2.0),
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(14),
-                    child: Image.asset(item['image']!, fit: BoxFit.cover, width: double.infinity),
-                  ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: Image.asset(item['image']!, fit: BoxFit.cover, width: double.infinity),
                 ),
               ),
               const SizedBox(height: 6),
