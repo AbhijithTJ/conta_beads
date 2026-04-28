@@ -405,69 +405,39 @@ class _LoginScreenState extends State<LoginScreen> {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 100),
         width: double.infinity,
-        height: 54,
-        transform: Matrix4.translationValues(0, _isPressed ? 4 : 0, 0),
+        height: 56,
+        transform: Matrix4.translationValues(0, _isPressed ? 2 : 0, 0),
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: _isLoading
-                ? [Color(0xFF624294).withOpacity(0.5), Color(0xFF7B55A8).withOpacity(0.5)]
-                : [Color(0xFF7B55A8), Color(0xFF624294)],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
+          gradient: const LinearGradient(
+            colors: [Color(0xFF321060), Color(0xFF220850), Color(0xFF1c023d)],
+            stops: [0.0, 0.5, 1.0],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
           borderRadius: BorderRadius.circular(30),
-          boxShadow: _isPressed || _isLoading
-              ? []
-              : [
-                  // 3D bottom depth layer
-                  BoxShadow(
-                    color: const Color(0xFF2A0A5E),
-                    blurRadius: 0,
-                    spreadRadius: 0,
-                    offset: const Offset(0, 5),
+          border: Border.all(color: AppColors.goldPrimary.withOpacity(0.75), width: 1.5),
+          boxShadow: _isPressed || _isLoading ? [] : [
+            BoxShadow(color: AppColors.goldPrimary.withOpacity(0.15), blurRadius: 12, offset: const Offset(0, 6)),
+          ],
+        ),
+        child: _isLoading
+            ? const Center(child: SizedBox(width: 22, height: 22, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5)))
+            : Stack(
+                alignment: Alignment.center,
+                children: [
+                  const Positioned(
+                    left: 16,
+                    child: Icon(Icons.language_rounded, color: Colors.white, size: 26),
                   ),
-                  // soft outer glow
-                  BoxShadow(
-                    color: const Color(0xFF624294).withOpacity(0.45),
-                    blurRadius: 14,
-                    offset: const Offset(0, 8),
-                  ),
+                  Text('Sign in',
+                      style: GoogleFonts.poppins(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.5,
+                      )),
                 ],
-          border: Border.all(
-            color: _isPressed ? Colors.transparent : Colors.white.withOpacity(0.15),
-            width: 1,
-          ),
-        ),
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(30),
-            gradient: LinearGradient(
-              colors: [
-                Colors.white.withOpacity(_isPressed ? 0.0 : 0.10),
-                Colors.transparent,
-              ],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-          ),
-          child: Center(
-            child: _isLoading
-                ? const SizedBox(
-                    width: 22,
-                    height: 22,
-                    child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
-                  )
-                : Text(
-                    'Sign in',
-                    style: GoogleFonts.poppins(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-          ),
-        ),
+              ),
       ),
     );
   }

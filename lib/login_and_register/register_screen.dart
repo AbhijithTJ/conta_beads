@@ -377,26 +377,38 @@ class _RegisterScreenState extends State<RegisterScreen> {
       onTap: _isLoading ? null : _handleRegister,
       child: Container(
         width: double.infinity,
-        height: 54,
+        height: 56,
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: _isLoading
-                ? [const Color(0xFF7B55A8).withOpacity(0.5), const Color(0xFF624294).withOpacity(0.5)]
-                : [const Color(0xFF7B55A8), const Color(0xFF624294)],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
+          gradient: const LinearGradient(
+            colors: [Color(0xFF321060), Color(0xFF220850), Color(0xFF1c023d)],
+            stops: [0.0, 0.5, 1.0],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
           borderRadius: BorderRadius.circular(30),
+          border: Border.all(color: AppColors.goldPrimary.withOpacity(0.75), width: 1.5),
           boxShadow: _isLoading ? [] : [
-            BoxShadow(color: const Color(0xFF2A0A5E), blurRadius: 0, offset: const Offset(0, 5)),
-            BoxShadow(color: const Color(0xFF624294).withOpacity(0.45), blurRadius: 14, offset: const Offset(0, 8)),
+            BoxShadow(color: AppColors.goldPrimary.withOpacity(0.15), blurRadius: 12, offset: const Offset(0, 6)),
           ],
         ),
-        child: Center(
-          child: _isLoading
-              ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5))
-              : Text('Create account', style: GoogleFonts.poppins(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700, letterSpacing: 0.5)),
-        ),
+        child: _isLoading
+            ? const Center(child: SizedBox(width: 22, height: 22, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5)))
+            : Stack(
+                alignment: Alignment.center,
+                children: [
+                  const Positioned(
+                    left: 16,
+                    child: Icon(Icons.person_add_rounded, color: Colors.white, size: 24),
+                  ),
+                  Text('Create account',
+                      style: GoogleFonts.poppins(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.5,
+                      )),
+                ],
+              ),
       ),
     );
   }
