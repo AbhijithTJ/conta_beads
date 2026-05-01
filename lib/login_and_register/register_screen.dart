@@ -97,13 +97,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Widget build(BuildContext context) {
     final isDark = themeNotifier.isDark;
     final logoAsset = isDark ? 'assets/splash/ur_logo.png' : 'assets/splash/ur_logo_light.png';
-    final titleColor = Colors.white;
-    final subColor = Colors.white.withOpacity(0.65);
-    final backIconColor = Colors.white;
-    final backBg = Colors.white.withOpacity(0.15);
-    final backBorder = Colors.white.withOpacity(0.30);
-    final linkTextColor = Colors.white.withOpacity(0.75);
-    final linkColor = Colors.white;
+    final subColor = isDark ? Colors.white.withOpacity(0.65) : AppColors.authBgMid.withOpacity(0.6);
+    final backIconColor = isDark ? Colors.white : const Color(0xFF624294);
+    final backBg = isDark ? Colors.white.withOpacity(0.15) : const Color(0xFF624294).withOpacity(0.08);
+    final backBorder = isDark ? Colors.white.withOpacity(0.30) : const Color(0xFF624294).withOpacity(0.25);
+    final linkTextColor = isDark ? Colors.white.withOpacity(0.75) : AppColors.authBgMid.withOpacity(0.7);
+    final linkColor = isDark ? Colors.white : AppColors.authPurple;
 
     return WillPopScope(
       onWillPop: () async => false,
@@ -112,18 +111,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
         body: Container(
           width: double.infinity,
           height: double.infinity,
-          decoration: const BoxDecoration(
-            gradient: RadialGradient(
-              center: Alignment(0.0, -0.4),
-              radius: 0.85,
-              colors: [
-                Color(0xFF321060),
-                Color(0xFF220850),
-                Color(0xFF1c023d),
-              ],
-              stops: [0.0, 0.5, 1.0],
-            ),
-          ),
+          decoration: isDark
+              ? const BoxDecoration(
+                  gradient: RadialGradient(
+                    center: Alignment(0.0, -0.4),
+                    radius: 0.85,
+                    colors: [
+                      Color(0xFF321060),
+                      Color(0xFF220850),
+                      Color(0xFF1c023d),
+                    ],
+                    stops: [0.0, 0.5, 1.0],
+                  ),
+                )
+              : const BoxDecoration(color: Color(0xFFF0EBF0)),
           child: Stack(
             children: [
               SafeArea(
@@ -133,7 +134,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   child: Column(
                     children: [
                       const SizedBox(height: 48),
-                      _buildHeader(logoAsset, titleColor, subColor),
+                      _buildHeader(logoAsset, subColor),
                       const SizedBox(height: 36),
                       _buildGlassCard(isDark),
                       const SizedBox(height: 24),
@@ -152,14 +153,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                     child: ClipOval(
                       child: BackdropFilter(
-                        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                        filter: ImageFilter.blur(sigmaX: isDark ? 10 : 0, sigmaY: isDark ? 10 : 0),
                         child: Container(
                           width: 40,
                           height: 40,
                           decoration: BoxDecoration(
                             color: backBg,
                             shape: BoxShape.circle,
-                            border: Border.all(color: backBorder, width: 1),
+                            border: Border.all(color: backBorder, width: 1.5),
                           ),
                           child: Icon(Icons.arrow_back_rounded, color: backIconColor, size: 20),
                         ),
@@ -175,7 +176,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  Widget _buildHeader(String logoAsset, Color titleColor, Color subColor) {
+  Widget _buildHeader(String logoAsset, Color subColor) {
     return Column(
       children: [
         Image.asset('assets/demo/logo_image.png', width: 160, height: 160),
@@ -188,49 +189,64 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   // ── Frosted glass card ───────────────────────────────────────────────────────
   Widget _buildGlassCard(bool isDark) {
-    final cardBg = Colors.white.withOpacity(0.92);
     final titleColor = const Color(0xFF624294);
     final subColor = const Color(0xFF624294).withOpacity(0.60);
 
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(28),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-        child: Container(
-          decoration: BoxDecoration(
-            color: cardBg,
-            borderRadius: BorderRadius.circular(28),
-            border: Border.all(color: Colors.white, width: 2.0),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.20),
-                blurRadius: 40, spreadRadius: 2, offset: const Offset(0, 12),
-              ),
-            ],
-          ),
-          padding: const EdgeInsets.fromLTRB(28, 32, 28, 28),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('CREATE ACCOUNT',
-                  style: GoogleFonts.poppins(fontSize: 22, fontWeight: FontWeight.w800, letterSpacing: 3, color: titleColor)),
-              const SizedBox(height: 4),
-              Text('Start your rosary journey today',
-                  style: GoogleFonts.poppins(fontSize: 12, color: subColor, letterSpacing: 0.3)),
-              const SizedBox(height: 28),
-              _buildGlassField(controller: _emailController, label: 'Email address', hint: 'Enter your email', icon: Icons.email_outlined),
-              const SizedBox(height: 18),
-              _buildPhoneField(),
-              const SizedBox(height: 18),
-              _buildGlassField(controller: _passwordController, label: 'Password', hint: 'Create a password', icon: Icons.lock_outline_rounded, isPassword: true, obscure: _obscurePassword, onToggle: () => setState(() => _obscurePassword = !_obscurePassword)),
-              const SizedBox(height: 18),
-              _buildGlassField(controller: _confirmPasswordController, label: 'Confirm Password', hint: 'Repeat your password', icon: Icons.lock_reset_rounded, isPassword: true, obscure: _obscureConfirmPassword, onToggle: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword)),
-              const SizedBox(height: 28),
-              _buildRegisterButton(),
-            ],
+    final cardContent = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('CREATE ACCOUNT',
+            style: GoogleFonts.poppins(fontSize: 22, fontWeight: FontWeight.w800, letterSpacing: 3, color: titleColor)),
+        const SizedBox(height: 4),
+        Text('Start your rosary journey today',
+            style: GoogleFonts.poppins(fontSize: 12, color: subColor, letterSpacing: 0.3)),
+        const SizedBox(height: 28),
+        _buildGlassField(controller: _emailController, label: 'Email address', hint: 'Enter your email', icon: Icons.email_outlined, isDark: isDark),
+        const SizedBox(height: 18),
+        _buildPhoneField(isDark),
+        const SizedBox(height: 18),
+        _buildGlassField(controller: _passwordController, label: 'Password', hint: 'Create a password', icon: Icons.lock_outline_rounded, isPassword: true, obscure: _obscurePassword, onToggle: () => setState(() => _obscurePassword = !_obscurePassword), isDark: isDark),
+        const SizedBox(height: 18),
+        _buildGlassField(controller: _confirmPasswordController, label: 'Confirm Password', hint: 'Repeat your password', icon: Icons.lock_reset_rounded, isPassword: true, obscure: _obscureConfirmPassword, onToggle: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword), isDark: isDark),
+        const SizedBox(height: 28),
+        _buildRegisterButton(),
+      ],
+    );
+
+    if (isDark) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(28),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.92),
+              borderRadius: BorderRadius.circular(28),
+              border: Border.all(color: Colors.white, width: 2.0),
+              boxShadow: [
+                BoxShadow(color: Colors.black.withOpacity(0.20), blurRadius: 40, spreadRadius: 2, offset: const Offset(0, 12)),
+              ],
+            ),
+            padding: const EdgeInsets.fromLTRB(28, 32, 28, 28),
+            child: cardContent,
           ),
         ),
+      );
+    }
+
+    // Light mode — home screen card style
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: const Color(0xFF624294).withOpacity(0.15), width: 1.5),
+        boxShadow: [
+          BoxShadow(color: const Color(0xFF624294).withOpacity(0.10), blurRadius: 16, spreadRadius: 1, offset: const Offset(0, 6)),
+          BoxShadow(color: Colors.white.withOpacity(0.80), blurRadius: 4, offset: const Offset(0, -2)),
+        ],
       ),
+      padding: const EdgeInsets.fromLTRB(28, 32, 28, 28),
+      child: cardContent,
     );
   }
 
@@ -242,6 +258,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     required IconData icon,
     bool isPassword = false,
     bool obscure = false,
+    bool isDark = true,
     VoidCallback? onToggle,
   }) {
     return Column(
@@ -260,7 +277,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ClipRRect(
           borderRadius: BorderRadius.circular(14),
           child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+            filter: ImageFilter.blur(sigmaX: isDark ? 8 : 0, sigmaY: isDark ? 8 : 0),
             child: TextField(
               controller: controller,
               obscureText: isPassword ? obscure : false,
@@ -287,15 +304,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       )
                     : null,
                 filled: true,
-                fillColor: Colors.white.withOpacity(0.80),
+                fillColor: isDark
+                    ? Colors.white.withOpacity(0.80)
+                    : const Color(0xFFF5F0FF),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
-                  borderSide: BorderSide(color: Colors.white, width: 2.0),
+                  borderSide: isDark
+                      ? const BorderSide(color: Colors.white, width: 2.0)
+                      : BorderSide(color: const Color(0xFF624294).withOpacity(0.20), width: 1.5),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
-                  borderSide: BorderSide(color: Colors.white, width: 2.0),
+                  borderSide: isDark
+                      ? const BorderSide(color: Colors.white, width: 2.0)
+                      : BorderSide(color: const Color(0xFF624294).withOpacity(0.20), width: 1.5),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
@@ -310,7 +333,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   // ── Phone field with glass style ─────────────────────────────────────────────
-  Widget _buildPhoneField() {
+  Widget _buildPhoneField(bool isDark) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -327,7 +350,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ClipRRect(
           borderRadius: BorderRadius.circular(14),
           child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+            filter: ImageFilter.blur(sigmaX: isDark ? 8 : 0, sigmaY: isDark ? 8 : 0),
             child: IntlPhoneField(
               controller: _phoneController,
               initialCountryCode: 'IN',
@@ -349,15 +372,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 hintText: 'Enter phone number',
                 hintStyle: GoogleFonts.poppins(color: const Color(0xFF624294).withOpacity(0.40), fontSize: 14),
                 filled: true,
-                fillColor: Colors.white.withOpacity(0.80),
+                fillColor: isDark
+                    ? Colors.white.withOpacity(0.80)
+                    : const Color(0xFFF5F0FF),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
-                  borderSide: BorderSide(color: Colors.white, width: 2.0),
+                  borderSide: isDark
+                      ? const BorderSide(color: Colors.white, width: 2.0)
+                      : BorderSide(color: const Color(0xFF624294).withOpacity(0.20), width: 1.5),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
-                  borderSide: BorderSide(color: Colors.white, width: 2.0),
+                  borderSide: isDark
+                      ? const BorderSide(color: Colors.white, width: 2.0)
+                      : BorderSide(color: const Color(0xFF624294).withOpacity(0.20), width: 1.5),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
@@ -373,15 +402,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   // ── Register button ──────────────────────────────────────────────────────────
   Widget _buildRegisterButton() {
+    final isDark = themeNotifier.isDark;
     return GestureDetector(
       onTap: _isLoading ? null : _handleRegister,
       child: Container(
         width: double.infinity,
         height: 56,
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [Color(0xFF321060), Color(0xFF220850), Color(0xFF1c023d)],
-            stops: [0.0, 0.5, 1.0],
+          gradient: LinearGradient(
+            colors: isDark
+                ? [const Color(0xFF321060), const Color(0xFF220850), const Color(0xFF1c023d)]
+                : [const Color(0xFF7B55A8), const Color(0xFF624294)],
+            stops: isDark ? const [0.0, 0.5, 1.0] : const [0.0, 1.0],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),

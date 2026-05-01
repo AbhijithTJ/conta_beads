@@ -264,18 +264,20 @@ class _CountingScreenState extends State<CountingScreen>
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: RadialGradient(
-            center: Alignment(0.0, -0.4),
-            radius: 0.85,
-            colors: [
-              Color(0xFF321060),
-              Color(0xFF220850),
-              Color(0xFF1c023d),
-            ],
-            stops: [0.0, 0.5, 1.0],
-          ),
-        ),
+        decoration: isDark
+            ? const BoxDecoration(
+                gradient: RadialGradient(
+                  center: Alignment(0.0, -0.4),
+                  radius: 0.85,
+                  colors: [
+                    Color(0xFF321060),
+                    Color(0xFF220850),
+                    Color(0xFF1c023d),
+                  ],
+                  stops: [0.0, 0.5, 1.0],
+                ),
+              )
+            : const BoxDecoration(color: Color(0xFFF0EBF0)),
         child: Stack(
           children: [
             // ── Blended top image ──
@@ -332,7 +334,11 @@ class _CountingScreenState extends State<CountingScreen>
             if (_showGlobalPanel)
               GestureDetector(
                 onTap: () => setState(() => _showGlobalPanel = false),
-                child: Container(color: Colors.black.withOpacity(0.35)),
+                child: Container(
+                  color: themeNotifier.isDark
+                      ? Colors.black.withOpacity(0.35)
+                      : const Color(0xFF624294).withOpacity(0.08),
+                ),
               ),
             if (_showGlobalPanel)
               Positioned(
@@ -354,6 +360,7 @@ class _CountingScreenState extends State<CountingScreen>
   }
 
   Widget _buildDraggableFab(Size size) {
+    final isDark = themeNotifier.isDark;
     return Positioned(
       left: _fabPosition.dx,
       top: _fabPosition.dy,
@@ -374,15 +381,32 @@ class _CountingScreenState extends State<CountingScreen>
           height: 52,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            gradient: const LinearGradient(
-              colors: [AppColors.goldPrimary, AppColors.goldDark],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
+            gradient: isDark
+                ? const LinearGradient(
+                    colors: [AppColors.goldPrimary, AppColors.goldDark],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  )
+                : const LinearGradient(
+                    colors: [Color(0xFF7B55A8), Color(0xFF624294)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
             boxShadow: [
-              BoxShadow(color: AppColors.goldDark.withOpacity(0.5), blurRadius: 14, offset: const Offset(0, 5)),
+              BoxShadow(
+                color: isDark
+                    ? AppColors.goldDark.withOpacity(0.5)
+                    : const Color(0xFF624294).withOpacity(0.35),
+                blurRadius: 14,
+                offset: const Offset(0, 5),
+              ),
             ],
-            border: Border.all(color: Colors.white.withOpacity(0.4), width: 2),
+            border: Border.all(
+              color: isDark
+                  ? Colors.white.withOpacity(0.4)
+                  : Colors.white.withOpacity(0.6),
+              width: 2,
+            ),
           ),
           child: const Icon(Icons.public_rounded, color: Colors.white, size: 26),
         ),
@@ -513,13 +537,17 @@ class _CountingScreenState extends State<CountingScreen>
 
   Widget _buildModeToggle() {
     final isDark = themeNotifier.isDark;
-    final toggleBg = _isRosary
-        ? (isDark ? Colors.white.withOpacity(0.15) : AppColors.authPurple.withOpacity(0.10))
-        : Colors.black.withOpacity(0.35);
+    final toggleBg = isDark
+        ? (_isRosary ? Colors.white.withOpacity(0.15) : Colors.black.withOpacity(0.35))
+        : const Color(0xFF624294).withOpacity(0.10);
 
     return Container(
       height: 48,
-      decoration: BoxDecoration(color: toggleBg, borderRadius: BorderRadius.circular(30)),
+      decoration: BoxDecoration(
+        color: toggleBg,
+        borderRadius: BorderRadius.circular(30),
+        border: isDark ? null : Border.all(color: const Color(0xFF624294).withOpacity(0.15), width: 1.5),
+      ),
       child: Row(
         children: [
           _toggleTab('Rosary', true),
@@ -532,8 +560,10 @@ class _CountingScreenState extends State<CountingScreen>
   Widget _toggleTab(String label, bool isRosary) {
     final isDark = themeNotifier.isDark;
     final selected = _isRosary == isRosary;
-    final selectedTextColor = AppColors.authBgMid;
-    final unselectedTextColor = Colors.white.withOpacity(0.55);
+    final selectedTextColor = isDark ? AppColors.authBgMid : const Color(0xFF624294);
+    final unselectedTextColor = isDark
+        ? Colors.white.withOpacity(0.55)
+        : const Color(0xFF624294).withOpacity(0.50);
 
     return Expanded(
       child: GestureDetector(
@@ -544,6 +574,9 @@ class _CountingScreenState extends State<CountingScreen>
           decoration: BoxDecoration(
             color: selected ? Colors.white : Colors.transparent,
             borderRadius: BorderRadius.circular(30),
+            boxShadow: selected && !isDark
+                ? [BoxShadow(color: const Color(0xFF624294).withOpacity(0.10), blurRadius: 8, offset: const Offset(0, 2))]
+                : null,
           ),
           alignment: Alignment.center,
           child: Text(label,
@@ -661,6 +694,7 @@ class _CountingScreenState extends State<CountingScreen>
   }
 
   Widget _buildCountCard() {
+    final isDark = themeNotifier.isDark;
     return SizedBox(
       width: 200,
       height: 200,
@@ -678,24 +712,32 @@ class _CountingScreenState extends State<CountingScreen>
               height: 155,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: _isRosary
-                  ? Colors.white.withOpacity(0.12)
-                  : Colors.black.withOpacity(0.40),
-                boxShadow: [
-                  BoxShadow(color: _bgBottom.withOpacity(0.35), blurRadius: 36, spreadRadius: 4, offset: const Offset(0, 8)),
-                  BoxShadow(color: Colors.white.withOpacity(0.08), blurRadius: 16, spreadRadius: -4, offset: const Offset(-4, -4)),
-                ],
-                border: Border.all(color: _accent.withOpacity(0.45), width: 2.5),
+                color: isDark
+                    ? (_isRosary ? Colors.white.withOpacity(0.12) : Colors.black.withOpacity(0.40))
+                    : Colors.white,
+                boxShadow: isDark
+                    ? [
+                        BoxShadow(color: _bgBottom.withOpacity(0.35), blurRadius: 36, spreadRadius: 4, offset: const Offset(0, 8)),
+                        BoxShadow(color: Colors.white.withOpacity(0.08), blurRadius: 16, spreadRadius: -4, offset: const Offset(-4, -4)),
+                      ]
+                    : [
+                        BoxShadow(color: const Color(0xFF624294).withOpacity(0.15), blurRadius: 24, spreadRadius: 2, offset: const Offset(0, 8)),
+                        BoxShadow(color: Colors.white.withOpacity(0.90), blurRadius: 8, offset: const Offset(-4, -4)),
+                      ],
+                border: Border.all(
+                  color: isDark ? _accent.withOpacity(0.45) : const Color(0xFF624294).withOpacity(0.20),
+                  width: 2.5,
+                ),
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
                     '$_activeCount',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 52,
                       fontWeight: FontWeight.w900,
-                      color: Colors.white,
+                      color: isDark ? Colors.white : const Color(0xFF624294),
                       height: 1.0,
                       letterSpacing: -2,
                     ),
@@ -715,7 +757,7 @@ class _CountingScreenState extends State<CountingScreen>
                     style: GoogleFonts.poppins(
                       fontSize: 10,
                       fontWeight: FontWeight.w500,
-                      color: Colors.white.withOpacity(0.65),
+                      color: isDark ? Colors.white.withOpacity(0.65) : const Color(0xFF624294).withOpacity(0.60),
                       letterSpacing: 1.5,
                     ),
                   ),
@@ -729,6 +771,8 @@ class _CountingScreenState extends State<CountingScreen>
   }
 
   Widget _buildCountButtons() {
+    final isDark = themeNotifier.isDark;
+    final iconColor = isDark ? Colors.white : const Color(0xFF624294);
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -737,7 +781,7 @@ class _CountingScreenState extends State<CountingScreen>
           builder: (context, child) => Transform.scale(scale: _decrementScaleAnim.value, child: child),
           child: GestureDetector(
             onTap: _decrement,
-            child: const Icon(Icons.remove_rounded, color: Colors.white, size: 36),
+            child: Icon(Icons.remove_rounded, color: iconColor, size: 36),
           ),
         ),
         const SizedBox(width: 60),
@@ -746,7 +790,7 @@ class _CountingScreenState extends State<CountingScreen>
           builder: (context, child) => Transform.scale(scale: _incrementScaleAnim.value, child: child),
           child: GestureDetector(
             onTap: _increment,
-            child: const Icon(Icons.add_rounded, color: Colors.white, size: 40),
+            child: Icon(Icons.add_rounded, color: iconColor, size: 40),
           ),
         ),
       ],
@@ -755,18 +799,28 @@ class _CountingScreenState extends State<CountingScreen>
 
   Widget _buildNoteInput() {
     final isDark = themeNotifier.isDark;
-    final inputBg = _isRosary
-        ? Colors.white.withOpacity(0.10)
-        : Colors.black.withOpacity(0.35);
-    final textColor = _isRosary ? Colors.white : Colors.white;
-    final hintColor = _isRosary ? Colors.white.withOpacity(0.40) : Colors.white.withOpacity(0.40);
+    final inputBg = isDark
+        ? (_isRosary ? Colors.white.withOpacity(0.10) : Colors.black.withOpacity(0.35))
+        : Colors.white;
+    final textColor = isDark ? Colors.white : const Color(0xFF624294);
+    final hintColor = isDark
+        ? Colors.white.withOpacity(0.40)
+        : const Color(0xFF624294).withOpacity(0.40);
+    final borderColor = isDark
+        ? _accent.withOpacity(0.35)
+        : const Color(0xFF624294).withOpacity(0.15);
 
     return Container(
       decoration: BoxDecoration(
         color: inputBg,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: _accent.withOpacity(0.35), width: 1.5),
-        boxShadow: [BoxShadow(color: _bgBottom.withOpacity(0.15), blurRadius: 12, offset: const Offset(0, 4))],
+        border: Border.all(color: borderColor, width: 1.5),
+        boxShadow: isDark
+            ? [BoxShadow(color: _bgBottom.withOpacity(0.15), blurRadius: 12, offset: const Offset(0, 4))]
+            : [
+                BoxShadow(color: const Color(0xFF624294).withOpacity(0.10), blurRadius: 16, spreadRadius: 1, offset: const Offset(0, 6)),
+                BoxShadow(color: Colors.white.withOpacity(0.80), blurRadius: 4, offset: const Offset(0, -2)),
+              ],
       ),
       child: TextField(
         controller: _noteController,
@@ -774,12 +828,16 @@ class _CountingScreenState extends State<CountingScreen>
         decoration: InputDecoration(
           hintText: loc.tr('add_intentions'),
           hintStyle: GoogleFonts.poppins(color: hintColor, fontSize: 12, fontWeight: FontWeight.w400),
-          prefixIcon: Icon(Icons.edit_note_rounded, color: _accent, size: 20),
+          prefixIcon: Icon(Icons.edit_note_rounded,
+              color: isDark ? _accent : const Color(0xFF624294).withOpacity(0.60), size: 20),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(18),
-            borderSide: BorderSide(color: _accent, width: 1.5),
+            borderSide: BorderSide(
+              color: isDark ? _accent : AppColors.goldPrimary.withOpacity(0.7),
+              width: 1.5,
+            ),
           ),
         ),
       ),
@@ -994,10 +1052,16 @@ class _PrayerInlineCardState extends State<_PrayerInlineCard> {
       decoration: BoxDecoration(
         color: const Color(0xFFFAF6FF),
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: Colors.white, width: 2.0),
-        boxShadow: [
-          BoxShadow(color: widget.bgBottom.withOpacity(0.20), blurRadius: 20, offset: const Offset(0, 6)),
-        ],
+        border: Border.all(
+          color: themeNotifier.isDark ? Colors.white : const Color(0xFF624294).withOpacity(0.15),
+          width: themeNotifier.isDark ? 2.0 : 1.5,
+        ),
+        boxShadow: themeNotifier.isDark
+            ? [BoxShadow(color: widget.bgBottom.withOpacity(0.20), blurRadius: 20, offset: const Offset(0, 6))]
+            : [
+                BoxShadow(color: const Color(0xFF624294).withOpacity(0.10), blurRadius: 16, spreadRadius: 1, offset: const Offset(0, 6)),
+                BoxShadow(color: Colors.white.withOpacity(0.80), blurRadius: 4, offset: const Offset(0, -2)),
+              ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../colors/colors.dart';
+import '../theme/theme_notifier.dart';
 
 /// Frosted-glass "Top Offerings" panel shown as an overlay on the counting screen.
 class GlobalCountPanel extends StatelessWidget {
@@ -20,6 +21,7 @@ class GlobalCountPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = themeNotifier.isDark;
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0.0, end: 1.0),
       duration: const Duration(milliseconds: 280),
@@ -29,73 +31,86 @@ class GlobalCountPanel extends StatelessWidget {
         alignment: Alignment.bottomCenter,
         child: Opacity(opacity: v.clamp(0.0, 1.0), child: child),
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(24),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: const RadialGradient(
-                center: Alignment(0.0, -0.5),
-                radius: 1.0,
-                colors: [
-                  Color(0xFF321060),
-                  Color(0xFF220850),
-                  Color(0xFF1c023d),
-                ],
-                stops: [0.0, 0.5, 1.0],
-              ),
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: Colors.white.withOpacity(0.12), width: 1.5),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.40),
-                  blurRadius: 32,
-                  offset: const Offset(0, 10),
-                ),
+      child: isDark ? _buildDarkPanel() : _buildLightPanel(),
+    );
+  }
+
+  Widget _buildDarkPanel() {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(24),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: const RadialGradient(
+              center: Alignment(0.0, -0.5),
+              radius: 1.0,
+              colors: [
+                Color(0xFF321060),
+                Color(0xFF220850),
+                Color(0xFF1c023d),
               ],
+              stops: [0.0, 0.5, 1.0],
             ),
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // ── Header ──
-                Row(
-                  children: [
-                    const Icon(Icons.public_rounded, color: Colors.white, size: 18),
-                    const SizedBox(width: 8),
-                    const Text(
-                      'Top Offerings',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w900,
-                        color: Colors.white,
-                      ),
-                    ),
-                    const Spacer(),
-                    LiveBadge(blinkAnimation: blinkAnimation),
-                    const SizedBox(width: 8),
-                    GestureDetector(
-                      onTap: onClose,
-                      child: Icon(
-                        Icons.close_rounded,
-                        color: Colors.white.withOpacity(0.5),
-                        size: 20,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                // ── Animated leaderboard ──
-                _AnimatedLeaderboard(
-                  items: leaderboardData,
-                  itemHeight: _itemHeight,
-                ),
-              ],
-            ),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: Colors.white.withOpacity(0.12), width: 1.5),
+            boxShadow: [
+              BoxShadow(color: Colors.black.withOpacity(0.40), blurRadius: 32, offset: const Offset(0, 10)),
+            ],
           ),
+          padding: const EdgeInsets.all(20),
+          child: _buildContent(isDark: true),
         ),
       ),
+    );
+  }
+
+  Widget _buildLightPanel() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: const Color(0xFF624294).withOpacity(0.15), width: 1.5),
+        boxShadow: [
+          BoxShadow(color: const Color(0xFF624294).withOpacity(0.12), blurRadius: 20, spreadRadius: 1, offset: const Offset(0, 8)),
+          BoxShadow(color: Colors.white.withOpacity(0.80), blurRadius: 4, offset: const Offset(0, -2)),
+        ],
+      ),
+      padding: const EdgeInsets.all(20),
+      child: _buildContent(isDark: false),
+    );
+  }
+
+  Widget _buildContent({required bool isDark}) {
+    final titleColor = isDark ? Colors.white : const Color(0xFF624294);
+    final iconColor = isDark ? Colors.white : const Color(0xFF624294);
+    final closeColor = isDark ? Colors.white.withOpacity(0.5) : const Color(0xFF624294).withOpacity(0.4);
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // ── Header ──
+        Row(
+          children: [
+            Icon(Icons.public_rounded, color: iconColor, size: 18),
+            const SizedBox(width: 8),
+            Text(
+              'Top Offerings',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: titleColor),
+            ),
+            const Spacer(),
+            LiveBadge(blinkAnimation: blinkAnimation),
+            const SizedBox(width: 8),
+            GestureDetector(
+              onTap: onClose,
+              child: Icon(Icons.close_rounded, color: closeColor, size: 20),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        // ── Animated leaderboard ──
+        _AnimatedLeaderboard(items: leaderboardData, itemHeight: _itemHeight, isDark: isDark),
+      ],
     );
   }
 }
@@ -104,8 +119,9 @@ class GlobalCountPanel extends StatelessWidget {
 class _AnimatedLeaderboard extends StatefulWidget {
   final List<Map<String, dynamic>> items;
   final double itemHeight;
+  final bool isDark;
 
-  const _AnimatedLeaderboard({required this.items, required this.itemHeight});
+  const _AnimatedLeaderboard({required this.items, required this.itemHeight, required this.isDark});
 
   @override
   State<_AnimatedLeaderboard> createState() => _AnimatedLeaderboardState();
@@ -159,6 +175,7 @@ class _AnimatedLeaderboardState extends State<_AnimatedLeaderboard> {
               name: name,
               count: count,
               isYou: isYou,
+              isDark: widget.isDark,
             ),
           );
         }).toList(),
@@ -221,6 +238,7 @@ class LeaderRow extends StatelessWidget {
   final String name;
   final int count;
   final bool isYou;
+  final bool isDark;
 
   const LeaderRow({
     super.key,
@@ -228,11 +246,28 @@ class LeaderRow extends StatelessWidget {
     required this.name,
     required this.count,
     required this.isYou,
+    this.isDark = true,
   });
 
   @override
   Widget build(BuildContext context) {
     final isGold = rank == 1;
+    final nameColor = isYou
+        ? AppColors.goldDark
+        : (isDark ? Colors.white.withOpacity(0.9) : const Color(0xFF624294));
+    final countColor = isYou
+        ? AppColors.goldDark
+        : (isDark ? Colors.white.withOpacity(0.9) : const Color(0xFF624294));
+    final rankTextColor = isGold
+        ? AppColors.goldDark
+        : (isDark ? Colors.white.withOpacity(0.8) : const Color(0xFF624294).withOpacity(0.7));
+    final rankBg = isGold
+        ? AppColors.goldPrimary.withOpacity(0.12)
+        : (isDark ? AppColors.authPurple.withOpacity(0.06) : const Color(0xFF624294).withOpacity(0.06));
+    final rankBorder = isGold
+        ? AppColors.goldPrimary.withOpacity(0.35)
+        : (isDark ? AppColors.authPurple.withOpacity(0.15) : const Color(0xFF624294).withOpacity(0.15));
+
     return AnimatedContainer(
       duration: const Duration(milliseconds: 500),
       curve: Curves.easeInOut,
@@ -241,16 +276,10 @@ class LeaderRow extends StatelessWidget {
       decoration: isYou
           ? BoxDecoration(
               gradient: LinearGradient(
-                colors: [
-                  AppColors.goldPrimary.withOpacity(0.15),
-                  AppColors.goldLight.withOpacity(0.05),
-                ],
+                colors: [AppColors.goldPrimary.withOpacity(0.15), AppColors.goldLight.withOpacity(0.05)],
               ),
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color: AppColors.goldPrimary.withOpacity(0.4),
-                width: 1.5,
-              ),
+              border: Border.all(color: AppColors.goldPrimary.withOpacity(0.4), width: 1.5),
             )
           : null,
       child: Row(
@@ -261,25 +290,11 @@ class LeaderRow extends StatelessWidget {
             height: 34,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: isGold
-                  ? AppColors.goldPrimary.withOpacity(0.12)
-                  : AppColors.authPurple.withOpacity(0.06),
-              border: Border.all(
-                color: isGold
-                    ? AppColors.goldPrimary.withOpacity(0.35)
-                    : AppColors.authPurple.withOpacity(0.15),
-                width: 1.5,
-              ),
+              color: rankBg,
+              border: Border.all(color: rankBorder, width: 1.5),
             ),
             child: Center(
-              child: Text(
-                '$rank',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w900,
-                  color: isGold ? AppColors.goldDark : Colors.white.withOpacity(0.8),
-                ),
-              ),
+              child: Text('$rank', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: rankTextColor)),
             ),
           ),
           const SizedBox(width: 12),
@@ -287,47 +302,23 @@ class LeaderRow extends StatelessWidget {
           Expanded(
             child: Row(
               children: [
-                Text(
-                  name,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: isYou ? AppColors.goldDark : Colors.white.withOpacity(0.9),
-                  ),
-                ),
+                Text(name, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: nameColor)),
                 if (isYou) ...[
                   const SizedBox(width: 6),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [AppColors.goldDark, AppColors.goldPrimary],
-                      ),
+                      gradient: const LinearGradient(colors: [AppColors.goldDark, AppColors.goldPrimary]),
                       borderRadius: BorderRadius.circular(5),
                     ),
-                    child: const Text(
-                      'YOU',
-                      style: TextStyle(
-                        fontSize: 7,
-                        fontWeight: FontWeight.w900,
-                        color: Colors.white,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
+                    child: const Text('YOU', style: TextStyle(fontSize: 7, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 0.5)),
                   ),
                 ],
               ],
             ),
           ),
           // count
-          Text(
-            '$count',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w900,
-              color: isYou ? AppColors.goldDark : Colors.white.withOpacity(0.9),
-            ),
-          ),
+          Text('$count', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: countColor)),
         ],
       ),
     );

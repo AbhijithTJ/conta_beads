@@ -164,18 +164,20 @@ class _LoginScreenState extends State<LoginScreen> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: RadialGradient(
-            center: Alignment(0.0, -0.4),
-            radius: 0.85,
-            colors: [
-              Color(0xFF321060),
-              Color(0xFF220850),
-              Color(0xFF1c023d),
-            ],
-            stops: [0.0, 0.5, 1.0],
-          ),
-        ),
+        decoration: isDark
+            ? const BoxDecoration(
+                gradient: RadialGradient(
+                  center: Alignment(0.0, -0.4),
+                  radius: 0.85,
+                  colors: [
+                    Color(0xFF321060),
+                    Color(0xFF220850),
+                    Color(0xFF1c023d),
+                  ],
+                  stops: [0.0, 0.5, 1.0],
+                ),
+              )
+            : const BoxDecoration(color: Color(0xFFF0EBF0)),
         child: Stack(
           children: [
             SafeArea(
@@ -219,104 +221,136 @@ class _LoginScreenState extends State<LoginScreen> {
 
   // ── Frosted glass login card ────────────────────────────────────────────────
   Widget _buildGlassCard(bool isDark) {
-    final cardBg = isDark ? Colors.white.withOpacity(0.92) : Colors.white;
     final signInColor = const Color(0xFF624294);
     final subTextColor = const Color(0xFF624294).withOpacity(0.60);
 
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(28),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-        child: Container(
-          decoration: BoxDecoration(
-            color: cardBg,
-            borderRadius: BorderRadius.circular(28),
-            border: Border.all(color: Colors.white, width: 2.0),
-            boxShadow: [
-              BoxShadow(
-                color: isDark
-                    ? Colors.black.withOpacity(0.20)
-                    : AppColors.authPurple.withOpacity(0.10),
-                blurRadius: 40,
-                spreadRadius: 2,
-                offset: const Offset(0, 12),
-              ),
-            ],
+    final cardContent = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('SIGN IN',
+            style: GoogleFonts.poppins(
+                fontSize: 22,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 3,
+                color: signInColor)),
+        const SizedBox(height: 4),
+        Text('Welcome back, continue your prayer journey',
+            style: GoogleFonts.poppins(
+                fontSize: 12,
+                color: subTextColor,
+                letterSpacing: 0.3)),
+        const SizedBox(height: 28),
+        _buildGlassField(
+          controller: _emailController,
+          label: 'Email address',
+          hint: 'Enter your email',
+          icon: Icons.email_outlined,
+          isDark: isDark,
+        ),
+        const SizedBox(height: 18),
+        _buildGlassField(
+          controller: _passwordController,
+          label: 'Password',
+          hint: 'Enter your password',
+          icon: Icons.lock_outline_rounded,
+          isPassword: true,
+          obscure: _obscurePassword,
+          onToggle: () => setState(() => _obscurePassword = !_obscurePassword),
+          isDark: isDark,
+        ),
+        const SizedBox(height: 10),
+        Align(
+          alignment: Alignment.centerRight,
+          child: Text('Forgot password?',
+              style: GoogleFonts.poppins(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.goldDark.withOpacity(0.85),
+                  letterSpacing: 0.2)),
+        ),
+        const SizedBox(height: 28),
+        _buildLoginButton(),
+        if (_biometricAvailable && _biometricEnabled) ...[
+          const SizedBox(height: 14),
+          _buildBiometricButton(),
+        ],
+        if (_biometricAvailable && !_biometricEnabled) ...[
+          const SizedBox(height: 14),
+          Center(
+            child: GestureDetector(
+              onTap: () async {
+                final email = _emailController.text.trim();
+                final password = _passwordController.text;
+                if (email != 'admin@gmail.com' || password != '1234') {
+                  _showError('Sign in with your password first to enable biometrics');
+                  return;
+                }
+                await _offerBiometricSetup(email);
+              },
+              child: Text('Set up biometric login',
+                  style: TextStyle(
+                      color: AppColors.authPurple,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                      decoration: TextDecoration.underline,
+                      decorationColor: AppColors.authPurple)),
+            ),
           ),
-          padding: const EdgeInsets.fromLTRB(28, 32, 28, 28),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('SIGN IN',
-                  style: GoogleFonts.poppins(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 3,
-                      color: signInColor)),
-              const SizedBox(height: 4),
-              Text('Welcome back, continue your prayer journey',
-                  style: GoogleFonts.poppins(
-                      fontSize: 12,
-                      color: subTextColor,
-                      letterSpacing: 0.3)),
-              const SizedBox(height: 28),
-              _buildGlassField(
-                controller: _emailController,
-                label: 'Email address',
-                hint: 'Enter your email',
-                icon: Icons.email_outlined,
-              ),
-              const SizedBox(height: 18),
-              _buildGlassField(
-                controller: _passwordController,
-                label: 'Password',
-                hint: 'Enter your password',
-                icon: Icons.lock_outline_rounded,
-                isPassword: true,
-              ),
-              const SizedBox(height: 10),
-              Align(
-                alignment: Alignment.centerRight,
-                child: Text('Forgot password?',
-                    style: GoogleFonts.poppins(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.goldDark.withOpacity(0.85),
-                        letterSpacing: 0.2)),
-              ),
-              const SizedBox(height: 28),
-              _buildLoginButton(),
-              if (_biometricAvailable && _biometricEnabled) ...[
-                const SizedBox(height: 14),
-                _buildBiometricButton(),
-              ],
-              if (_biometricAvailable && !_biometricEnabled) ...[
-                const SizedBox(height: 14),
-                Center(
-                  child: GestureDetector(
-                    onTap: () async {
-                      final email = _emailController.text.trim();
-                      final password = _passwordController.text;
-                      if (email != 'admin@gmail.com' || password != '1234') {
-                        _showError('Sign in with your password first to enable biometrics');
-                        return;
-                      }
-                      await _offerBiometricSetup(email);
-                    },
-                    child: Text('Set up biometric login',
-                        style: TextStyle(
-                            color: AppColors.authPurple,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 13,
-                            decoration: TextDecoration.underline,
-                            decorationColor: AppColors.authPurple)),
-                  ),
+        ],
+      ],
+    );
+
+    if (isDark) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(28),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.92),
+              borderRadius: BorderRadius.circular(28),
+              border: Border.all(color: Colors.white, width: 2.0),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.20),
+                  blurRadius: 40,
+                  spreadRadius: 2,
+                  offset: const Offset(0, 12),
                 ),
               ],
-            ],
+            ),
+            padding: const EdgeInsets.fromLTRB(28, 32, 28, 28),
+            child: cardContent,
           ),
         ),
+      );
+    }
+
+    // Light mode — home screen card style
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(
+          color: const Color(0xFF624294).withOpacity(0.15),
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF624294).withOpacity(0.10),
+            blurRadius: 16,
+            spreadRadius: 1,
+            offset: const Offset(0, 6),
+          ),
+          BoxShadow(
+            color: Colors.white.withOpacity(0.80),
+            blurRadius: 4,
+            offset: const Offset(0, -2),
+          ),
+        ],
       ),
+      padding: const EdgeInsets.fromLTRB(28, 32, 28, 28),
+      child: cardContent,
     );
   }
 
@@ -327,6 +361,9 @@ class _LoginScreenState extends State<LoginScreen> {
     required String hint,
     required IconData icon,
     bool isPassword = false,
+    bool obscure = false,
+    bool isDark = true,
+    VoidCallback? onToggle,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -344,10 +381,10 @@ class _LoginScreenState extends State<LoginScreen> {
         ClipRRect(
           borderRadius: BorderRadius.circular(14),
           child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+            filter: ImageFilter.blur(sigmaX: isDark ? 8 : 0, sigmaY: isDark ? 8 : 0),
             child: TextField(
               controller: controller,
-              obscureText: isPassword ? _obscurePassword : false,
+              obscureText: isPassword ? obscure : false,
               style: GoogleFonts.poppins(
                 color: const Color(0xFF624294),
                 fontWeight: FontWeight.w500,
@@ -362,24 +399,30 @@ class _LoginScreenState extends State<LoginScreen> {
                 prefixIcon: Icon(icon, color: const Color(0xFF624294).withOpacity(0.70), size: 20),
                 suffixIcon: isPassword
                     ? GestureDetector(
-                        onTap: () => setState(() => _obscurePassword = !_obscurePassword),
+                        onTap: onToggle,
                         child: Icon(
-                          _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                          obscure ? Icons.visibility_off_outlined : Icons.visibility_outlined,
                           color: const Color(0xFF624294).withOpacity(0.60),
                           size: 20,
                         ),
                       )
                     : null,
                 filled: true,
-                fillColor: Colors.white.withOpacity(0.80),
+                fillColor: isDark
+                    ? Colors.white.withOpacity(0.80)
+                    : const Color(0xFFF5F0FF),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
-                  borderSide: BorderSide(color: Colors.white, width: 2.0),
+                  borderSide: isDark
+                      ? const BorderSide(color: Colors.white, width: 2.0)
+                      : BorderSide(color: const Color(0xFF624294).withOpacity(0.20), width: 1.5),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
-                  borderSide: BorderSide(color: Colors.white, width: 2.0),
+                  borderSide: isDark
+                      ? const BorderSide(color: Colors.white, width: 2.0)
+                      : BorderSide(color: const Color(0xFF624294).withOpacity(0.20), width: 1.5),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
@@ -397,6 +440,7 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isPressed = false;
 
   Widget _buildLoginButton() {
+    final isDark = themeNotifier.isDark;
     return GestureDetector(
       onTap: _isLoading ? null : _handleLogin,
       onTapDown: (_) => setState(() => _isPressed = true),
@@ -408,9 +452,11 @@ class _LoginScreenState extends State<LoginScreen> {
         height: 56,
         transform: Matrix4.translationValues(0, _isPressed ? 2 : 0, 0),
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [Color(0xFF321060), Color(0xFF220850), Color(0xFF1c023d)],
-            stops: [0.0, 0.5, 1.0],
+          gradient: LinearGradient(
+            colors: isDark
+                ? [const Color(0xFF321060), const Color(0xFF220850), const Color(0xFF1c023d)]
+                : [const Color(0xFF7B55A8), const Color(0xFF624294)],
+            stops: isDark ? const [0.0, 0.5, 1.0] : const [0.0, 1.0],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
