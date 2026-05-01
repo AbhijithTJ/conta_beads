@@ -114,6 +114,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildAvatar() {
+    final isDark = themeNotifier.isDark;
     return Stack(
       clipBehavior: Clip.none,
       children: [
@@ -123,7 +124,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: AppColors.cardLavender,
-            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.15), blurRadius: 25, spreadRadius: 2)],
+            boxShadow: [
+              BoxShadow(
+                color: isDark
+                    ? Colors.black.withOpacity(0.15)
+                    : const Color(0xFF624294).withOpacity(0.15),
+                blurRadius: 25,
+                spreadRadius: 2,
+              ),
+            ],
           ),
           padding: const EdgeInsets.all(4),
           child: ClipRRect(
@@ -150,9 +159,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
             height: 32,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              gradient: LinearGradient(colors: [AppColors.cardLavender, AppColors.cardLavender], begin: Alignment.topLeft, end: Alignment.bottomRight),
+              gradient: const LinearGradient(colors: [AppColors.cardLavender, AppColors.cardLavender], begin: Alignment.topLeft, end: Alignment.bottomRight),
               border: Border.all(color: const Color(0xFF624294), width: 2.5),
-              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.15), blurRadius: 8, offset: const Offset(0, 4))],
+              boxShadow: [
+                BoxShadow(
+                  color: isDark
+                      ? Colors.black.withOpacity(0.15)
+                      : const Color(0xFF624294).withOpacity(0.15),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
             child: const Icon(Icons.camera_alt_rounded, size: 14, color: Color(0xFF3D0227)),
           ),
@@ -270,22 +287,54 @@ class _WhiteCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(28),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.92),
-            borderRadius: BorderRadius.circular(28),
-            border: Border.all(color: Colors.white, width: 2.0),
-            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.20), blurRadius: 40, spreadRadius: 2, offset: const Offset(0, 12))],
+    final isDark = themeNotifier.isDark;
+
+    if (isDark) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(28),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.92),
+              borderRadius: BorderRadius.circular(28),
+              border: Border.all(color: Colors.white, width: 2.0),
+              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.20), blurRadius: 40, spreadRadius: 2, offset: const Offset(0, 12))],
+            ),
+            child: child,
           ),
-          child: child,
         ),
+      );
+    }
+
+    // Light mode — matches home screen card style
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(
+          color: const Color(0xFF624294).withOpacity(0.15),
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF624294).withOpacity(0.10),
+            blurRadius: 16,
+            spreadRadius: 1,
+            offset: const Offset(0, 6),
+          ),
+          BoxShadow(
+            color: Colors.white.withOpacity(0.80),
+            blurRadius: 4,
+            offset: const Offset(0, -2),
+          ),
+        ],
       ),
+      child: child,
     );
   }
 }
@@ -369,27 +418,66 @@ class _StatBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(24),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-          child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 18),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.92),
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: Colors.white, width: 2.0),
-              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.12), blurRadius: 20, offset: const Offset(0, 8))],
-            ),
-            child: Column(
-              children: [
-                Text(value, style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: AppColors.authBgMid, height: 1)),
-                const SizedBox(height: 6),
-                Text(label.toUpperCase(), style: GoogleFonts.poppins(fontSize: 9, fontWeight: FontWeight.w800, letterSpacing: 1.2, color: const Color(0xFF624294).withOpacity(0.5))),
-              ],
+    final isDark = themeNotifier.isDark;
+
+    if (isDark) {
+      return Expanded(
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(24),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 18),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.92),
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: Colors.white, width: 2.0),
+                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.12), blurRadius: 20, offset: const Offset(0, 8))],
+              ),
+              child: Column(
+                children: [
+                  Text(value, style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: AppColors.authBgMid, height: 1)),
+                  const SizedBox(height: 6),
+                  Text(label.toUpperCase(), style: GoogleFonts.poppins(fontSize: 9, fontWeight: FontWeight.w800, letterSpacing: 1.2, color: const Color(0xFF624294).withOpacity(0.5))),
+                ],
+              ),
             ),
           ),
+        ),
+      );
+    }
+
+    // Light mode — matches home screen card style
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 18),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(
+            color: const Color(0xFF624294).withOpacity(0.15),
+            width: 1.5,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF624294).withOpacity(0.10),
+              blurRadius: 16,
+              spreadRadius: 1,
+              offset: const Offset(0, 6),
+            ),
+            BoxShadow(
+              color: Colors.white.withOpacity(0.80),
+              blurRadius: 4,
+              offset: const Offset(0, -2),
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            Text(value, style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: AppColors.authBgMid, height: 1)),
+            const SizedBox(height: 6),
+            Text(label.toUpperCase(), style: GoogleFonts.poppins(fontSize: 9, fontWeight: FontWeight.w800, letterSpacing: 1.2, color: const Color(0xFF624294).withOpacity(0.5))),
+          ],
         ),
       ),
     );

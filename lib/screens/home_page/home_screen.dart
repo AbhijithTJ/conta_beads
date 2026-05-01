@@ -467,42 +467,70 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               ));
             }
           },
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(16),
-                  child: Image.asset(item['image']!, fit: BoxFit.cover, width: double.infinity),
-                ),
-              ),
-              const SizedBox(height: 6),
-              SizedBox(
-                height: 44,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          '${item['title']!} ${item['subtitle']!}',
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.poppins(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
-                            color: isDark ? Colors.white : const Color(0xFF624294),
-                            height: 1.3,
-                          ),
-                        ),
+          child: Container(
+            decoration: isDark
+                ? null
+                : BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: const Color(0xFF624294).withOpacity(0.15),
+                      width: 1.5,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF624294).withOpacity(0.10),
+                        blurRadius: 16,
+                        spreadRadius: 1,
+                        offset: const Offset(0, 6),
                       ),
-                      Icon(Icons.favorite_rounded, color: isDark ? Colors.white : const Color(0xFF624294), size: 20),
+                      BoxShadow(
+                        color: Colors.white.withOpacity(0.80),
+                        blurRadius: 4,
+                        offset: const Offset(0, -2),
+                      ),
                     ],
                   ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: ClipRRect(
+                    borderRadius: isDark
+                        ? BorderRadius.circular(16)
+                        : const BorderRadius.vertical(top: Radius.circular(18)),
+                    child: Image.asset(item['image']!, fit: BoxFit.cover, width: double.infinity),
+                  ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 6),
+                SizedBox(
+                  height: 44,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            '${item['title']!} ${item['subtitle']!}',
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.poppins(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: isDark ? Colors.white : const Color(0xFF624294),
+                              height: 1.3,
+                            ),
+                          ),
+                        ),
+                        Icon(Icons.favorite_rounded, color: isDark ? Colors.white : const Color(0xFF624294), size: 20),
+                      ],
+                    ),
+                  ),
+                ),
+                if (!isDark) const SizedBox(height: 4),
+              ],
+            ),
           ),
         );
       },

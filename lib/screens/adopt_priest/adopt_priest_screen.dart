@@ -345,9 +345,26 @@ class _AdoptPriestScreenState extends State<AdoptPriestScreen> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 16, vertical: 14),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(isDark ? 0.07 : 0.8),
+                            color: isDark
+                                ? Colors.white.withOpacity(0.07)
+                                : Colors.white,
                             borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: Colors.white, width: 2.0),
+                            border: Border.all(
+                              color: isDark
+                                  ? Colors.white
+                                  : const Color(0xFF624294).withOpacity(0.15),
+                              width: isDark ? 2.0 : 1.5,
+                            ),
+                            boxShadow: isDark
+                                ? null
+                                : [
+                                    BoxShadow(
+                                      color: const Color(0xFF624294).withOpacity(0.10),
+                                      blurRadius: 16,
+                                      spreadRadius: 1,
+                                      offset: const Offset(0, 6),
+                                    ),
+                                  ],
                           ),
                           child: Row(
                             children: [
@@ -465,15 +482,30 @@ class _EmptySlot extends StatelessWidget {
         decoration: BoxDecoration(
           color: isDark
               ? Colors.white.withOpacity(0.05)
-              : Colors.white.withOpacity(0.6),
+              : Colors.white,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isDark
                 ? Colors.white.withOpacity(0.18)
-                : const Color(0xFF624294).withOpacity(0.25),
-            width: 2.0,
+                : const Color(0xFF624294).withOpacity(0.15),
+            width: isDark ? 2.0 : 1.5,
             strokeAlign: BorderSide.strokeAlignInside,
           ),
+          boxShadow: isDark
+              ? null
+              : [
+                  BoxShadow(
+                    color: const Color(0xFF624294).withOpacity(0.10),
+                    blurRadius: 16,
+                    spreadRadius: 1,
+                    offset: const Offset(0, 6),
+                  ),
+                  BoxShadow(
+                    color: Colors.white.withOpacity(0.80),
+                    blurRadius: 4,
+                    offset: const Offset(0, -2),
+                  ),
+                ],
         ),
         padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 8),
         child: Column(
@@ -554,14 +586,33 @@ class _FilledCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFF624294), width: 2.0),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF624294).withOpacity(0.3),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        border: Border.all(
+          color: isDark
+              ? const Color(0xFF624294)
+              : const Color(0xFF624294).withOpacity(0.15),
+          width: isDark ? 2.0 : 1.5,
+        ),
+        boxShadow: isDark
+            ? [
+                BoxShadow(
+                  color: const Color(0xFF624294).withOpacity(0.3),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ]
+            : [
+                BoxShadow(
+                  color: const Color(0xFF624294).withOpacity(0.10),
+                  blurRadius: 16,
+                  spreadRadius: 1,
+                  offset: const Offset(0, 6),
+                ),
+                BoxShadow(
+                  color: Colors.white.withOpacity(0.80),
+                  blurRadius: 4,
+                  offset: const Offset(0, -2),
+                ),
+              ],
       ),
       padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
       child: Column(
