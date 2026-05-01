@@ -1,7 +1,23 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../colors/colors.dart';
 import '../../theme/theme_notifier.dart';
+
+// Full pool of priests to randomly pick from
+const List<Map<String, String>> _priestPool = [
+  {'name': 'Fr. Thomas', 'role': 'Parish Priest'},
+  {'name': 'Fr. Joseph', 'role': 'Mission Priest'},
+  {'name': 'Fr. Michael', 'role': 'Seminary Rector'},
+  {'name': 'Fr. Anthony', 'role': 'Hospital Chaplain'},
+  {'name': 'Fr. Sebastian', 'role': 'Youth Minister'},
+  {'name': 'Fr. George', 'role': 'Retreat Director'},
+  {'name': 'Fr. Paul', 'role': 'Foreign Missionary'},
+  {'name': 'Fr. James', 'role': 'Prison Chaplain'},
+  {'name': 'Fr. Peter', 'role': 'University Chaplain'},
+  {'name': 'Fr. Francis', 'role': 'Parish Priest'},
+  {'name': 'Fr. David', 'role': 'Mission Priest'},
+  {'name': 'Fr. John', 'role': 'Retreat Director'},
+];
 
 class AdoptPriestScreen extends StatefulWidget {
   const AdoptPriestScreen({super.key});
@@ -11,24 +27,169 @@ class AdoptPriestScreen extends StatefulWidget {
 }
 
 class _AdoptPriestScreenState extends State<AdoptPriestScreen> {
-  final Set<int> _selected = {};
-  static const int _maxSelection = 3;
+  static const int _maxSlots = 3;
 
-  final List<Map<String, String>> _priests = [
-    {'name': 'Fr. Thomas', 'subtitle': 'Your Prayer\nmatters for me', 'slot': '1/3'},
-    {'name': 'Fr. Joseph', 'subtitle': 'Your Prayer\nmatters for me', 'slot': '2/3'},
-    {'name': 'Fr. Michael', 'subtitle': 'Your Prayer\nmatters for me', 'slot': '3/3'},
-  ];
+  // Each slot holds either null (empty) or a priest map
+  final List<Map<String, String>?> _slots = [null, null, null];
 
-  void _toggleSelect(int index) {
+  // Returns priests not already chosen in any slot
+  List<Map<String, String>> _availablePriests() {
+    final chosen = _slots
+        .where((s) => s != null)
+        .map((s) => s!['name'])
+        .toSet();
+    return _priestPool.where((p) => !chosen.contains(p['name'])).toList();
+  }
+
+  // Returns a shuffled random subset (up to 6) from available priests
+  List<Map<String, String>> _randomSubset() {
+    final available = _availablePriests();
+    available.shuffle(Random());
+    return available.take(6).toList();
+  }
+
+  void _openPickerForSlot(int slotIndex) {
+    final candidates = _randomSubset();
+    if (candidates.isEmpty) return;
+
+    final isDark = themeNotifier.isDark;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (_) {
+        return Container(
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF220850) : Colors.white,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+          ),
+          padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Drag handle
+              Center(
+                child: Container(
+                  width: 40, height: 4,
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? Colors.white.withOpacity(0.2)
+                        : Colors.black.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                'Choose a Priest',
+                style: GoogleFonts.poppins(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                  color: isDark ? Colors.white : const Color(0xFF624294),
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Select one to add to your prayer list',
+                style: GoogleFonts.poppins(
+                  fontSize: 12,
+                  color: isDark
+                      ? Colors.white.withOpacity(0.55)
+                      : const Color(0xFF624294).withOpacity(0.55),
+                ),
+              ),
+              const SizedBox(height: 20),
+              ...candidates.map((priest) {
+                return GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _slots[slotIndex] = priest;
+                    });
+                    Navigator.of(context).pop();
+                  },
+                  child: Container(
+                    margin: const EdgeInsets.only(bottom: 10),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? Colors.white.withOpacity(0.07)
+                          : const Color(0xFFF0EBF0),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: isDark
+                            ? Colors.white.withOpacity(0.12)
+                            : const Color(0xFF624294).withOpacity(0.15),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 44, height: 44,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: const Color(0xFFEDE0ED),
+                            border: Border.all(
+                              color: const Color(0xFF624294).withOpacity(0.2),
+                              width: 1.5,
+                            ),
+                          ),
+                          child: const Icon(
+                            Icons.person_rounded,
+                            size: 24,
+                            color: Color(0xFF624294),
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                priest['name']!,
+                                style: GoogleFonts.poppins(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w700,
+                                  color: isDark ? Colors.white : const Color(0xFF624294),
+                                ),
+                              ),
+                              Text(
+                                priest['role']!,
+                                style: GoogleFonts.poppins(
+                                  fontSize: 11,
+                                  color: isDark
+                                      ? Colors.white.withOpacity(0.5)
+                                      : const Color(0xFF624294).withOpacity(0.5),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Icon(
+                          Icons.add_circle_rounded,
+                          color: const Color(0xFF624294).withOpacity(0.7),
+                          size: 22,
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _removeSlot(int slotIndex) {
     setState(() {
-      if (_selected.contains(index)) {
-        _selected.remove(index);
-      } else if (_selected.length < _maxSelection) {
-        _selected.add(index);
-      }
+      _slots[slotIndex] = null;
     });
   }
+
+  int get _filledCount => _slots.where((s) => s != null).length;
 
   @override
   Widget build(BuildContext context) {
@@ -37,13 +198,15 @@ class _AdoptPriestScreenState extends State<AdoptPriestScreen> {
       builder: (_, isDark, __) {
         final bgColor = isDark ? const Color(0xFF1c023d) : const Color(0xFFF0EBF0);
         final titleColor = isDark ? Colors.white : const Color(0xFF624294);
-        final subColor = isDark ? Colors.white.withOpacity(0.65) : const Color(0xFF624294).withOpacity(0.6);
+        final subColor = isDark
+            ? Colors.white.withOpacity(0.65)
+            : const Color(0xFF624294).withOpacity(0.6);
 
         return Scaffold(
           backgroundColor: bgColor,
           body: Column(
             children: [
-              // Hero image
+              // ── Hero image ──────────────────────────────────────────────
               Stack(
                 children: [
                   SizedBox(
@@ -54,7 +217,6 @@ class _AdoptPriestScreenState extends State<AdoptPriestScreen> {
                       fit: BoxFit.cover,
                     ),
                   ),
-                  // gradient fade bottom
                   Positioned(
                     bottom: 0, left: 0, right: 0,
                     child: Container(
@@ -73,29 +235,32 @@ class _AdoptPriestScreenState extends State<AdoptPriestScreen> {
                       ),
                     ),
                   ),
-                  // back button — only show when pushed via navigation
                   if (Navigator.of(context).canPop())
-                  SafeArea(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: GestureDetector(
-                        onTap: () => Navigator.of(context).pop(),
-                        child: Container(
-                          width: 40, height: 40,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.black.withOpacity(0.35),
-                            border: Border.all(color: Colors.white.withOpacity(0.4)),
+                    SafeArea(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: GestureDetector(
+                          onTap: () => Navigator.of(context).pop(),
+                          child: Container(
+                            width: 40, height: 40,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.black.withOpacity(0.35),
+                              border: Border.all(color: Colors.white.withOpacity(0.4)),
+                            ),
+                            child: const Icon(
+                              Icons.arrow_back_rounded,
+                              color: Colors.white,
+                              size: 20,
+                            ),
                           ),
-                          child: const Icon(Icons.arrow_back_rounded, color: Colors.white, size: 20),
                         ),
                       ),
                     ),
-                  ),
                 ],
               ),
 
-              // Content with gradient background
+              // ── Content ─────────────────────────────────────────────────
               Expanded(
                 child: Container(
                   decoration: isDark
@@ -113,104 +278,162 @@ class _AdoptPriestScreenState extends State<AdoptPriestScreen> {
                         )
                       : const BoxDecoration(color: Color(0xFFF0EBF0)),
                   child: SingleChildScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: Column(
-                    children: [
-                      const SizedBox(height: 8),
-                      Text('Adopt a priest',
-                          style: GoogleFonts.poppins(fontSize: 26, fontWeight: FontWeight.w800, color: titleColor)),
-                      const SizedBox(height: 4),
-                      Text('Support a Spiritual Journey',
-                          style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500, color: subColor)),
-                      const SizedBox(height: 24),
-                      Text('Choose your Priest',
-                          style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w800, color: titleColor)),
-                      const SizedBox(height: 16),
-
-                      // Priest cards row
-                      Row(
-                        children: List.generate(_priests.length, (i) {
-                          final priest = _priests[i];
-                          final isSelected = _selected.contains(i);
-                          return Expanded(
-                            child: Padding(
-                              padding: EdgeInsets.only(
-                                left: i == 0 ? 0 : 6,
-                                right: i == _priests.length - 1 ? 0 : 6,
-                              ),
-                              child: _PriestCard(
-                                name: priest['name']!,
-                                subtitle: priest['subtitle']!,
-                                slot: priest['slot']!,
-                                isSelected: isSelected,
-                                onTap: () => _toggleSelect(i),
-                              ),
-                            ),
-                          );
-                        }),
-                      ),
-
-                      const SizedBox(height: 24),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(isDark ? 0.07 : 0.8),
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.white, width: 2.0),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(Icons.info_outline_rounded, size: 18, color: subColor),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Text(
-                                'You may select up to three priests for Spiritual partnership',
-                                style: GoogleFonts.poppins(fontSize: 12, color: isDark ? Colors.white.withOpacity(0.7) : const Color(0xFF624294).withOpacity(0.7), height: 1.5),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      const SizedBox(height: 24),
-                      if (_selected.isNotEmpty)
-                        GestureDetector(
-                          onTap: () {
-                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                              content: Text('${_selected.length} priest(s) adopted!',
-                                  style: GoogleFonts.poppins(color: Colors.white, fontWeight: FontWeight.w600)),
-                              backgroundColor: const Color(0xFF22014D),
-                              behavior: SnackBarBehavior.floating,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                              margin: const EdgeInsets.all(16),
-                            ));
-                          },
-                          child: Container(
-                            width: double.infinity,
-                            height: 54,
-                            decoration: BoxDecoration(
-                              gradient: const LinearGradient(
-                                colors: [Color(0xFF7B55A8), Color(0xFF624294)],
-                                begin: Alignment.topCenter,
-                                end: Alignment.bottomCenter,
-                              ),
-                              borderRadius: BorderRadius.circular(30),
-                              boxShadow: [
-                                BoxShadow(color: const Color(0xFF2A0A5E), blurRadius: 0, offset: const Offset(0, 5)),
-                                BoxShadow(color: const Color(0xFF624294).withOpacity(0.45), blurRadius: 14, offset: const Offset(0, 8)),
-                              ],
-                            ),
-                            child: Center(
-                              child: Text('Adopt ${_selected.length} Priest${_selected.length > 1 ? 's' : ''}',
-                                  style: GoogleFonts.poppins(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700, letterSpacing: 0.5)),
-                            ),
+                    physics: const BouncingScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 8),
+                        Text(
+                          'Adopt a priest',
+                          style: GoogleFonts.poppins(
+                            fontSize: 26,
+                            fontWeight: FontWeight.w800,
+                            color: titleColor,
                           ),
                         ),
-                      const SizedBox(height: 40),
-                    ],
+                        const SizedBox(height: 4),
+                        Text(
+                          'Support a Spiritual Journey',
+                          style: GoogleFonts.poppins(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                            color: subColor,
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        Text(
+                          'Choose your Priest',
+                          style: GoogleFonts.poppins(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w800,
+                            color: titleColor,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+
+                        // ── 3 Slots ────────────────────────────────────────
+                        Row(
+                          children: List.generate(_maxSlots, (i) {
+                            return Expanded(
+                              child: Padding(
+                                padding: EdgeInsets.only(
+                                  left: i == 0 ? 0 : 6,
+                                  right: i == _maxSlots - 1 ? 0 : 6,
+                                ),
+                                child: _slots[i] == null
+                                    ? _EmptySlot(
+                                        slotNumber: i + 1,
+                                        isDark: isDark,
+                                        onAdd: () => _openPickerForSlot(i),
+                                      )
+                                    : _FilledCard(
+                                        name: _slots[i]!['name']!,
+                                        role: _slots[i]!['role']!,
+                                        slotLabel: '${i + 1}/$_maxSlots',
+                                        isDark: isDark,
+                                        onRemove: () => _removeSlot(i),
+                                      ),
+                              ),
+                            );
+                          }),
+                        ),
+
+                        const SizedBox(height: 24),
+
+                        // ── Info box ───────────────────────────────────────
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 14),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(isDark ? 0.07 : 0.8),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: Colors.white, width: 2.0),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(Icons.info_outline_rounded,
+                                  size: 18, color: subColor),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  'Select at least 1 and up to 3 priests for your spiritual partnership',
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 12,
+                                    color: isDark
+                                        ? Colors.white.withOpacity(0.7)
+                                        : const Color(0xFF624294).withOpacity(0.7),
+                                    height: 1.5,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        const SizedBox(height: 24),
+
+                        // ── Adopt button (visible when ≥1 filled) ──────────
+                        if (_filledCount > 0)
+                          GestureDetector(
+                            onTap: () {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    '$_filledCount priest${_filledCount > 1 ? 's' : ''} adopted!',
+                                    style: GoogleFonts.poppins(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  backgroundColor: const Color(0xFF22014D),
+                                  behavior: SnackBarBehavior.floating,
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(14)),
+                                  margin: const EdgeInsets.all(16),
+                                ),
+                              );
+                            },
+                            child: Container(
+                              width: double.infinity,
+                              height: 54,
+                              decoration: BoxDecoration(
+                                gradient: const LinearGradient(
+                                  colors: [Color(0xFF7B55A8), Color(0xFF624294)],
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                ),
+                                borderRadius: BorderRadius.circular(30),
+                                boxShadow: [
+                                  const BoxShadow(
+                                    color: Color(0xFF2A0A5E),
+                                    blurRadius: 0,
+                                    offset: Offset(0, 5),
+                                  ),
+                                  BoxShadow(
+                                    color: const Color(0xFF624294).withOpacity(0.45),
+                                    blurRadius: 14,
+                                    offset: const Offset(0, 8),
+                                  ),
+                                ],
+                              ),
+                              child: Center(
+                                child: Text(
+                                  'Adopt $_filledCount Priest${_filledCount > 1 ? 's' : ''}',
+                                  style: GoogleFonts.poppins(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w700,
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+
+                        const SizedBox(height: 40),
+                      ],
+                    ),
                   ),
-                ),
                 ),
               ),
             ],
@@ -221,87 +444,218 @@ class _AdoptPriestScreenState extends State<AdoptPriestScreen> {
   }
 }
 
-class _PriestCard extends StatelessWidget {
-  final String name;
-  final String subtitle;
-  final String slot;
-  final bool isSelected;
-  final VoidCallback onTap;
+// ── Empty slot with + button ─────────────────────────────────────────────────
+class _EmptySlot extends StatelessWidget {
+  final int slotNumber;
+  final bool isDark;
+  final VoidCallback onAdd;
 
-  const _PriestCard({
-    required this.name,
-    required this.subtitle,
-    required this.slot,
-    required this.isSelected,
-    required this.onTap,
+  const _EmptySlot({
+    required this.slotNumber,
+    required this.isDark,
+    required this.onAdd,
   });
 
   @override
   Widget build(BuildContext context) {
-    final isDark = themeNotifier.isDark;
     return GestureDetector(
-      onTap: onTap,
+      onTap: onAdd,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: isDark
+              ? Colors.white.withOpacity(0.05)
+              : Colors.white.withOpacity(0.6),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isSelected ? const Color(0xFF624294) : Colors.white,
+            color: isDark
+                ? Colors.white.withOpacity(0.18)
+                : const Color(0xFF624294).withOpacity(0.25),
             width: 2.0,
+            strokeAlign: BorderSide.strokeAlignInside,
           ),
-          boxShadow: [
-            BoxShadow(
-              color: isSelected
-                  ? const Color(0xFF624294).withOpacity(0.3)
-                  : Colors.black.withOpacity(0.08),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
         ),
-        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
+        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 8),
         child: Column(
           children: [
-            // Priest avatar placeholder
+            // Dashed circle with + icon
             Container(
               width: 64, height: 64,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: const Color(0xFFEDE0ED),
-                border: Border.all(color: const Color(0xFF624294).withOpacity(0.15), width: 1.5),
+                color: isDark
+                    ? Colors.white.withOpacity(0.08)
+                    : const Color(0xFFEDE0ED),
+                border: Border.all(
+                  color: isDark
+                      ? Colors.white.withOpacity(0.25)
+                      : const Color(0xFF624294).withOpacity(0.3),
+                  width: 1.5,
+                ),
               ),
-              child: const Icon(Icons.person_rounded, size: 36, color: Color(0xFF624294)),
+              child: Icon(
+                Icons.add_rounded,
+                size: 32,
+                color: isDark
+                    ? Colors.white.withOpacity(0.6)
+                    : const Color(0xFF624294).withOpacity(0.6),
+              ),
             ),
-            const SizedBox(height: 8),
-            Text(name,
-                textAlign: TextAlign.center,
-                style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w800, color: const Color(0xFF624294))),
-            const SizedBox(height: 2),
-            Text(subtitle,
-                textAlign: TextAlign.center,
-                style: GoogleFonts.poppins(fontSize: 9, color: const Color(0xFF624294).withOpacity(0.55), height: 1.4)),
             const SizedBox(height: 10),
-            // Select button
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-              decoration: BoxDecoration(
-                color: isSelected ? const Color(0xFF624294) : Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: const Color(0xFF624294), width: 1.5),
+            Text(
+              'Add Priest',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.poppins(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: isDark
+                    ? Colors.white.withOpacity(0.5)
+                    : const Color(0xFF624294).withOpacity(0.5),
               ),
-              child: Text('SELECT',
-                  style: GoogleFonts.poppins(
-                      fontSize: 9,
-                      fontWeight: FontWeight.w800,
-                      color: isSelected ? Colors.white : const Color(0xFF624294),
-                      letterSpacing: 0.5)),
             ),
             const SizedBox(height: 6),
-            Text(slot,
-                style: GoogleFonts.poppins(fontSize: 10, fontWeight: FontWeight.w600, color: const Color(0xFF624294).withOpacity(0.4))),
+            Text(
+              '$slotNumber/3',
+              style: GoogleFonts.poppins(
+                fontSize: 10,
+                fontWeight: FontWeight.w600,
+                color: isDark
+                    ? Colors.white.withOpacity(0.25)
+                    : const Color(0xFF624294).withOpacity(0.3),
+              ),
+            ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+// ── Filled priest card with remove button ────────────────────────────────────
+class _FilledCard extends StatelessWidget {
+  final String name;
+  final String role;
+  final String slotLabel;
+  final bool isDark;
+  final VoidCallback onRemove;
+
+  const _FilledCard({
+    required this.name,
+    required this.role,
+    required this.slotLabel,
+    required this.isDark,
+    required this.onRemove,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFF624294), width: 2.0),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF624294).withOpacity(0.3),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
+      child: Column(
+        children: [
+          // Avatar with remove button overlay
+          Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Container(
+                width: 64, height: 64,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: const Color(0xFFEDE0ED),
+                  border: Border.all(
+                    color: const Color(0xFF624294).withOpacity(0.15),
+                    width: 1.5,
+                  ),
+                ),
+                child: const Icon(
+                  Icons.person_rounded,
+                  size: 36,
+                  color: Color(0xFF624294),
+                ),
+              ),
+              // Remove (×) button — top-right of avatar
+              Positioned(
+                top: -4, right: -4,
+                child: GestureDetector(
+                  onTap: onRemove,
+                  child: Container(
+                    width: 22, height: 22,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: const Color(0xFFE53935),
+                      border: Border.all(color: Colors.white, width: 1.5),
+                    ),
+                    child: const Icon(
+                      Icons.close_rounded,
+                      size: 13,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            name,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.poppins(
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
+              color: const Color(0xFF624294),
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            role,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.poppins(
+              fontSize: 9,
+              color: const Color(0xFF624294).withOpacity(0.55),
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 10),
+          // "Selected" badge
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+            decoration: BoxDecoration(
+              color: const Color(0xFF624294),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              'SELECTED',
+              style: GoogleFonts.poppins(
+                fontSize: 9,
+                fontWeight: FontWeight.w800,
+                color: Colors.white,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            slotLabel,
+            style: GoogleFonts.poppins(
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+              color: const Color(0xFF624294).withOpacity(0.4),
+            ),
+          ),
+        ],
       ),
     );
   }
