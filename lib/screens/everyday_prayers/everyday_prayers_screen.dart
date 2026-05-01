@@ -44,21 +44,27 @@ class EverydayPrayersScreen extends StatelessWidget {
                     width: double.infinity,
                     child: Image.asset('assets/demo/every day.png', fit: BoxFit.cover),
                   ),
-                  // gradient fade
+                  // gradient fade — theme-aware
                   Positioned(
                     bottom: 0, left: 0, right: 0,
                     child: Container(
                       height: 120,
-                      decoration: const BoxDecoration(
+                      decoration: BoxDecoration(
                         gradient: LinearGradient(
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
-                          colors: [
-                            Colors.transparent,
-                            Color(0xBB220850),
-                            Color(0xFF220850),
-                          ],
-                          stops: [0.0, 0.6, 1.0],
+                          colors: isDark
+                              ? [
+                                  Colors.transparent,
+                                  const Color(0xBB220850),
+                                  const Color(0xFF220850),
+                                ]
+                              : [
+                                  Colors.transparent,
+                                  bgColor.withOpacity(0.7),
+                                  bgColor,
+                                ],
+                          stops: const [0.0, 0.6, 1.0],
                         ),
                       ),
                     ),
@@ -74,10 +80,20 @@ class EverydayPrayersScreen extends StatelessWidget {
                           width: 40, height: 40,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: Colors.black.withOpacity(0.35),
-                            border: Border.all(color: Colors.white.withOpacity(0.4)),
+                            color: isDark
+                                ? Colors.black.withOpacity(0.35)
+                                : Colors.white.withOpacity(0.75),
+                            border: Border.all(
+                              color: isDark
+                                  ? Colors.white.withOpacity(0.4)
+                                  : const Color(0xFF624294).withOpacity(0.25),
+                            ),
                           ),
-                          child: const Icon(Icons.arrow_back_rounded, color: Colors.white, size: 20),
+                          child: Icon(
+                            Icons.arrow_back_rounded,
+                            color: isDark ? Colors.white : const Color(0xFF624294),
+                            size: 20,
+                          ),
                         ),
                       ),
                     ),

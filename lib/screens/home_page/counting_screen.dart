@@ -388,7 +388,7 @@ class _CountingScreenState extends State<CountingScreen>
                     end: Alignment.bottomRight,
                   )
                 : const LinearGradient(
-                    colors: [Color(0xFF7B55A8), Color(0xFF624294)],
+                    colors: [Color(0xFFB57BEA), Color(0xFF624294)],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -396,7 +396,7 @@ class _CountingScreenState extends State<CountingScreen>
               BoxShadow(
                 color: isDark
                     ? AppColors.goldDark.withOpacity(0.5)
-                    : const Color(0xFF624294).withOpacity(0.35),
+                    : const Color(0xFFB57BEA).withOpacity(0.45),
                 blurRadius: 14,
                 offset: const Offset(0, 5),
               ),

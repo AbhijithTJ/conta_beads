@@ -217,24 +217,32 @@ class _AdoptPriestScreenState extends State<AdoptPriestScreen> {
                       fit: BoxFit.cover,
                     ),
                   ),
+                  // Bottom gradient — theme-aware fade into bgColor
                   Positioned(
                     bottom: 0, left: 0, right: 0,
                     child: Container(
                       height: 120,
-                      decoration: const BoxDecoration(
+                      decoration: BoxDecoration(
                         gradient: LinearGradient(
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
-                          colors: [
-                            Colors.transparent,
-                            Color(0xBB220850),
-                            Color(0xFF220850),
-                          ],
-                          stops: [0.0, 0.6, 1.0],
+                          colors: isDark
+                              ? [
+                                  Colors.transparent,
+                                  const Color(0xBB220850),
+                                  const Color(0xFF220850),
+                                ]
+                              : [
+                                  Colors.transparent,
+                                  bgColor.withOpacity(0.7),
+                                  bgColor,
+                                ],
+                          stops: const [0.0, 0.6, 1.0],
                         ),
                       ),
                     ),
                   ),
+                  // Back button
                   if (Navigator.of(context).canPop())
                     SafeArea(
                       child: Padding(
@@ -245,12 +253,18 @@ class _AdoptPriestScreenState extends State<AdoptPriestScreen> {
                             width: 40, height: 40,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: Colors.black.withOpacity(0.35),
-                              border: Border.all(color: Colors.white.withOpacity(0.4)),
+                              color: isDark
+                                  ? Colors.black.withOpacity(0.35)
+                                  : Colors.white.withOpacity(0.75),
+                              border: Border.all(
+                                color: isDark
+                                    ? Colors.white.withOpacity(0.4)
+                                    : const Color(0xFF624294).withOpacity(0.25),
+                              ),
                             ),
-                            child: const Icon(
+                            child: Icon(
                               Icons.arrow_back_rounded,
-                              color: Colors.white,
+                              color: isDark ? Colors.white : const Color(0xFF624294),
                               size: 20,
                             ),
                           ),

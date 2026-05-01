@@ -57,12 +57,14 @@ class _ThemeSelectScreenState extends State<ThemeSelectScreen>
   @override
   Widget build(BuildContext context) {
     final isDark = _selected != false;
-    final bgColors = [const Color(0xFF22014D), const Color(0xFF22014D), const Color(0xFF22014D)];
-    final titleColor = isDark ? Colors.white : AppColors.authBgBottom;
-    final subColor = isDark ? Colors.white.withOpacity(0.50) : AppColors.authBgMid.withOpacity(0.6);
+    final titleColor = isDark ? Colors.white : const Color(0xFF624294);
+    final subColor = isDark ? Colors.white.withOpacity(0.50) : const Color(0xFF624294).withOpacity(0.6);
     final badgeColor = isDark ? AppColors.goldLight : AppColors.goldDark;
     final badgeBg = isDark ? AppColors.goldPrimary.withOpacity(0.12) : AppColors.goldPrimary.withOpacity(0.15);
     final badgeBorder = isDark ? AppColors.goldLight.withOpacity(0.5) : AppColors.goldDark.withOpacity(0.4);
+    final noteTextColor = isDark ? Colors.white.withOpacity(0.45) : const Color(0xFF624294).withOpacity(0.55);
+    final noteBg = isDark ? Colors.white.withOpacity(0.06) : const Color(0xFF624294).withOpacity(0.06);
+    final noteBorder = isDark ? Colors.white.withOpacity(0.10) : const Color(0xFF624294).withOpacity(0.15);
 
     return Scaffold(
       body: AnimatedContainer(
@@ -72,7 +74,9 @@ class _ThemeSelectScreenState extends State<ThemeSelectScreen>
         height: double.infinity,
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: bgColors,
+            colors: isDark
+                ? const [Color(0xFF321060), Color(0xFF220850), Color(0xFF1c023d)]
+                : const [Color(0xFFF0EBF0), Color(0xFFE8E0F0), Color(0xFFF0EBF0)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -107,7 +111,7 @@ class _ThemeSelectScreenState extends State<ThemeSelectScreen>
                     textAlign: TextAlign.center,
                     style: GoogleFonts.poppins(
                         fontSize: 32, fontWeight: FontWeight.w900,
-                        color: Colors.white, height: 1.2, letterSpacing: -0.5),
+                        color: titleColor, height: 1.2, letterSpacing: -0.5),
                   ),
                   const SizedBox(height: 10),
                   const SizedBox(height: 28),
@@ -117,6 +121,7 @@ class _ThemeSelectScreenState extends State<ThemeSelectScreen>
                       Expanded(child: _ThemeCard(
                         isDarkOption: false,
                         selected: _selected == false,
+                        screenIsDark: isDark,
                         onTap: () {
                           HapticFeedback.selectionClick();
                           setState(() => _selected = false);
@@ -126,6 +131,7 @@ class _ThemeSelectScreenState extends State<ThemeSelectScreen>
                       Expanded(child: _ThemeCard(
                         isDarkOption: true,
                         selected: _selected == true,
+                        screenIsDark: isDark,
                         onTap: () {
                           HapticFeedback.selectionClick();
                           setState(() => _selected = true);
@@ -136,22 +142,22 @@ class _ThemeSelectScreenState extends State<ThemeSelectScreen>
                   const SizedBox(height: 24),
                   _ProfilePreviewTutorial(isDark: isDark),
                   const SizedBox(height: 16),
-                  // Future note
+                  // Info note
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.06),
+                      color: noteBg,
                       borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: Colors.white.withOpacity(0.10)),
+                      border: Border.all(color: noteBorder),
                     ),
                     child: Row(
                       children: [
-                        Icon(Icons.info_outline_rounded, size: 16, color: Colors.white.withOpacity(0.45)),
+                        Icon(Icons.info_outline_rounded, size: 16, color: noteTextColor),
                         const SizedBox(width: 10),
                         Expanded(
                           child: Text(
                             'You can change this anytime from your Profile → Settings inside the app.',
-                            style: GoogleFonts.poppins(fontSize: 11, height: 1.5, color: Colors.white.withOpacity(0.45)),
+                            style: GoogleFonts.poppins(fontSize: 11, height: 1.5, color: noteTextColor),
                           ),
                         ),
                       ],
@@ -204,11 +210,13 @@ class _ThemeSelectScreenState extends State<ThemeSelectScreen>
 class _ThemeCard extends StatelessWidget {
   final bool isDarkOption;
   final bool selected;
+  final bool screenIsDark;
   final VoidCallback onTap;
 
   const _ThemeCard({
     required this.isDarkOption,
     required this.selected,
+    required this.screenIsDark,
     required this.onTap,
   });
 
@@ -217,11 +225,20 @@ class _ThemeCard extends StatelessWidget {
     final bg = isDarkOption ? const Color(0xFF22014D) : const Color(0xFFF5EEF5);
     final cardBg = isDarkOption ? const Color(0xFFEDE0ED) : Colors.white;
     final textColor = isDarkOption ? Colors.white : const Color(0xFF22014D);
-    final subColor = isDarkOption
-        ? Colors.white.withOpacity(0.45)
-        : const Color(0xFF22014D).withOpacity(0.45);
     final label = isDarkOption ? 'Dark' : 'Light';
     final icon = isDarkOption ? Icons.dark_mode_rounded : Icons.light_mode_rounded;
+
+    // Unselected label colours depend on the screen background
+    final unselectedLabelBg = screenIsDark
+        ? Colors.white.withOpacity(0.08)
+        : const Color(0xFF624294).withOpacity(0.08);
+    final unselectedLabelColor = screenIsDark
+        ? Colors.white.withOpacity(0.7)
+        : const Color(0xFF624294).withOpacity(0.7);
+    // Unselected card border
+    final unselectedBorder = screenIsDark
+        ? Colors.white.withOpacity(0.12)
+        : const Color(0xFF624294).withOpacity(0.20);
 
     return GestureDetector(
       onTap: onTap,
@@ -231,7 +248,7 @@ class _ThemeCard extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
-            color: selected ? AppColors.goldPrimary : Colors.white.withOpacity(0.12),
+            color: selected ? AppColors.goldPrimary : unselectedBorder,
             width: selected ? 2.5 : 1.5,
           ),
           boxShadow: selected
@@ -292,20 +309,20 @@ class _ThemeCard extends StatelessWidget {
               ),
               // Label area
               Container(
-                color: selected ? AppColors.goldPrimary : Colors.white.withOpacity(0.08),
+                color: selected ? AppColors.goldPrimary : unselectedLabelBg,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(icon,
                         size: 16,
-                        color: selected ? const Color(0xFF2E0A3A) : Colors.white.withOpacity(0.7)),
+                        color: selected ? const Color(0xFF2E0A3A) : unselectedLabelColor),
                     const SizedBox(width: 8),
                     Text(label,
                         style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w800,
-                            color: selected ? const Color(0xFF2E0A3A) : Colors.white.withOpacity(0.7),
+                            color: selected ? const Color(0xFF2E0A3A) : unselectedLabelColor,
                             letterSpacing: 0.5)),
                     if (selected) ...[
                       const SizedBox(width: 6),
