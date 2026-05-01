@@ -146,7 +146,7 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
   Widget _buildQuoteCard(bool isDark) {
     final q = _quotes[_currentQuoteIndex];
     final quoteTextColor = isDark ? const Color(0xFF333333) : AppColors.authBgBottom;
-    final shadowColor = isDark ? AppColors.authBgBottom.withOpacity(0.20) : const Color(0xFF22014D).withOpacity(0.10);
+    final shadowColor = isDark ? AppColors.authBgBottom.withOpacity(0.20) : const Color(0xFF624294).withOpacity(0.10);
 
     return GestureDetector(
       onHorizontalDragEnd: (details) {
@@ -178,13 +178,13 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text('\u275D', style: TextStyle(fontSize: 20, color: const Color(0xFF22014D).withOpacity(0.45), height: 1.0)),
+              Text('\u275D', style: TextStyle(fontSize: 20, color: const Color(0xFF624294).withOpacity(0.45), height: 1.0)),
               const SizedBox(height: 6),
               Text(q['text']!,
                   textAlign: TextAlign.center, maxLines: 2, overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.poppins(fontSize: 14.5, fontWeight: FontWeight.w500, color: quoteTextColor, fontStyle: FontStyle.italic, height: 1.5, letterSpacing: 0.2)),
               const SizedBox(height: 8),
-              Text(q['author']!, style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w700, color: const Color(0xFF22014D), letterSpacing: 1.2)),
+              Text(q['author']!, style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w700, color: const Color(0xFF624294), letterSpacing: 1.2)),
               const SizedBox(height: 10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -196,7 +196,7 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
                     margin: const EdgeInsets.symmetric(horizontal: 3),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(3),
-                      color: i == _currentQuoteIndex ? const Color(0xFF22014D) : const Color(0xFF22014D).withOpacity(0.25),
+                      color: i == _currentQuoteIndex ? const Color(0xFF624294) : const Color(0xFF624294).withOpacity(0.25),
                     ),
                   );
                 }),
@@ -231,15 +231,15 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
                 child: const Icon(Icons.church_rounded, color: Colors.white, size: 26),
               ),
               const Spacer(),
-              Icon(Icons.chevron_right_rounded, color: const Color(0xFF22014D).withOpacity(0.35), size: 22),
+              Icon(Icons.chevron_right_rounded, color: const Color(0xFF624294).withOpacity(0.35), size: 22),
             ],
           ),
           const SizedBox(height: 14),
           Text(todayIntention,
-              style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w800, color: const Color(0xFF22014D))),
+              style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w800, color: const Color(0xFF624294))),
           const SizedBox(height: 4),
           Text("Today's Intention",
-              style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w500, color: const Color(0xFF22014D).withOpacity(0.5))),
+              style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w500, color: const Color(0xFF624294).withOpacity(0.5))),
         ],
       ),
     );
@@ -269,19 +269,19 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
                 child: const Icon(Icons.people_alt_rounded, color: Colors.white, size: 26),
               ),
               const Spacer(),
-              Icon(Icons.chevron_right_rounded, color: const Color(0xFF22014D).withOpacity(0.35), size: 22),
+              Icon(Icons.chevron_right_rounded, color: const Color(0xFF624294).withOpacity(0.35), size: 22),
             ],
           ),
           const SizedBox(height: 14),
           Text('Community Prayers',
-              style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w800, color: const Color(0xFF22014D))),
+              style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w800, color: const Color(0xFF624294))),
           const SizedBox(height: 4),
           Row(
             children: [
               Container(width: 6, height: 6, decoration: const BoxDecoration(shape: BoxShape.circle, color: Colors.green)),
               const SizedBox(width: 6),
               Text('$prayerRequests active requests',
-                  style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w500, color: const Color(0xFF22014D).withOpacity(0.5))),
+                  style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w500, color: const Color(0xFF624294).withOpacity(0.5))),
             ],
           ),
         ],
@@ -290,7 +290,7 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
   }
 
   Widget _buildDivider(bool isDark) {
-    final divColor = isDark ? Colors.white.withOpacity(0.2) : const Color(0xFF22014D).withOpacity(0.15);
+    final divColor = isDark ? Colors.white.withOpacity(0.2) : const Color(0xFF624294).withOpacity(0.15);
     return Row(
       children: [
         Expanded(child: Container(height: 1.5, decoration: BoxDecoration(gradient: LinearGradient(colors: [Colors.transparent, divColor])))),
@@ -304,7 +304,6 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
   }
 
   Widget _buildRequestRosaryCard(bool isDark) {
-    final btnColor = isDark ? const Color(0xFF22014D) : AppColors.authPurple;
     return _GlassCard(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -318,7 +317,7 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text('REQUEST A ROSARY',
-                      style: GoogleFonts.poppins(fontSize: 10, fontWeight: FontWeight.w800, color: const Color(0xFF22014D).withOpacity(0.8), letterSpacing: 1.8)),
+                      style: GoogleFonts.poppins(fontSize: 10, fontWeight: FontWeight.w800, color: const Color(0xFF624294).withOpacity(0.8), letterSpacing: 1.8)),
                   const SizedBox(height: 2),
                   Text('Offer your intention',
                       style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.authBgBottom, letterSpacing: -0.5)),
@@ -340,7 +339,7 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
                 style: GoogleFonts.poppins(fontSize: 15, color: AppColors.authBgBottom, fontWeight: FontWeight.w600),
                 decoration: InputDecoration(
                   hintText: 'Write your intention here...',
-                  hintStyle: GoogleFonts.poppins(color: const Color(0xFF22014D).withOpacity(0.3), fontSize: 14, fontWeight: FontWeight.w500),
+                  hintStyle: GoogleFonts.poppins(color: const Color(0xFF624294).withOpacity(0.3), fontSize: 14, fontWeight: FontWeight.w500),
                   filled: true,
                   fillColor: Colors.white.withOpacity(0.7),
                   contentPadding: const EdgeInsets.all(18),
@@ -362,15 +361,15 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text('Rosaries to offer',
-                        style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w700, color: const Color(0xFF22014D).withOpacity(0.7))),
+                        style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w700, color: const Color(0xFF624294).withOpacity(0.7))),
                     const SizedBox(height: 6),
                     TextField(
                       controller: _rosaryCountController,
                       keyboardType: TextInputType.number,
-                      style: GoogleFonts.poppins(fontSize: 15, color: const Color(0xFF22014D), fontWeight: FontWeight.w700),
+                      style: GoogleFonts.poppins(fontSize: 15, color: const Color(0xFF624294), fontWeight: FontWeight.w700),
                       decoration: InputDecoration(
                         hintText: 'e.g. 3',
-                        hintStyle: GoogleFonts.poppins(color: const Color(0xFF22014D).withOpacity(0.35), fontSize: 14),
+                        hintStyle: GoogleFonts.poppins(color: const Color(0xFF624294).withOpacity(0.35), fontSize: 14),
                         filled: true,
                         fillColor: Colors.white.withOpacity(0.8),
                         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -387,12 +386,12 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text('Your Total',
-                      style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w700, color: const Color(0xFF22014D).withOpacity(0.7))),
+                      style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w700, color: const Color(0xFF624294).withOpacity(0.7))),
                   const SizedBox(height: 6),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
                     decoration: BoxDecoration(
-                      color: _myTotal < 0 ? Colors.red.withOpacity(0.1) : const Color(0xFF22014D).withOpacity(0.08),
+                      color: _myTotal < 0 ? Colors.red.withOpacity(0.1) : const Color(0xFF624294).withOpacity(0.08),
                       borderRadius: BorderRadius.circular(14),
                       border: Border.all(color: _myTotal < 0 ? Colors.red.withOpacity(0.4) : Colors.white, width: 2.0),
                     ),
@@ -400,7 +399,7 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
                       '$_myTotal',
                       style: GoogleFonts.poppins(
                         fontSize: 22, fontWeight: FontWeight.w900,
-                        color: _myTotal < 0 ? Colors.red : const Color(0xFF22014D),
+                        color: _myTotal < 0 ? Colors.red : const Color(0xFF624294),
                       ),
                     ),
                   ),
@@ -409,13 +408,13 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
             ],
           ),
           const SizedBox(height: 24),
-          _buildSubmitButton(btnColor),
+          _buildSubmitButton(isDark),
         ],
       ),
     );
   }
 
-  Widget _buildSubmitButton(Color btnColor) {
+  Widget _buildSubmitButton(bool isDark) {
     return GestureDetector(
       onTap: () {
         if (_intentionController.text.isNotEmpty) {
@@ -444,9 +443,13 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
         width: double.infinity,
         height: 56,
         decoration: BoxDecoration(
-          color: btnColor,
+          gradient: const LinearGradient(
+            colors: [Color(0xFF7B55A8), Color(0xFF624294)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
           borderRadius: BorderRadius.circular(30),
-          boxShadow: [BoxShadow(color: const Color(0xFF22014D).withOpacity(0.35), blurRadius: 15, offset: const Offset(0, 8))],
+          boxShadow: [BoxShadow(color: const Color(0xFF624294).withOpacity(0.35), blurRadius: 15, offset: const Offset(0, 8))],
         ),
         child: Center(
           child: Text('Request Rosary',
@@ -504,10 +507,10 @@ class _IconBox extends StatelessWidget {
       height: 46,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(14),
-        color: const Color(0xFF22014D).withOpacity(0.08),
-        border: Border.all(color: const Color(0xFF22014D).withOpacity(0.15), width: 1),
+        color: const Color(0xFF624294).withOpacity(0.08),
+        border: Border.all(color: const Color(0xFF624294).withOpacity(0.15), width: 1),
       ),
-      child: Icon(icon, color: const Color(0xFF22014D), size: 22),
+      child: Icon(icon, color: const Color(0xFF624294), size: 22),
     );
   }
 }

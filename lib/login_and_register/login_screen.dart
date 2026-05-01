@@ -220,8 +220,8 @@ class _LoginScreenState extends State<LoginScreen> {
   // ── Frosted glass login card ────────────────────────────────────────────────
   Widget _buildGlassCard(bool isDark) {
     final cardBg = isDark ? Colors.white.withOpacity(0.92) : Colors.white;
-    final signInColor = const Color(0xFF22014D);
-    final subTextColor = const Color(0xFF22014D).withOpacity(0.60);
+    final signInColor = const Color(0xFF624294);
+    final subTextColor = const Color(0xFF624294).withOpacity(0.60);
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(28),
@@ -336,7 +336,7 @@ class _LoginScreenState extends State<LoginScreen> {
           style: GoogleFonts.poppins(
             fontSize: 12,
             fontWeight: FontWeight.w600,
-            color: const Color(0xFF22014D).withOpacity(0.80),
+            color: const Color(0xFF624294).withOpacity(0.80),
             letterSpacing: 0.4,
           ),
         ),
@@ -349,23 +349,23 @@ class _LoginScreenState extends State<LoginScreen> {
               controller: controller,
               obscureText: isPassword ? _obscurePassword : false,
               style: GoogleFonts.poppins(
-                color: const Color(0xFF22014D),
+                color: const Color(0xFF624294),
                 fontWeight: FontWeight.w500,
                 fontSize: 15,
               ),
               decoration: InputDecoration(
                 hintText: hint,
                 hintStyle: GoogleFonts.poppins(
-                  color: const Color(0xFF22014D).withOpacity(0.40),
+                  color: const Color(0xFF624294).withOpacity(0.40),
                   fontSize: 14,
                 ),
-                prefixIcon: Icon(icon, color: const Color(0xFF22014D).withOpacity(0.70), size: 20),
+                prefixIcon: Icon(icon, color: const Color(0xFF624294).withOpacity(0.70), size: 20),
                 suffixIcon: isPassword
                     ? GestureDetector(
                         onTap: () => setState(() => _obscurePassword = !_obscurePassword),
                         child: Icon(
                           _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-                          color: const Color(0xFF22014D).withOpacity(0.60),
+                          color: const Color(0xFF624294).withOpacity(0.60),
                           size: 20,
                         ),
                       )
@@ -452,17 +452,17 @@ class _LoginScreenState extends State<LoginScreen> {
         decoration: BoxDecoration(
           color: Colors.transparent,
           borderRadius: BorderRadius.circular(30),
-          border: Border.all(color: const Color(0xFF22014D).withOpacity(0.45), width: 1.5),
+          border: Border.all(color: const Color(0xFF624294).withOpacity(0.45), width: 1.5),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.fingerprint, color: const Color(0xFF22014D), size: 22),
+            Icon(Icons.fingerprint, color: const Color(0xFF624294), size: 22),
             const SizedBox(width: 8),
             Text(
               'Use biometric login',
               style: GoogleFonts.poppins(
-                color: const Color(0xFF22014D),
+                color: const Color(0xFF624294),
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
               ),

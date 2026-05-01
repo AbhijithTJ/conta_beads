@@ -189,8 +189,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   // ── Frosted glass card ───────────────────────────────────────────────────────
   Widget _buildGlassCard(bool isDark) {
     final cardBg = Colors.white.withOpacity(0.92);
-    final titleColor = const Color(0xFF22014D);
-    final subColor = const Color(0xFF22014D).withOpacity(0.60);
+    final titleColor = const Color(0xFF624294);
+    final subColor = const Color(0xFF624294).withOpacity(0.60);
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(28),
@@ -252,7 +252,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           style: GoogleFonts.poppins(
             fontSize: 12,
             fontWeight: FontWeight.w600,
-            color: const Color(0xFF22014D).withOpacity(0.80),
+            color: const Color(0xFF624294).withOpacity(0.80),
             letterSpacing: 0.4,
           ),
         ),
@@ -265,23 +265,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
               controller: controller,
               obscureText: isPassword ? obscure : false,
               style: GoogleFonts.poppins(
-                color: const Color(0xFF22014D),
+                color: const Color(0xFF624294),
                 fontWeight: FontWeight.w500,
                 fontSize: 15,
               ),
               decoration: InputDecoration(
                 hintText: hint,
                 hintStyle: GoogleFonts.poppins(
-                  color: const Color(0xFF22014D).withOpacity(0.40),
+                  color: const Color(0xFF624294).withOpacity(0.40),
                   fontSize: 14,
                 ),
-                prefixIcon: Icon(icon, color: const Color(0xFF22014D).withOpacity(0.70), size: 20),
+                prefixIcon: Icon(icon, color: const Color(0xFF624294).withOpacity(0.70), size: 20),
                 suffixIcon: isPassword
                     ? GestureDetector(
                         onTap: onToggle,
                         child: Icon(
                           obscure ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-                          color: const Color(0xFF22014D).withOpacity(0.60),
+                          color: const Color(0xFF624294).withOpacity(0.60),
                           size: 20,
                         ),
                       )
@@ -319,7 +319,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           style: GoogleFonts.poppins(
             fontSize: 12,
             fontWeight: FontWeight.w600,
-            color: const Color(0xFF22014D).withOpacity(0.80),
+            color: const Color(0xFF624294).withOpacity(0.80),
             letterSpacing: 0.4,
           ),
         ),
@@ -333,21 +333,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
               initialCountryCode: 'IN',
               onChanged: (phone) => _completePhoneNumber = phone.completeNumber,
               style: GoogleFonts.poppins(
-                color: const Color(0xFF22014D),
+                color: const Color(0xFF624294),
                 fontWeight: FontWeight.w500,
                 fontSize: 15,
               ),
               dropdownIconPosition: IconPosition.trailing,
-              dropdownIcon: Icon(Icons.arrow_drop_down, color: const Color(0xFF22014D).withOpacity(0.70), size: 20),
+              dropdownIcon: Icon(Icons.arrow_drop_down, color: const Color(0xFF624294).withOpacity(0.70), size: 20),
               dropdownTextStyle: GoogleFonts.poppins(
-                color: const Color(0xFF22014D),
+                color: const Color(0xFF624294),
                 fontWeight: FontWeight.w600,
                 fontSize: 15,
               ),
               languageCode: 'en',
               decoration: InputDecoration(
                 hintText: 'Enter phone number',
-                hintStyle: GoogleFonts.poppins(color: const Color(0xFF22014D).withOpacity(0.40), fontSize: 14),
+                hintStyle: GoogleFonts.poppins(color: const Color(0xFF624294).withOpacity(0.40), fontSize: 14),
                 filled: true,
                 fillColor: Colors.white.withOpacity(0.80),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),

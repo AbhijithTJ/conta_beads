@@ -29,8 +29,8 @@ class EverydayPrayersScreen extends StatelessWidget {
       valueListenable: themeNotifier,
       builder: (_, isDark, __) {
         final bgColor = isDark ? const Color(0xFF1c023d) : const Color(0xFFF0EBF0);
-        final titleColor = isDark ? Colors.white : const Color(0xFF22014D);
-        final subColor = isDark ? Colors.white.withOpacity(0.55) : const Color(0xFF22014D).withOpacity(0.55);
+        final titleColor = isDark ? Colors.white : const Color(0xFF624294);
+        final subColor = isDark ? Colors.white.withOpacity(0.55) : const Color(0xFF624294).withOpacity(0.55);
 
         return Scaffold(
           backgroundColor: bgColor,
@@ -215,7 +215,7 @@ class EverydayPrayersScreen extends StatelessWidget {
                                         padding: const EdgeInsets.all(10),
                                         child: Text(
                                           _guides[i],
-                                          style: GoogleFonts.poppins(fontSize: 11, fontWeight: FontWeight.w700, color: const Color(0xFF22014D), height: 1.4),
+                                          style: GoogleFonts.poppins(fontSize: 11, fontWeight: FontWeight.w700, color: const Color(0xFF624294), height: 1.4),
                                         ),
                                       ),
                                     ],

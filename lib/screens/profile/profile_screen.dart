@@ -151,7 +151,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               gradient: LinearGradient(colors: [AppColors.cardLavender, AppColors.cardLavender], begin: Alignment.topLeft, end: Alignment.bottomRight),
-              border: Border.all(color: const Color(0xFF22014D), width: 2.5),
+              border: Border.all(color: const Color(0xFF624294), width: 2.5),
               boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.15), blurRadius: 8, offset: const Offset(0, 4))],
             ),
             child: const Icon(Icons.camera_alt_rounded, size: 14, color: Color(0xFF3D0227)),
@@ -197,7 +197,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _divider() => Container(height: 1, margin: const EdgeInsets.symmetric(horizontal: 4), color: const Color(0xFF22014D).withOpacity(0.08));
+  Widget _divider() => Container(height: 1, margin: const EdgeInsets.symmetric(horizontal: 4), color: const Color(0xFF624294).withOpacity(0.08));
 
   Widget _buildSettingsList() {
     return Column(
@@ -211,10 +211,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   width: 40, height: 40,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
-                    color: const Color(0xFF22014D).withOpacity(0.08),
-                    border: Border.all(color: const Color(0xFF22014D).withOpacity(0.15), width: 1),
+                    color: const Color(0xFF624294).withOpacity(0.08),
+                    border: Border.all(color: const Color(0xFF624294).withOpacity(0.15), width: 1),
                   ),
-                  child: Icon(Icons.dark_mode_rounded, color: const Color(0xFF22014D), size: 18),
+                  child: Icon(Icons.dark_mode_rounded, color: const Color(0xFF624294), size: 18),
                 ),
                 const SizedBox(width: 16),
                 Expanded(child: Text('Dark Mode', style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.authBgBottom))),
@@ -224,8 +224,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     value: _isDarkMode,
                     activeColor: AppColors.goldPrimary,
                     activeTrackColor: AppColors.goldPrimary.withOpacity(0.3),
-                    inactiveThumbColor: const Color(0xFF22014D).withOpacity(0.5),
-                    inactiveTrackColor: const Color(0xFF22014D).withOpacity(0.1),
+                    inactiveThumbColor: const Color(0xFF624294).withOpacity(0.5),
+                    inactiveTrackColor: const Color(0xFF624294).withOpacity(0.1),
                     onChanged: (val) {
                       themeNotifier.setDark(val);
                       HapticFeedback.selectionClick();
@@ -307,10 +307,10 @@ class _InfoRow extends StatelessWidget {
             width: 42, height: 42,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(14),
-              color: const Color(0xFF22014D).withOpacity(0.08),
-              border: Border.all(color: const Color(0xFF22014D).withOpacity(0.15), width: 1),
+              color: const Color(0xFF624294).withOpacity(0.08),
+              border: Border.all(color: const Color(0xFF624294).withOpacity(0.15), width: 1),
             ),
-            child: Icon(icon, color: const Color(0xFF22014D), size: 20),
+            child: Icon(icon, color: const Color(0xFF624294), size: 20),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -346,14 +346,14 @@ class _SettingRow extends StatelessWidget {
               width: 40, height: 40,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
-                color: const Color(0xFF22014D).withOpacity(0.08),
-                border: Border.all(color: const Color(0xFF22014D).withOpacity(0.15), width: 1),
+                color: const Color(0xFF624294).withOpacity(0.08),
+                border: Border.all(color: const Color(0xFF624294).withOpacity(0.15), width: 1),
               ),
-              child: Icon(icon, color: const Color(0xFF22014D), size: 18),
+              child: Icon(icon, color: const Color(0xFF624294), size: 18),
             ),
             const SizedBox(width: 16),
             Expanded(child: Text(title, style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.authBgBottom))),
-            Icon(Icons.chevron_right_rounded, color: const Color(0xFF22014D).withOpacity(0.3), size: 24),
+            Icon(Icons.chevron_right_rounded, color: const Color(0xFF624294).withOpacity(0.3), size: 24),
           ],
         ),
       ),
@@ -386,7 +386,7 @@ class _StatBox extends StatelessWidget {
               children: [
                 Text(value, style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: AppColors.authBgMid, height: 1)),
                 const SizedBox(height: 6),
-                Text(label.toUpperCase(), style: GoogleFonts.poppins(fontSize: 9, fontWeight: FontWeight.w800, letterSpacing: 1.2, color: const Color(0xFF22014D).withOpacity(0.5))),
+                Text(label.toUpperCase(), style: GoogleFonts.poppins(fontSize: 9, fontWeight: FontWeight.w800, letterSpacing: 1.2, color: const Color(0xFF624294).withOpacity(0.5))),
               ],
             ),
           ),

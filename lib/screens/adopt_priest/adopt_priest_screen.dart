@@ -36,8 +36,8 @@ class _AdoptPriestScreenState extends State<AdoptPriestScreen> {
       valueListenable: themeNotifier,
       builder: (_, isDark, __) {
         final bgColor = isDark ? const Color(0xFF1c023d) : const Color(0xFFF0EBF0);
-        final titleColor = isDark ? Colors.white : const Color(0xFF22014D);
-        final subColor = isDark ? Colors.white.withOpacity(0.65) : const Color(0xFF22014D).withOpacity(0.6);
+        final titleColor = isDark ? Colors.white : const Color(0xFF624294);
+        final subColor = isDark ? Colors.white.withOpacity(0.65) : const Color(0xFF624294).withOpacity(0.6);
 
         return Scaffold(
           backgroundColor: bgColor,
@@ -166,7 +166,7 @@ class _AdoptPriestScreenState extends State<AdoptPriestScreen> {
                             Expanded(
                               child: Text(
                                 'You may select up to three priests for Spiritual partnership',
-                                style: GoogleFonts.poppins(fontSize: 12, color: isDark ? Colors.white.withOpacity(0.7) : const Color(0xFF22014D).withOpacity(0.7), height: 1.5),
+                                style: GoogleFonts.poppins(fontSize: 12, color: isDark ? Colors.white.withOpacity(0.7) : const Color(0xFF624294).withOpacity(0.7), height: 1.5),
                               ),
                             ),
                           ],
@@ -269,18 +269,18 @@ class _PriestCard extends StatelessWidget {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: const Color(0xFFEDE0ED),
-                border: Border.all(color: const Color(0xFF22014D).withOpacity(0.15), width: 1.5),
+                border: Border.all(color: const Color(0xFF624294).withOpacity(0.15), width: 1.5),
               ),
-              child: const Icon(Icons.person_rounded, size: 36, color: Color(0xFF22014D)),
+              child: const Icon(Icons.person_rounded, size: 36, color: Color(0xFF624294)),
             ),
             const SizedBox(height: 8),
             Text(name,
                 textAlign: TextAlign.center,
-                style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w800, color: const Color(0xFF22014D))),
+                style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w800, color: const Color(0xFF624294))),
             const SizedBox(height: 2),
             Text(subtitle,
                 textAlign: TextAlign.center,
-                style: GoogleFonts.poppins(fontSize: 9, color: const Color(0xFF22014D).withOpacity(0.55), height: 1.4)),
+                style: GoogleFonts.poppins(fontSize: 9, color: const Color(0xFF624294).withOpacity(0.55), height: 1.4)),
             const SizedBox(height: 10),
             // Select button
             Container(
@@ -299,7 +299,7 @@ class _PriestCard extends StatelessWidget {
             ),
             const SizedBox(height: 6),
             Text(slot,
-                style: GoogleFonts.poppins(fontSize: 10, fontWeight: FontWeight.w600, color: const Color(0xFF22014D).withOpacity(0.4))),
+                style: GoogleFonts.poppins(fontSize: 10, fontWeight: FontWeight.w600, color: const Color(0xFF624294).withOpacity(0.4))),
           ],
         ),
       ),
