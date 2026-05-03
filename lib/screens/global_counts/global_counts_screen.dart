@@ -173,66 +173,105 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
   }
 
   Widget _buildToggleButton(bool isDark) {
-    final toggleBg = isDark ? Colors.white.withOpacity(0.1) : Colors.white;
-    final toggleBorder = isDark ? Colors.white.withOpacity(0.2) : const Color(0xFF22014D).withOpacity(0.15);
-    final activeColor = AppColors.goldPrimary;
-    final inactiveTextColor = isDark ? Colors.white.withOpacity(0.5) : AppColors.authBgMid.withOpacity(0.6);
-    final activeTextColor = Colors.white;
+    // ── Dark mode colours (from reference image) ──
+    // Outer pill: deep dark purple background
+    // Active pill: white
+    // Active text: deep purple
+    // Inactive text: muted light grey
+
+    // ── Light mode colours (unchanged) ──
+    // Outer pill: white
+    // Active pill: deep dark purple (#3B0764)
+    // Active text: gold
+    // Inactive text: muted purple-grey
+
+    final outerBg = isDark
+        ? const Color(0xFF2D1B4E)          // dark purple pill track
+        : Colors.white;
+    final outerBorder = isDark
+        ? const Color(0xFF3D2560)          // slightly lighter purple border
+        : const Color(0xFF22014D).withOpacity(0.18);
+
+    final activePillColor = isDark
+        ? Colors.white                     // white pill in dark mode
+        : const Color(0xFF3B0764);         // dark purple pill in light mode
+
+    final activeTextColor = isDark
+        ? const Color(0xFF3B0764)          // deep purple text on white pill
+        : AppColors.goldPrimary;           // gold text on dark pill
+
+    final inactiveTextColor = isDark
+        ? Colors.white.withOpacity(0.45)   // muted white in dark mode
+        : AppColors.authBgMid.withOpacity(0.55);
+
+    final activeShadowColor = isDark
+        ? Colors.white.withOpacity(0.20)
+        : const Color(0xFF22014D).withOpacity(0.35);
 
     return Container(
+      height: 52,
       decoration: BoxDecoration(
-        color: toggleBg,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: toggleBorder, width: 1.5),
+        color: outerBg,
+        borderRadius: BorderRadius.circular(30),
+        border: Border.all(color: outerBorder, width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF22014D).withOpacity(isDark ? 0.0 : 0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       padding: const EdgeInsets.all(4),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
+          // ── Rosary tab ──
           GestureDetector(
-            onTap: () {
-              setState(() {
-                _isRosaryMode = true;
-              });
-            },
+            onTap: () => setState(() => _isRosaryMode = true),
             child: AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              duration: const Duration(milliseconds: 280),
+              curve: Curves.easeInOut,
+              padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 10),
               decoration: BoxDecoration(
-                color: _isRosaryMode ? activeColor : Colors.transparent,
-                borderRadius: BorderRadius.circular(10),
+                color: _isRosaryMode ? activePillColor : Colors.transparent,
+                borderRadius: BorderRadius.circular(26),
+                boxShadow: _isRosaryMode
+                    ? [BoxShadow(color: activeShadowColor, blurRadius: 10, offset: const Offset(0, 3))]
+                    : [],
               ),
               child: Text(
                 'Rosary',
                 style: GoogleFonts.poppins(
-                  fontSize: 13,
+                  fontSize: 14,
                   fontWeight: FontWeight.w700,
                   color: _isRosaryMode ? activeTextColor : inactiveTextColor,
-                  letterSpacing: 0.5,
+                  letterSpacing: 0.3,
                 ),
               ),
             ),
           ),
+          // ── Chaplet tab ──
           GestureDetector(
-            onTap: () {
-              setState(() {
-                _isRosaryMode = false;
-              });
-            },
+            onTap: () => setState(() => _isRosaryMode = false),
             child: AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              duration: const Duration(milliseconds: 280),
+              curve: Curves.easeInOut,
+              padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 10),
               decoration: BoxDecoration(
-                color: !_isRosaryMode ? activeColor : Colors.transparent,
-                borderRadius: BorderRadius.circular(10),
+                color: !_isRosaryMode ? activePillColor : Colors.transparent,
+                borderRadius: BorderRadius.circular(26),
+                boxShadow: !_isRosaryMode
+                    ? [BoxShadow(color: activeShadowColor, blurRadius: 10, offset: const Offset(0, 3))]
+                    : [],
               ),
               child: Text(
-                'Divine Mercy',
+                'Chaplet',
                 style: GoogleFonts.poppins(
-                  fontSize: 13,
+                  fontSize: 14,
                   fontWeight: FontWeight.w700,
                   color: !_isRosaryMode ? activeTextColor : inactiveTextColor,
-                  letterSpacing: 0.5,
+                  letterSpacing: 0.3,
                 ),
               ),
             ),

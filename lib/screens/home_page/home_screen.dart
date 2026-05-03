@@ -365,8 +365,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   Widget _buildQuoteCard() {
     final isDark = themeNotifier.isDark;
     final quote = _quotes[_currentQuoteIndex];
-    final quoteTextColor = isDark ? const Color(0xFF333333) : AppColors.authBgBottom;
-    final shadowColor = isDark ? AppColors.authBgBottom.withOpacity(0.20) : const Color(0xFF624294).withOpacity(0.10);
+    final quoteTextColor = const Color(0xFF624294);
+    final shadowColor = isDark ? AppColors.authBgBottom.withOpacity(0.20) : const Color(0xFF624294).withOpacity(0.15);
+    final borderColor = isDark ? Colors.white : const Color(0xFF624294).withOpacity(0.12);
+    final activeDotColor = isDark ? const Color(0xFF624294) : AppColors.goldPrimary;
 
     return GestureDetector(
       onHorizontalDragEnd: (details) {
@@ -392,7 +394,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(22),
-            border: Border.all(color: Colors.white, width: 2.0),
+            border: Border.all(color: isDark ? Colors.white : borderColor, width: isDark ? 2.0 : 1.5),
             boxShadow: [BoxShadow(color: shadowColor, blurRadius: 20, offset: const Offset(0, 6))],
           ),
           child: Column(
@@ -405,7 +407,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w500, color: quoteTextColor, fontStyle: FontStyle.italic, height: 1.5, letterSpacing: 0.2),
+                style: TextStyle(fontSize: 14.5, fontWeight: isDark ? FontWeight.w500 : FontWeight.w700, color: quoteTextColor, fontStyle: FontStyle.italic, height: 1.5, letterSpacing: 0.2),
               ),
               const SizedBox(height: 8),
               if (quote['reference']!.isNotEmpty)
@@ -422,7 +424,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     margin: const EdgeInsets.symmetric(horizontal: 3),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(3),
-                      color: i == _currentQuoteIndex ? const Color(0xFF624294) : const Color(0xFF624294).withOpacity(0.25),
+                      color: i == _currentQuoteIndex ? activeDotColor : const Color(0xFF624294).withOpacity(0.25),
                     ),
                   );
                 }),
@@ -474,12 +476,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: const Color(0xFF624294).withOpacity(0.15),
+                      color: const Color(0xFF624294).withOpacity(0.22),
                       width: 1.5,
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF624294).withOpacity(0.10),
+                        color: const Color(0xFF624294).withOpacity(0.15),
                         blurRadius: 16,
                         spreadRadius: 1,
                         offset: const Offset(0, 6),
