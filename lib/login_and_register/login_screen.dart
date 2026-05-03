@@ -152,12 +152,14 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = themeNotifier.isDark;
-    final logoAsset = isDark ? 'assets/splash/ur_logo.png' : 'assets/splash/ur_logo_light.png';
-    final titleColor = isDark ? Colors.white : AppColors.authBgBottom;
-    final subColor = isDark ? Colors.white.withOpacity(0.65) : AppColors.authBgMid.withOpacity(0.6);
-    final registerTextColor = isDark ? Colors.white.withOpacity(0.75) : AppColors.authBgMid.withOpacity(0.7);
-    final registerLinkColor = isDark ? Colors.white : AppColors.authPurple;
+    return ValueListenableBuilder<bool>(
+      valueListenable: themeNotifier,
+      builder: (_, isDark, __) {
+        final logoAsset = isDark ? 'assets/demo/logo_image.png' : 'assets/demo/logo_image_light.png';
+        final titleColor = isDark ? Colors.white : AppColors.authBgBottom;
+        final subColor = isDark ? Colors.white.withOpacity(0.65) : AppColors.authBgMid.withOpacity(0.6);
+        final registerTextColor = isDark ? Colors.white.withOpacity(0.75) : AppColors.authBgMid.withOpacity(0.7);
+        final registerLinkColor = isDark ? Colors.white : AppColors.authPurple;
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
@@ -201,13 +203,15 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
+      }, // ValueListenableBuilder builder
+    );   // ValueListenableBuilder
   }
 
   // ── Header: logo + app name ─────────────────────────────────────────────────
   Widget _buildHeader(String logoAsset, Color titleColor, Color subColor) {
     return Column(
       children: [
-        Image.asset('assets/demo/logo_image.png', width: 160, height: 160),
+        Image.asset(logoAsset, width: 160, height: 160),
         const SizedBox(height: 6),
         Text.rich(
             TextSpan(

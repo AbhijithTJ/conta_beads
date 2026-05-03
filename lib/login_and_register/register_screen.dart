@@ -95,14 +95,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = themeNotifier.isDark;
-    final logoAsset = isDark ? 'assets/splash/ur_logo.png' : 'assets/splash/ur_logo_light.png';
-    final subColor = isDark ? Colors.white.withOpacity(0.65) : AppColors.authBgMid.withOpacity(0.6);
-    final backIconColor = isDark ? Colors.white : const Color(0xFF624294);
-    final backBg = isDark ? Colors.white.withOpacity(0.15) : const Color(0xFF624294).withOpacity(0.08);
-    final backBorder = isDark ? Colors.white.withOpacity(0.30) : const Color(0xFF624294).withOpacity(0.25);
-    final linkTextColor = isDark ? Colors.white.withOpacity(0.75) : AppColors.authBgMid.withOpacity(0.7);
-    final linkColor = isDark ? Colors.white : AppColors.authPurple;
+    return ValueListenableBuilder<bool>(
+      valueListenable: themeNotifier,
+      builder: (_, isDark, __) {
+        final logoAsset = isDark ? 'assets/demo/logo_image.png' : 'assets/demo/logo_image_light.png';
+        final subColor = isDark ? Colors.white.withOpacity(0.65) : AppColors.authBgMid.withOpacity(0.6);
+        final backIconColor = isDark ? Colors.white : const Color(0xFF624294);
+        final backBg = isDark ? Colors.white.withOpacity(0.15) : const Color(0xFF624294).withOpacity(0.08);
+        final backBorder = isDark ? Colors.white.withOpacity(0.30) : const Color(0xFF624294).withOpacity(0.25);
+        final linkTextColor = isDark ? Colors.white.withOpacity(0.75) : AppColors.authBgMid.withOpacity(0.7);
+        final linkColor = isDark ? Colors.white : AppColors.authPurple;
 
     return WillPopScope(
       onWillPop: () async => false,
@@ -174,12 +176,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ),
       ),
     );
+      }, // ValueListenableBuilder builder
+    );   // ValueListenableBuilder
   }
 
   Widget _buildHeader(String logoAsset, Color subColor) {
     return Column(
       children: [
-        Image.asset('assets/demo/logo_image.png', width: 160, height: 160),
+        Image.asset(logoAsset, width: 160, height: 160),
         const SizedBox(height: 6),
         Text.rich(
             TextSpan(
