@@ -33,6 +33,10 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
   int _currentQuotePage = 0;
   final _random = Random();
   final int goalCount = 150000000;
+  
+  // Toggle state for Rosary vs Divine Mercy
+  bool _isRosaryMode = true;
+  final int divineMercyGoalCount = 100000000;
   final List<Map<String, String>> quotes = [
     {'text': 'Every bead is a whisper of love to heaven.', 'author': ''},
     {'text': '"The rosary is the most excellent form of prayer."', 'author': 'Pope Paul VI'},
@@ -162,23 +166,98 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
         const SizedBox(height: 6),
         Text('UNITED IN SPIRIT AND FAITH',
             style: GoogleFonts.poppins(fontSize: 10, letterSpacing: 1.5, fontWeight: FontWeight.w600, color: subColor)),
+        const SizedBox(height: 20),
+        _buildToggleButton(isDark),
       ],
     );
   }
 
+  Widget _buildToggleButton(bool isDark) {
+    final toggleBg = isDark ? Colors.white.withOpacity(0.1) : Colors.white;
+    final toggleBorder = isDark ? Colors.white.withOpacity(0.2) : const Color(0xFF22014D).withOpacity(0.15);
+    final activeColor = AppColors.goldPrimary;
+    final inactiveTextColor = isDark ? Colors.white.withOpacity(0.5) : AppColors.authBgMid.withOpacity(0.6);
+    final activeTextColor = Colors.white;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: toggleBg,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: toggleBorder, width: 1.5),
+      ),
+      padding: const EdgeInsets.all(4),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          GestureDetector(
+            onTap: () {
+              setState(() {
+                _isRosaryMode = true;
+              });
+            },
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              decoration: BoxDecoration(
+                color: _isRosaryMode ? activeColor : Colors.transparent,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                'Rosary',
+                style: GoogleFonts.poppins(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: _isRosaryMode ? activeTextColor : inactiveTextColor,
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ),
+          ),
+          GestureDetector(
+            onTap: () {
+              setState(() {
+                _isRosaryMode = false;
+              });
+            },
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              decoration: BoxDecoration(
+                color: !_isRosaryMode ? activeColor : Colors.transparent,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                'Divine Mercy',
+                style: GoogleFonts.poppins(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: !_isRosaryMode ? activeTextColor : inactiveTextColor,
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildGlobalCountCard() {
-    final double percentage = goalCount > 0 ? (widget.globalCount / goalCount) * 100 : 0;
+    final currentGoal = _isRosaryMode ? goalCount : divineMercyGoalCount;
+    final currentGlobalCount = _isRosaryMode ? widget.globalCount : (widget.globalCount * 80 ~/ 100); // Divine Mercy is 80% of Rosary for demo
+    final double percentage = currentGoal > 0 ? (currentGlobalCount / currentGoal) * 100 : 0;
+    final countLabel = _isRosaryMode ? 'TOTAL ROSARIES OFFERED' : 'TOTAL DIVINE MERCY CHAPLETS OFFERED';
 
     return _GlassCard(
       child: Column(
         children: [
           Text(
-            'TOTAL ROSARIES OFFERED',
+            countLabel,
             style: GoogleFonts.poppins(fontSize: 10, letterSpacing: 2, color: AppColors.authBgMid.withOpacity(0.5), fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 12),
           Text(
-            _formatNumber(widget.globalCount),
+            _formatNumber(currentGlobalCount),
             style: const TextStyle(
               fontSize: 56,
               fontWeight: FontWeight.w900,
@@ -192,7 +271,7 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Goal: ${_formatNumber(goalCount)}',
+                'Goal: ${_formatNumber(currentGoal)}',
                 style: GoogleFonts.poppins(fontSize: 12, color: AppColors.authBgMid.withOpacity(0.5), fontWeight: FontWeight.w700),
               ),
               Text(
@@ -213,7 +292,9 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
           ),
           const SizedBox(height: 18),
           Text(
-            'Together, we are building a river of prayer',
+            _isRosaryMode 
+              ? 'Together, we are building a river of prayer'
+              : 'Together, we are spreading Divine Mercy',
             style: GoogleFonts.poppins(fontSize: 13, color: AppColors.authBgMid.withOpacity(0.6), fontStyle: FontStyle.italic, fontWeight: FontWeight.w500),
           ),
         ],
@@ -222,6 +303,11 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
   }
 
   Widget _buildStatsRow() {
+    final personalCountDisplay = _isRosaryMode 
+      ? widget.personalCount 
+      : (widget.personalCount * 75 ~/ 100); // Divine Mercy is 75% of Rosary for demo
+    final label = _isRosaryMode ? 'rosaries' : 'chaplets';
+
     return _GlassCard(
       child: Column(
         children: [
@@ -236,7 +322,7 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
             textBaseline: TextBaseline.alphabetic,
             children: [
               Text(
-                widget.personalCount.toString(),
+                personalCountDisplay.toString(),
                 style: const TextStyle(
                   fontSize: 42,
                   fontWeight: FontWeight.w900,
@@ -245,7 +331,7 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
               ),
               const SizedBox(width: 8),
               Text(
-                'rosaries',
+                label,
                 style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.authBgMid.withOpacity(0.5)),
               ),
             ],
