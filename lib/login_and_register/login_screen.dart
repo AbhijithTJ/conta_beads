@@ -209,12 +209,18 @@ class _LoginScreenState extends State<LoginScreen> {
       children: [
         Image.asset('assets/demo/logo_image.png', width: 160, height: 160),
         const SizedBox(height: 6),
-        Text('Where U Find Rest',
-            style: GoogleFonts.poppins(
-                fontSize: 12,
-                letterSpacing: 1.2,
-                fontWeight: FontWeight.w500,
-                color: subColor)),
+        Text.rich(
+            TextSpan(
+              style: GoogleFonts.poppins(fontSize: 12, letterSpacing: 1.2, fontWeight: FontWeight.w500, color: subColor),
+              children: [
+                const TextSpan(text: 'Where '),
+                TextSpan(text: 'U', style: GoogleFonts.poppins(fontSize: 12, letterSpacing: 1.2, fontWeight: FontWeight.w800, color: subColor)),
+                const TextSpan(text: ' Find '),
+                TextSpan(text: 'R', style: GoogleFonts.poppins(fontSize: 12, letterSpacing: 1.2, fontWeight: FontWeight.w800, color: subColor)),
+                const TextSpan(text: 'est'),
+              ],
+            ),
+          ),
       ],
     );
   }
