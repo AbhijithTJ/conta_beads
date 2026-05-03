@@ -266,12 +266,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
           height: 110,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: AppColors.cardLavender,
+            color: isDark ? AppColors.cardLavender : Colors.white,
+            border: isDark ? null : Border.all(color: const Color(0xFF624294).withOpacity(0.30), width: 2.5),
             boxShadow: [
               BoxShadow(
                 color: isDark
                     ? Colors.black.withOpacity(0.15)
-                    : const Color(0xFF624294).withOpacity(0.15),
+                    : const Color(0xFF624294).withOpacity(0.12),
                 blurRadius: 25,
                 spreadRadius: 2,
               ),
@@ -283,12 +284,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
               child: Container(
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: AppColors.cardLavender,
+                  color: isDark ? AppColors.cardLavender : Colors.white,
                 ),
-                child: const Center(
-                  child: Text('JD', style: TextStyle(fontSize: 36, fontWeight: FontWeight.w900, color: Color(0xFF3D0227), letterSpacing: -1)),
+                child: Center(
+                  child: Text('JD', style: TextStyle(fontSize: 36, fontWeight: FontWeight.w900, color: isDark ? const Color(0xFF3D0227) : const Color(0xFF624294), letterSpacing: -1)),
                 ),
               ),
             ),
@@ -302,19 +303,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
             height: 32,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              gradient: const LinearGradient(colors: [AppColors.cardLavender, AppColors.cardLavender], begin: Alignment.topLeft, end: Alignment.bottomRight),
-              border: Border.all(color: const Color(0xFF624294), width: 2.5),
+              color: isDark ? AppColors.cardLavender : Colors.white,
+              border: Border.all(color: const Color(0xFF624294).withOpacity(isDark ? 1.0 : 0.30), width: 2.5),
               boxShadow: [
                 BoxShadow(
                   color: isDark
                       ? Colors.black.withOpacity(0.15)
-                      : const Color(0xFF624294).withOpacity(0.15),
+                      : const Color(0xFF624294).withOpacity(0.12),
                   blurRadius: 8,
                   offset: const Offset(0, 4),
                 ),
               ],
             ),
-            child: const Icon(Icons.camera_alt_rounded, size: 14, color: Color(0xFF3D0227)),
+            child: Icon(Icons.camera_alt_rounded, size: 14, color: isDark ? const Color(0xFF3D0227) : const Color(0xFF624294)),
           ),
         ),
       ],
