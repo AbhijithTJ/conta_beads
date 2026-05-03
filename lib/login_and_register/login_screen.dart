@@ -209,7 +209,7 @@ class _LoginScreenState extends State<LoginScreen> {
       children: [
         Image.asset('assets/demo/logo_image.png', width: 160, height: 160),
         const SizedBox(height: 6),
-        Text('Hearts United in Prayer.',
+        Text('Where U Find Rest',
             style: GoogleFonts.poppins(
                 fontSize: 12,
                 letterSpacing: 1.2,
@@ -227,14 +227,14 @@ class _LoginScreenState extends State<LoginScreen> {
     final cardContent = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('SIGN IN',
+        Text('Log In ',
             style: GoogleFonts.poppins(
                 fontSize: 22,
                 fontWeight: FontWeight.w800,
                 letterSpacing: 3,
                 color: signInColor)),
         const SizedBox(height: 4),
-        Text('Welcome back, continue your prayer journey',
+        Text('Return to prayer',
             style: GoogleFonts.poppins(
                 fontSize: 12,
                 color: subTextColor,
@@ -475,7 +475,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     left: 16,
                     child: Icon(Icons.language_rounded, color: Colors.white, size: 26),
                   ),
-                  Text('Sign in',
+                  Text('Continue',
                       style: GoogleFonts.poppins(
                         color: Colors.white,
                         fontSize: 16,
@@ -506,7 +506,7 @@ class _LoginScreenState extends State<LoginScreen> {
             Icon(Icons.fingerprint, color: const Color(0xFF624294), size: 22),
             const SizedBox(width: 8),
             Text(
-              'Use biometric login',
+              'Use Face ID / Fingerprint',
               style: GoogleFonts.poppins(
                 color: const Color(0xFF624294),
                 fontSize: 13,
@@ -524,13 +524,13 @@ class _LoginScreenState extends State<LoginScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text("Don't have an account? ",
+        Text("New here? ",
             style: GoogleFonts.poppins(color: textColor, fontSize: 13)),
         GestureDetector(
           onTap: () => Navigator.of(context).pushReplacement(
             MaterialPageRoute(builder: (_) => const RegisterScreen()),
           ),
-          child: Text('Register',
+          child: Text('Create an account',
               style: GoogleFonts.poppins(
                   color: linkColor,
                   fontWeight: FontWeight.w700,

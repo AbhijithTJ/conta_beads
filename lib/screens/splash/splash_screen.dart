@@ -79,7 +79,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
               children: [
                 Image.asset('assets/demo/logo_image.png', width: 200, height: 200),
                 const SizedBox(height: 10),
-                Text('Hearts United in Prayer',
+                Text('Where U Find Rest',
                     style: TextStyle(
                         fontSize: 14,
                         fontFamily: 'Georgia',

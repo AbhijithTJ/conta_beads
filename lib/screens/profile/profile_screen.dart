@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../colors/colors.dart';
 import '../../dialog_box/logout_alert_dialog.dart';
 import '../../login_and_register/login_screen.dart';
+import '../../services/localization_service.dart';
 import '../../theme/theme_notifier.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -22,6 +23,12 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
 
   bool get _isDarkMode => themeNotifier.isDark;
+  String _selectedLanguage = 'English';
+
+  final List<Map<String, String>> _languages = [
+    {'code': 'EN', 'name': 'English'},
+    {'code': 'ML', 'name': 'Malayalam'},
+  ];
 
   @override
   void initState() {
@@ -46,6 +53,115 @@ class _ProfileScreenState extends State<ProfileScreen> {
         (route) => false,
       );
     }
+  }
+
+  void _showLanguagePicker() {
+    HapticFeedback.lightImpact();
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (ctx) => Padding(
+        padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
+        child: Container(
+          decoration: const BoxDecoration(
+            gradient: RadialGradient(
+              center: Alignment(0.0, -0.5),
+              radius: 1.2,
+              colors: [
+                Color(0xFF321060),
+                Color(0xFF220850),
+                Color(0xFF1c023d),
+              ],
+              stops: [0.0, 0.5, 1.0],
+            ),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+          ),
+          padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40, height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Row(children: [
+                const Icon(Icons.language_rounded, color: Colors.white, size: 22),
+                const SizedBox(width: 10),
+                Text('Select Language', style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w700, color: Colors.white)),
+              ]),
+              const SizedBox(height: 16),
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: _languages.map((lang) {
+                  final isSelected = lang['name'] == _selectedLanguage;
+                  return GestureDetector(
+                    onTap: () async {
+                      await loc.load(lang['name']!);
+                      setState(() => _selectedLanguage = lang['name']!);
+                      Navigator.pop(ctx);
+                    },
+                    child: Container(
+                      margin: const EdgeInsets.only(bottom: 10),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? Colors.white.withOpacity(0.18)
+                            : Colors.white.withOpacity(0.08),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: isSelected
+                              ? Colors.white.withOpacity(0.55)
+                              : Colors.white.withOpacity(0.12),
+                          width: 1.5,
+                        ),
+                      ),
+                      child: Row(children: [
+                        Container(
+                          width: 38, height: 28,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Center(
+                            child: Text(
+                              lang['code']!,
+                              style: GoogleFonts.poppins(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w800,
+                                color: Colors.white,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Text(
+                            lang['name']!,
+                            style: GoogleFonts.poppins(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                        if (isSelected)
+                          const Icon(Icons.check_rounded, color: Colors.white, size: 20),
+                      ]),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -83,13 +199,40 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     const SizedBox(height: 12),
-                    Text('MY PROFILE', style: GoogleFonts.poppins(fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 3.5, color: subColor)),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('My Prayer Life', style: GoogleFonts.poppins(fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 3.5, color: subColor)),
+                        GestureDetector(
+                          onTap: _showLanguagePicker,
+                          child: Container(
+                            height: 40,
+                            padding: const EdgeInsets.symmetric(horizontal: 14),
+                            decoration: BoxDecoration(
+                              color: isDark ? Colors.white.withOpacity(0.12) : const Color(0xFF624294).withOpacity(0.08),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: isDark ? Colors.white.withOpacity(0.30) : const Color(0xFF624294).withOpacity(0.25),
+                                width: 1.5,
+                              ),
+                            ),
+                            child: Row(mainAxisSize: MainAxisSize.min, children: [
+                              Icon(Icons.language_rounded, color: isDark ? Colors.white : const Color(0xFF624294), size: 16),
+                              const SizedBox(width: 6),
+                              Text(_selectedLanguage, style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w700, color: isDark ? Colors.white : const Color(0xFF624294))),
+                              const SizedBox(width: 4),
+                              Icon(Icons.keyboard_arrow_down_rounded, color: (isDark ? Colors.white : const Color(0xFF624294)).withOpacity(0.7), size: 16),
+                            ]),
+                          ),
+                        ),
+                      ],
+                    ),
                     const SizedBox(height: 28),
                     _buildAvatar(),
                     const SizedBox(height: 16),
                     Text('John David', style: GoogleFonts.poppins(fontSize: 28, fontWeight: FontWeight.w800, color: headerColor, letterSpacing: 0.5)),
                     const SizedBox(height: 6),
-                    Text('MEMBER SINCE 2023', style: GoogleFonts.poppins(fontSize: 10, fontWeight: FontWeight.w600, letterSpacing: 2.0, color: subColor)),
+                    Text('Disciple of prayer since January 2026', style: GoogleFonts.poppins(fontSize: 10, fontWeight: FontWeight.w600, letterSpacing: 2.0, color: subColor)),
                     const SizedBox(height: 32),
                     _buildStatsRow(),
                     const SizedBox(height: 36),
@@ -254,7 +397,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ),
         const SizedBox(height: 12),
-        _SettingRow(icon: Icons.history_rounded, title: 'Counting History'),
+        _SettingRow(icon: Icons.history_rounded, title: 'My Prayer History'),
         const SizedBox(height: 12),
         _SettingRow(icon: Icons.security_rounded, title: 'Account Security'),
         const SizedBox(height: 12),

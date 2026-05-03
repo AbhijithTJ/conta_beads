@@ -198,7 +198,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         Text('CREATE ACCOUNT',
             style: GoogleFonts.poppins(fontSize: 22, fontWeight: FontWeight.w800, letterSpacing: 3, color: titleColor)),
         const SizedBox(height: 4),
-        Text('Start your rosary journey today',
+        Text('Become a disciple of prayer',
             style: GoogleFonts.poppins(fontSize: 12, color: subColor, letterSpacing: 0.3)),
         const SizedBox(height: 28),
         _buildGlassField(controller: _emailController, label: 'Email address', hint: 'Enter your email', icon: Icons.email_outlined, isDark: isDark),
@@ -453,7 +453,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         Text('Already have an account? ', style: GoogleFonts.poppins(color: textColor, fontSize: 13)),
         GestureDetector(
           onTap: () => Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const LoginScreen())),
-          child: Text('Sign In', style: GoogleFonts.poppins(color: linkColor, fontWeight: FontWeight.w800, fontSize: 13)),
+          child: Text('Log In', style: GoogleFonts.poppins(color: linkColor, fontWeight: FontWeight.w800, fontSize: 13)),
         ),
       ],
     );

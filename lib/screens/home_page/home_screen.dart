@@ -37,18 +37,18 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   ];
 
   final List<Map<String, String>> _quotes = [
-    {'text': '"God\'s love is a sea without a shore."', 'reference': 'St. Catherine of Siena'},
-    {'text': '"Prayer is the key of the morning and the bolt of the evening."', 'reference': 'Mahatma Gandhi'},
-    {'text': '"To pray is to let Jesus into our lives."', 'reference': 'Ole Hallesby'},
-    {'text': '"The rosary is the most excellent form of prayer."', 'reference': 'Pope Paul VI'},
-    {'text': '"With God, all things are possible."', 'reference': 'Matthew 19:26'},
+    {'text': '"God\'s love is a sea without a shore."', 'reference': '— St. Catherine of Siena'},
+    {'text': '"Prayer is the key of the morning and the bolt of the evening."', 'reference': '— Mahatma Gandhi'},
+    {'text': '"To pray is to let Jesus into our lives."', 'reference': '— Ole Hallesby'},
+    {'text': '"The rosary is the most excellent form of prayer."', 'reference': '— Pope Paul VI'},
+    {'text': '"With God, all things are possible."', 'reference': '— Matthew 19:26'},
   ];
 
   final List<Map<String, dynamic>> _features = [
-    {'title': 'Count Your', 'subtitle': 'Rosary', 'image': 'assets/demo/mathav.png'},
+    {'title': 'Rosary', 'subtitle': 'Bank', 'image': 'assets/demo/mathav.png'},
     {'title': 'Adopt a', 'subtitle': 'Priest', 'image': 'assets/demo/adopt a priest.png'},
     {'title': 'Divine Mercy', 'subtitle': 'Chaplet', 'image': 'assets/demo/i trust you jesus.png'},
-    {'title': 'Every Day', 'subtitle': 'Prayers', 'image': 'assets/demo/every day.png'},
+    {'title': 'Daily', 'subtitle': 'Prayers', 'image': 'assets/demo/every day.png'},
   ];
 
   @override

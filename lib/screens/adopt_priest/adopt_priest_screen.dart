@@ -5,18 +5,18 @@ import '../../theme/theme_notifier.dart';
 
 // Full pool of priests to randomly pick from
 const List<Map<String, String>> _priestPool = [
-  {'name': 'Fr. Thomas', 'role': 'Parish Priest'},
-  {'name': 'Fr. Joseph', 'role': 'Mission Priest'},
-  {'name': 'Fr. Michael', 'role': 'Seminary Rector'},
-  {'name': 'Fr. Anthony', 'role': 'Hospital Chaplain'},
-  {'name': 'Fr. Sebastian', 'role': 'Youth Minister'},
-  {'name': 'Fr. George', 'role': 'Retreat Director'},
-  {'name': 'Fr. Paul', 'role': 'Foreign Missionary'},
-  {'name': 'Fr. James', 'role': 'Prison Chaplain'},
-  {'name': 'Fr. Peter', 'role': 'University Chaplain'},
-  {'name': 'Fr. Francis', 'role': 'Parish Priest'},
-  {'name': 'Fr. David', 'role': 'Mission Priest'},
-  {'name': 'Fr. John', 'role': 'Retreat Director'},
+  {'name': 'Fr. Thomas'},
+  {'name': 'Fr. Joseph'},
+  {'name': 'Fr. Michael'},
+  {'name': 'Fr. Anthony'},
+  {'name': 'Fr. Sebastian'},
+  {'name': 'Fr. George'},
+  {'name': 'Fr. Paul'},
+  {'name': 'Fr. James'},
+  {'name': 'Fr. Peter'},
+  {'name': 'Fr. Francis'},
+  {'name': 'Fr. David'},
+  {'name': 'Fr. John'},
 ];
 
 class AdoptPriestScreen extends StatefulWidget {
@@ -155,7 +155,7 @@ class _AdoptPriestScreenState extends State<AdoptPriestScreen> {
                                 ),
                               ),
                               Text(
-                                priest['role']!,
+                                'Pray for me',
                                 style: GoogleFonts.poppins(
                                   fontSize: 11,
                                   color: isDark
@@ -307,7 +307,7 @@ class _AdoptPriestScreenState extends State<AdoptPriestScreen> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'Support a Spiritual Journey',
+                          'Pray for God’s anointed ones',
                           style: GoogleFonts.poppins(
                             fontSize: 13,
                             fontWeight: FontWeight.w500,
@@ -342,7 +342,6 @@ class _AdoptPriestScreenState extends State<AdoptPriestScreen> {
                                       )
                                     : _FilledCard(
                                         name: _slots[i]!['name']!,
-                                        role: _slots[i]!['role']!,
                                         slotLabel: '${i + 1}/$_maxSlots',
                                         isDark: isDark,
                                         onRemove: () => _removeSlot(i),
@@ -387,7 +386,7 @@ class _AdoptPriestScreenState extends State<AdoptPriestScreen> {
                               const SizedBox(width: 10),
                               Expanded(
                                 child: Text(
-                                  'Select at least 1 and up to 3 priests for your spiritual partnership',
+                                  'You may select up to 3 priests',
                                   style: GoogleFonts.poppins(
                                     fontSize: 12,
                                     color: isDark
@@ -580,14 +579,12 @@ class _EmptySlot extends StatelessWidget {
 // ── Filled priest card with remove button ────────────────────────────────────
 class _FilledCard extends StatelessWidget {
   final String name;
-  final String role;
   final String slotLabel;
   final bool isDark;
   final VoidCallback onRemove;
 
   const _FilledCard({
     required this.name,
-    required this.role,
     required this.slotLabel,
     required this.isDark,
     required this.onRemove,
@@ -685,7 +682,7 @@ class _FilledCard extends StatelessWidget {
           ),
           const SizedBox(height: 2),
           Text(
-            role,
+            'Pray for me',
             textAlign: TextAlign.center,
             style: GoogleFonts.poppins(
               fontSize: 9,
