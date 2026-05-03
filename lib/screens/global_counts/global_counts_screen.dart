@@ -382,8 +382,10 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
 
   Widget _buildQuoteCard(bool isDark) {
     final quote = quotes[_currentQuotePage];
-    final quoteTextColor = isDark ? const Color(0xFF333333) : AppColors.authBgBottom;
-    final shadowColor = isDark ? AppColors.authBgBottom.withOpacity(0.20) : const Color(0xFF22014D).withOpacity(0.10);
+    final quoteTextColor = const Color(0xFF624294);
+    final shadowColor = isDark ? AppColors.authBgBottom.withOpacity(0.20) : const Color(0xFF624294).withOpacity(0.15);
+    final borderColor = isDark ? Colors.white : const Color(0xFF624294).withOpacity(0.12);
+    final activeDotColor = isDark ? const Color(0xFF624294) : AppColors.goldPrimary;
 
     return GestureDetector(
       onHorizontalDragEnd: (details) {
@@ -409,23 +411,25 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(22),
-            border: Border.all(color: Colors.white, width: 2.0),
+            border: Border.all(color: isDark ? Colors.white : borderColor, width: isDark ? 2.0 : 1.5),
             boxShadow: [BoxShadow(color: shadowColor, blurRadius: 20, offset: const Offset(0, 6))],
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text('\u275D', style: TextStyle(fontSize: 20, color: const Color(0xFF22014D).withOpacity(0.45), height: 1.0)),
+              Text('\u275D', style: TextStyle(fontSize: 20, color: const Color(0xFF624294).withOpacity(0.45), height: 1.0)),
               const SizedBox(height: 6),
-              Text(quote['text']!,
-                  textAlign: TextAlign.center,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.poppins(fontSize: 14.5, fontWeight: FontWeight.w500, color: quoteTextColor, fontStyle: FontStyle.italic, height: 1.5, letterSpacing: 0.2)),
+              Text(
+                quote['text']!,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(fontSize: 14.5, fontWeight: isDark ? FontWeight.w500 : FontWeight.w700, color: quoteTextColor, fontStyle: FontStyle.italic, height: 1.5, letterSpacing: 0.2),
+              ),
               const SizedBox(height: 8),
               if (quote['author']!.isNotEmpty)
                 Text(quote['author']!,
-                    style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w700, color: const Color(0xFF22014D), letterSpacing: 1.2)),
+                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Color(0xFF624294), letterSpacing: 1.2)),
               const SizedBox(height: 10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -437,7 +441,7 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
                     margin: const EdgeInsets.symmetric(horizontal: 3),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(3),
-                      color: i == _currentQuotePage ? const Color(0xFF22014D) : const Color(0xFF22014D).withOpacity(0.25),
+                      color: i == _currentQuotePage ? activeDotColor : const Color(0xFF624294).withOpacity(0.25),
                     ),
                   );
                 }),

@@ -16,6 +16,8 @@ class IntentionsScreen extends StatefulWidget {
 class _IntentionsScreenState extends State<IntentionsScreen> with TickerProviderStateMixin {
   final TextEditingController _intentionController = TextEditingController();
   final TextEditingController _rosaryCountController = TextEditingController();
+  final FocusNode _intentionFocus = FocusNode();
+  final FocusNode _rosaryCountFocus = FocusNode();
   int _myTotal = 300; // user's rosary total
 
   late AnimationController _quoteFadeController;
@@ -49,12 +51,16 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
         _quoteFadeController.forward();
       });
     });
+    _intentionFocus.addListener(() => setState(() {}));
+    _rosaryCountFocus.addListener(() => setState(() {}));
   }
 
   @override
   void dispose() {
     _intentionController.dispose();
     _rosaryCountController.dispose();
+    _intentionFocus.dispose();
+    _rosaryCountFocus.dispose();
     _quoteTimer?.cancel();
     _quoteFadeController.dispose();
     super.dispose();
@@ -145,8 +151,10 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
 
   Widget _buildQuoteCard(bool isDark) {
     final q = _quotes[_currentQuoteIndex];
-    final quoteTextColor = isDark ? const Color(0xFF333333) : AppColors.authBgBottom;
-    final shadowColor = isDark ? AppColors.authBgBottom.withOpacity(0.20) : const Color(0xFF624294).withOpacity(0.10);
+    final quoteTextColor = const Color(0xFF624294);
+    final shadowColor = isDark ? AppColors.authBgBottom.withOpacity(0.20) : const Color(0xFF624294).withOpacity(0.15);
+    final borderColor = isDark ? Colors.white : const Color(0xFF624294).withOpacity(0.12);
+    final activeDotColor = isDark ? const Color(0xFF624294) : AppColors.goldPrimary;
 
     return GestureDetector(
       onHorizontalDragEnd: (details) {
@@ -172,7 +180,7 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(22),
-            border: Border.all(color: Colors.white, width: 2.0),
+            border: Border.all(color: isDark ? Colors.white : borderColor, width: isDark ? 2.0 : 1.5),
             boxShadow: [BoxShadow(color: shadowColor, blurRadius: 20, offset: const Offset(0, 6))],
           ),
           child: Column(
@@ -180,11 +188,17 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
             children: [
               Text('\u275D', style: TextStyle(fontSize: 20, color: const Color(0xFF624294).withOpacity(0.45), height: 1.0)),
               const SizedBox(height: 6),
-              Text(q['text']!,
-                  textAlign: TextAlign.center, maxLines: 2, overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.poppins(fontSize: 14.5, fontWeight: FontWeight.w500, color: quoteTextColor, fontStyle: FontStyle.italic, height: 1.5, letterSpacing: 0.2)),
+              Text(
+                q['text']!,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(fontSize: 14.5, fontWeight: isDark ? FontWeight.w500 : FontWeight.w700, color: quoteTextColor, fontStyle: FontStyle.italic, height: 1.5, letterSpacing: 0.2),
+              ),
               const SizedBox(height: 8),
-              Text(q['author']!, style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w700, color: const Color(0xFF624294), letterSpacing: 1.2)),
+              if (q['author']!.isNotEmpty)
+                Text(q['author']!,
+                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Color(0xFF624294), letterSpacing: 1.2)),
               const SizedBox(height: 10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -196,7 +210,7 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
                     margin: const EdgeInsets.symmetric(horizontal: 3),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(3),
-                      color: i == _currentQuoteIndex ? const Color(0xFF624294) : const Color(0xFF624294).withOpacity(0.25),
+                      color: i == _currentQuoteIndex ? activeDotColor : const Color(0xFF624294).withOpacity(0.25),
                     ),
                   );
                 }),
@@ -341,6 +355,7 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
               filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
               child: TextField(
                 controller: _intentionController,
+                focusNode: _intentionFocus,
                 maxLines: 4,
                 style: GoogleFonts.poppins(fontSize: 15, color: AppColors.authBgBottom, fontWeight: FontWeight.w600),
                 decoration: InputDecoration(
@@ -350,9 +365,10 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
                   fillColor: Colors.white.withOpacity(0.7),
                   contentPadding: const EdgeInsets.all(18),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide(color: AppColors.goldPrimary.withOpacity(0.5), width: 1.5),
+                    borderSide: BorderSide(color: AppColors.goldPrimary.withOpacity(0.7), width: 1.5),
                   ),
                 ),
               ),
@@ -371,6 +387,7 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
                     const SizedBox(height: 6),
                     TextField(
                       controller: _rosaryCountController,
+                      focusNode: _rosaryCountFocus,
                       keyboardType: TextInputType.number,
                       style: GoogleFonts.poppins(fontSize: 15, color: const Color(0xFF624294), fontWeight: FontWeight.w700),
                       decoration: InputDecoration(
@@ -379,8 +396,8 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
                         filled: true,
                         fillColor: Colors.white.withOpacity(0.8),
                         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: Colors.white, width: 2.0)),
-                        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: Colors.white, width: 2.0)),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+                        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
                         focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: AppColors.goldPrimary.withOpacity(0.7), width: 1.5)),
                       ),
                     ),
