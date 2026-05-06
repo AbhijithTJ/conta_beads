@@ -83,13 +83,22 @@ class _ThemeSelectScreenState extends State<ThemeSelectScreen>
         width: double.infinity,
         height: double.infinity,
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: isDark
-                ? const [Color(0xFF321060), Color(0xFF220850), Color(0xFF1c023d)]
-                : const [Color(0xFFF0EBF0), Color(0xFFE8E0F0), Color(0xFFF0EBF0)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
+          gradient: isDark
+              ? const RadialGradient(
+                  center: Alignment(0.0, -0.2),
+                  radius: 1.2,
+                  colors: [
+                    Color(0xFF4A4080),
+                    Color(0xFF2A1F5E),
+                    Color(0xFF100828),
+                  ],
+                  stops: [0.0, 0.50, 1.0],
+                )
+              : const LinearGradient(
+                  colors: [Color(0xFFF0EBF0), Color(0xFFE8E0F0), Color(0xFFF0EBF0)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
         ),
         child: SafeArea(
           child: FadeTransition(

@@ -113,7 +113,20 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
           body: Container(
             width: double.infinity,
             height: double.infinity,
-            decoration: BoxDecoration(color: bgColor),
+            decoration: isDark
+                ? const BoxDecoration(
+                    gradient: RadialGradient(
+                      center: Alignment(0.0, -0.2),
+                      radius: 1.2,
+                      colors: [
+                        Color(0xFF4A4080),
+                        Color(0xFF2A1F5E),
+                        Color(0xFF100828),
+                      ],
+                      stops: [0.0, 0.50, 1.0],
+                    ),
+                  )
+                : BoxDecoration(color: bgColor),
             child: SafeArea(
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
@@ -164,7 +177,7 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
         Text('Global Count',
             style: GoogleFonts.poppins(fontSize: 36, fontWeight: FontWeight.w900, color: titleColor, letterSpacing: -1)),
         const SizedBox(height: 6),
-        Text('UNITED IN SPIRIT AND FAITH',
+        Text('EVERY BEAD COUNTS',
             style: GoogleFonts.poppins(fontSize: 10, letterSpacing: 1.5, fontWeight: FontWeight.w600, color: subColor)),
         const SizedBox(height: 20),
         _buildToggleButton(isDark),
@@ -285,7 +298,7 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
     final currentGoal = _isRosaryMode ? goalCount : divineMercyGoalCount;
     final currentGlobalCount = _isRosaryMode ? widget.globalCount : (widget.globalCount * 80 ~/ 100); // Divine Mercy is 80% of Rosary for demo
     final double percentage = currentGoal > 0 ? (currentGlobalCount / currentGoal) * 100 : 0;
-    final countLabel = _isRosaryMode ? 'TOTAL ROSARIES OFFERED' : 'TOTAL DIVINE MERCY CHAPLETS OFFERED';
+    final countLabel = _isRosaryMode ? 'ROSARIES PRAYED WORLDWIDE' : 'TOTAL DIVINE MERCY CHAPLETS OFFERED';
 
     return _GlassCard(
       child: Column(
@@ -332,8 +345,8 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
           const SizedBox(height: 18),
           Text(
             _isRosaryMode 
-              ? 'Together, we are building a river of prayer'
-              : 'Together, we are spreading Divine Mercy',
+              ? ''
+              : '',
             style: GoogleFonts.poppins(fontSize: 13, color: AppColors.authBgMid.withOpacity(0.6), fontStyle: FontStyle.italic, fontWeight: FontWeight.w500),
           ),
         ],
@@ -345,13 +358,13 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
     final personalCountDisplay = _isRosaryMode 
       ? widget.personalCount 
       : (widget.personalCount * 75 ~/ 100); // Divine Mercy is 75% of Rosary for demo
-    final label = _isRosaryMode ? 'rosaries' : 'chaplets';
+    final label = _isRosaryMode ? 'Rosaries' : 'chaplets';
 
     return _GlassCard(
       child: Column(
         children: [
           Text(
-            'YOUR TOTAL',
+            'YOUR CONTRIBUTION',
             style: GoogleFonts.poppins(fontSize: 10, letterSpacing: 2, color: AppColors.authBgMid.withOpacity(0.5), fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 8),
@@ -585,7 +598,7 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
                     ],
                   ),
                   Text(
-                    'rosaries offered today',
+                    'Rosaries offered today',
                     style: GoogleFonts.poppins(fontSize: 11, color: isYou ? AppColors.goldDark.withOpacity(0.6) : AppColors.authBgMid.withOpacity(0.4), fontWeight: FontWeight.w600),
                   ),
                 ],
@@ -639,7 +652,12 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
 
   String _formatNumber(int number) {
     if (number >= 1000000) {
-      return '${(number / 1000000).toStringAsFixed(1)}M';
+      final millions = number / 1000000;
+      // If it's a whole number, don't show decimal
+      if (millions == millions.toInt()) {
+        return '${millions.toInt()}M';
+      }
+      return '${millions.toStringAsFixed(1)}M';
     } else if (number >= 1000) {
       return '${(number / 1000).toStringAsFixed(0)},${(number % 1000).toString().padLeft(3, '0')}';
     }

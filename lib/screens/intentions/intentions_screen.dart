@@ -79,14 +79,14 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
             decoration: isDark
                 ? const BoxDecoration(
                     gradient: RadialGradient(
-                      center: Alignment(0.0, -0.4),
-                      radius: 0.85,
+                      center: Alignment(0.0, -0.2),
+                      radius: 1.2,
                       colors: [
-                        Color(0xFF321060),
-                        Color(0xFF220850),
-                        Color(0xFF1c023d),
+                        Color(0xFF4A4080),
+                        Color(0xFF2A1F5E),
+                        Color(0xFF100828),
                       ],
-                      stops: [0.0, 0.5, 1.0],
+                      stops: [0.0, 0.50, 1.0],
                     ),
                   )
                 : const BoxDecoration(color: Color(0xFFF0EBF0)),
@@ -143,7 +143,7 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
         Text('Intentions',
             style: GoogleFonts.poppins(fontSize: 42, fontWeight: FontWeight.w900, color: titleColor, letterSpacing: -1, height: 1.0)),
         const SizedBox(height: 8),
-        Text('LIFT YOUR HEART IN PRAYER',
+        Text('HEARTS UNITED IN PRAYER',
             style: GoogleFonts.poppins(fontSize: 10, fontWeight: FontWeight.w700, color: subColor, letterSpacing: 2.5)),
       ],
     );
@@ -252,10 +252,10 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
             ],
           ),
           const SizedBox(height: 14),
-          Text(todayIntention,
+          Text("Today's Intention",
               style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w800, color: const Color(0xFF624294))),
           const SizedBox(height: 4),
-          Text("Today's Intention",
+          Text(todayIntention,
               style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w500, color: const Color(0xFF624294).withOpacity(0.5))),
         ],
       ),
@@ -333,20 +333,22 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
             children: [
               const _IconBox(icon: Icons.auto_awesome_rounded),
               const SizedBox(width: 16),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('REQUEST A ROSARY',
-                      style: GoogleFonts.poppins(fontSize: 10, fontWeight: FontWeight.w800, color: const Color(0xFF624294).withOpacity(0.8), letterSpacing: 1.8)),
-                  const SizedBox(height: 2),
-                  Text('Offer your intention',
-                      style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.authBgBottom, letterSpacing: -0.5)),
-                ],
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('BORROW ROSARIES',
+                        style: GoogleFonts.poppins(fontSize: 10, fontWeight: FontWeight.w800, color: const Color(0xFF624294).withOpacity(0.8), letterSpacing: 1.8)),
+                    const SizedBox(height: 2),
+                    Text('Share your intention',
+                        style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.authBgBottom, letterSpacing: -0.5)),
+                  ],
+                ),
               ),
             ],
           ),
           const SizedBox(height: 20),
-          Text('Share your personal intention with the community in prayer and trust it to the Mother of God.',
+          Text('Borrow prayers from the community. (Your intention remains private while the community entrusts you to Mother Mary.)',
               style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.authBgMid.withOpacity(0.7), height: 1.6)),
           const SizedBox(height: 20),
           ClipRRect(
@@ -359,7 +361,7 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
                 maxLines: 4,
                 style: GoogleFonts.poppins(fontSize: 15, color: AppColors.authBgBottom, fontWeight: FontWeight.w600),
                 decoration: InputDecoration(
-                  hintText: 'Write your intention here...',
+                  hintText: 'Write your intention...',
                   hintStyle: GoogleFonts.poppins(color: const Color(0xFF624294).withOpacity(0.3), fontSize: 14, fontWeight: FontWeight.w500),
                   filled: true,
                   fillColor: Colors.white.withOpacity(0.7),
@@ -382,7 +384,7 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Rosaries to offer',
+                    Text('Borrow Rosaries',
                         style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w700, color: const Color(0xFF624294).withOpacity(0.7))),
                     const SizedBox(height: 6),
                     TextField(
@@ -475,7 +477,7 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
           boxShadow: [BoxShadow(color: const Color(0xFF624294).withOpacity(0.35), blurRadius: 15, offset: const Offset(0, 8))],
         ),
         child: Center(
-          child: Text('Request Rosary',
+          child: Text('Borrow Rosaries',
               style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w800, color: Colors.white, letterSpacing: 0.5)),
         ),
       ),

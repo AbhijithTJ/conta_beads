@@ -116,14 +116,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
           decoration: isDark
               ? const BoxDecoration(
                   gradient: RadialGradient(
-                    center: Alignment(0.0, -0.4),
-                    radius: 0.85,
+                    center: Alignment(0.0, -0.2),
+                    radius: 1.2,
                     colors: [
-                      Color(0xFF321060),
-                      Color(0xFF220850),
-                      Color(0xFF1c023d),
+                      Color(0xFF4A4080),
+                      Color(0xFF2A1F5E),
+                      Color(0xFF100828),
                     ],
-                    stops: [0.0, 0.5, 1.0],
+                    stops: [0.0, 0.50, 1.0],
                   ),
                 )
               : const BoxDecoration(color: Color(0xFFF0EBF0)),
