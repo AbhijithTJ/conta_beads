@@ -1,13 +1,14 @@
 import 'dart:ui';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:provider/provider.dart';
 import '../colors/colors.dart';
 import '../providers/auth_provider.dart';
 import '../providers/user_provider.dart';
-import '../screens/onboarding/onboarding_wrapper.dart';
+import '../services/session_service.dart';
 import '../theme/theme_notifier.dart';
 import 'login_screen.dart';
 
@@ -83,17 +84,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final auth = context.read<AuthProvider>();
     final userProvider = context.read<UserProvider>();
 
-    // Derive timezone as IANA name from device UTC offset.
-    // DateTime.timeZoneName is OS-dependent ("IST", "GMT+5:30", etc.) — unreliable.
-    // UTC offset is always accurate on every device.
-    final now = DateTime.now();
-    final offset = now.timeZoneOffset;
-    final sign = offset.isNegative ? '-' : '+';
-    final hh = offset.inHours.abs().toString().padLeft(2, '0');
-    final mm = (offset.inMinutes.abs() % 60).toString().padLeft(2, '0');
-    final timezone = 'UTC$sign$hh:$mm'; // e.g. "UTC+05:30"
+    // Get the real IANA timezone name from the device OS.
+    // e.g. "America/Los_Angeles", "Asia/Kolkata", "Europe/London"
+    String timezone;
+    try {
+      final tzInfo = await FlutterTimezone.getLocalTimezone();
+      timezone = tzInfo.identifier;
+    } catch (_) {
+      // Fallback to UTC offset string if the plugin fails.
+      final offset = DateTime.now().timeZoneOffset;
+      final sign = offset.isNegative ? '-' : '+';
+      final hh = offset.inHours.abs().toString().padLeft(2, '0');
+      final mm = (offset.inMinutes.abs() % 60).toString().padLeft(2, '0');
+      timezone = 'UTC$sign$hh:$mm';
+    }
 
     // Stable device identifier.
+    final now = DateTime.now();
     final deviceId =
         '${Platform.operatingSystem}_${now.millisecondsSinceEpoch}';
 
@@ -110,10 +117,34 @@ class _RegisterScreenState extends State<RegisterScreen> {
     if (!mounted) return;
 
     if (success) {
-      if (auth.user != null) userProvider.setUser(auth.user!);
+      // Registration succeeded — send to login so the user signs in properly.
+      // This ensures biometric setup is offered on first login.
+      await auth.logout(); // clear the auto-session created by register API
+      // Save only the phone number (no country code) so login screen pre-fills it cleanly.
+      await SessionService.instance.saveContact(_phoneNumber);
+      if (!mounted) return;
       Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const OnboardingWrapper()),
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
         (route) => false,
+      );
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Row(
+            children: [
+              Icon(Icons.check_circle_outline, color: Colors.white, size: 20),
+              SizedBox(width: 10),
+              Expanded(
+                child: Text('Account created! Please log in.',
+                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+              ),
+            ],
+          ),
+          backgroundColor: Colors.green.shade600,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          margin: const EdgeInsets.all(16),
+          duration: const Duration(seconds: 3),
+        ),
       );
     } else {
       _showError(auth.errorMessage ?? 'Registration failed');

@@ -47,7 +47,7 @@ class _AppView extends StatelessWidget {
       valueListenable: themeNotifier,
       builder: (_, isDark, __) {
         return MaterialApp(
-          title: 'Rosary Bank',
+          title: 'UPPER ROOM',
           debugShowCheckedModeBanner: false,
           themeMode: isDark ? ThemeMode.dark : ThemeMode.light,
           theme: ThemeData(

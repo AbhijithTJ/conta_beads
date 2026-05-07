@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../login_and_register/login_screen.dart';
+import '../../screens/onboarding/onboarding_wrapper.dart';
+import '../../services/session_service.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -26,9 +28,14 @@ class _SplashScreenState extends State<SplashScreen>
 
     _gifCtrl.addStatusListener((status) {
       if (status == AnimationStatus.completed && mounted) {
+        // Route to home if already logged in, otherwise show login.
+        final destination = SessionService.instance.isLoggedIn
+            ? const OnboardingWrapper()
+            : const LoginScreen();
+
         Navigator.of(context).pushReplacement(
           PageRouteBuilder(
-            pageBuilder: (_, __, ___) => const LoginScreen(),
+            pageBuilder: (_, __, ___) => destination,
             transitionsBuilder: (_, animation, __, child) =>
                 FadeTransition(opacity: animation, child: child),
             transitionDuration: const Duration(milliseconds: 800),
