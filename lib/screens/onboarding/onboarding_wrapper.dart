@@ -1,60 +1,27 @@
 import 'package:flutter/material.dart';
 import '../bottom_nav_wrapper.dart';
 import 'onboarding_screen.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import '../../services/session_service.dart';
 
-class OnboardingWrapper extends StatefulWidget {
-  final String userEmail;
+/// Checks if the user has seen onboarding (sync from SessionService — no FutureBuilder needed).
+class OnboardingWrapper extends StatelessWidget {
+  const OnboardingWrapper({super.key});
 
-  const OnboardingWrapper({
-    super.key,
-    required this.userEmail,
-  });
-
-  @override
-  State<OnboardingWrapper> createState() => _OnboardingWrapperState();
-}
-
-class _OnboardingWrapperState extends State<OnboardingWrapper> {
-  late Future<bool> _hasSeenOnboarding;
-
-  @override
-  void initState() {
-    super.initState();
-    _hasSeenOnboarding = _checkOnboardingStatus();
-  }
-
-  Future<bool> _checkOnboardingStatus() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool('hasSeenOnboarding') ?? false;
-  }
-
-  void _navigateToHome() {
+  void _navigateToHome(BuildContext context) {
+    SessionService.instance.setOnboardingComplete();
     Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(
-        builder: (_) => BottomNavWrapper(userEmail: widget.userEmail),
-      ),
+      MaterialPageRoute(builder: (_) => const BottomNavWrapper()),
       (route) => false,
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<bool>(
-      future: _hasSeenOnboarding,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
-        }
+    final hasSeenOnboarding = SessionService.instance.onboardingComplete;
 
-        if (snapshot.data == true) {
-          return BottomNavWrapper(userEmail: widget.userEmail);
-        } else {
-          return OnboardingScreen(onComplete: _navigateToHome);
-        }
-      },
-    );
+    if (hasSeenOnboarding) {
+      return const BottomNavWrapper();
+    }
+    return OnboardingScreen(onComplete: () => _navigateToHome(context));
   }
 }

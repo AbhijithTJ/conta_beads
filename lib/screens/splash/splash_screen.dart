@@ -8,14 +8,24 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
+class _SplashScreenState extends State<SplashScreen>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _gifCtrl;
 
   @override
   void initState() {
     super.initState();
 
-    Future.delayed(const Duration(milliseconds: 5000), () {
-      if (mounted) {
+    // Duration matches the GIF's total animation length (182 frames @ ~6.07 s).
+    _gifCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 6070),
+    );
+
+    _gifCtrl.forward();
+
+    _gifCtrl.addStatusListener((status) {
+      if (status == AnimationStatus.completed && mounted) {
         Navigator.of(context).pushReplacement(
           PageRouteBuilder(
             pageBuilder: (_, __, ___) => const LoginScreen(),
@@ -26,6 +36,12 @@ class _SplashScreenState extends State<SplashScreen> {
         );
       }
     });
+  }
+
+  @override
+  void dispose() {
+    _gifCtrl.dispose();
+    super.dispose();
   }
 
   @override

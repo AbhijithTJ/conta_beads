@@ -2,19 +2,17 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import '../../colors/colors.dart';
 import '../../dialog_box/logout_alert_dialog.dart';
 import '../../login_and_register/login_screen.dart';
+import '../../providers/auth_provider.dart';
+import '../../providers/user_provider.dart';
 import '../../services/localization_service.dart';
 import '../../theme/theme_notifier.dart';
 
 class ProfileScreen extends StatefulWidget {
-  final String userEmail;
-
-  const ProfileScreen({
-    super.key,
-    required this.userEmail,
-  });
+  const ProfileScreen({super.key});
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -33,6 +31,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void initState() {
     super.initState();
+    // Fetch fresh profile data from API on screen open
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<UserProvider>().fetchProfile();
+    });
   }
 
   @override
@@ -48,10 +50,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
       builder: (_) => const LogoutAlertDialog(),
     );
     if (confirmed == true && mounted) {
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const LoginScreen()),
-        (route) => false,
-      );
+      await context.read<AuthProvider>().logout();
+      context.read<UserProvider>().clear();
+      if (mounted) {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const LoginScreen()),
+          (route) => false,
+        );
+      }
     }
   }
 
@@ -164,6 +170,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  /// Formats "created_at" ISO string → "January 2026"
+  String _formatSince(String? iso) {
+    if (iso == null || iso.isEmpty) return '—';
+    try {
+      final dt = DateTime.parse(iso);
+      const months = ['January','February','March','April','May','June',
+                      'July','August','September','October','November','December'];
+      return '${months[dt.month - 1]} ${dt.year}';
+    } catch (_) {
+      return '—';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<bool>(
@@ -230,9 +249,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     const SizedBox(height: 28),
                     _buildAvatar(),
                     const SizedBox(height: 16),
-                    Text('John David', style: GoogleFonts.poppins(fontSize: 28, fontWeight: FontWeight.w800, color: headerColor, letterSpacing: 0.5)),
-                    const SizedBox(height: 6),
-                    Text('Disciple of prayer since January 2026', style: GoogleFonts.poppins(fontSize: 10, fontWeight: FontWeight.w600, letterSpacing: 2.0, color: subColor)),
+                    Consumer<UserProvider>(
+                      builder: (_, userProvider, __) {
+                        if (userProvider.isLoading && userProvider.user == null) {
+                          return Column(children: [
+                            const SizedBox(height: 8),
+                            SizedBox(
+                              width: 20, height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: isDark ? Colors.white54 : const Color(0xFF624294),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                          ]);
+                        }
+                        final name = userProvider.displayName;
+                        final createdAt = userProvider.user?.createdAt;
+                        final since = _formatSince(createdAt);
+                        return Column(children: [
+                          Text(name, style: GoogleFonts.poppins(fontSize: 28, fontWeight: FontWeight.w800, color: headerColor, letterSpacing: 0.5)),
+                          const SizedBox(height: 6),
+                          Text('Disciple of prayer since $since', style: GoogleFonts.poppins(fontSize: 10, fontWeight: FontWeight.w600, letterSpacing: 2.0, color: subColor)),
+                        ]);
+                      },
+                    ),
                     const SizedBox(height: 32),
                     _buildStatsRow(),
                     const SizedBox(height: 36),
@@ -258,6 +299,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _buildAvatar() {
     final isDark = themeNotifier.isDark;
+    final name = context.read<UserProvider>().displayName;
+    // Build initials from name (up to 2 chars)
+    final parts = name.trim().split(RegExp(r'\s+'));
+    final initials = parts.length >= 2
+        ? '${parts.first[0]}${parts.last[0]}'.toUpperCase()
+        : name.isNotEmpty
+            ? name[0].toUpperCase()
+            : '?';
     return Stack(
       clipBehavior: Clip.none,
       children: [
@@ -289,7 +338,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   color: isDark ? AppColors.cardLavender : Colors.white,
                 ),
                 child: Center(
-                  child: Text('JD', style: TextStyle(fontSize: 36, fontWeight: FontWeight.w900, color: isDark ? const Color(0xFF3D0227) : const Color(0xFF624294), letterSpacing: -1)),
+                  child: Text(initials, style: TextStyle(fontSize: 36, fontWeight: FontWeight.w900, color: isDark ? const Color(0xFF3D0227) : const Color(0xFF624294), letterSpacing: -1)),
                 ),
               ),
             ),
@@ -323,13 +372,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildStatsRow() {
+    final user = context.watch<UserProvider>();
     return Row(
       children: [
-        _StatBox(value: '342', label: 'Prayers'),
+        _StatBox(value: '${user.totalCount}', label: 'Total'),
         const SizedBox(width: 12),
-        _StatBox(value: '28', label: 'Novenas'),
+        _StatBox(value: '${user.rosaryPrayedTotal}', label: 'Rosary'),
         const SizedBox(width: 12),
-        _StatBox(value: '14', label: 'Day Streak'),
+        _StatBox(value: '${user.chapelPrayedTotal}', label: 'Chaplet'),
       ],
     );
   }
@@ -345,14 +395,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildDetailsCard() {
+    final user = context.watch<UserProvider>();
+    final phone = [user.countryCode, user.phone]
+        .where((s) => s.isNotEmpty)
+        .join(' ');
     return _WhiteCard(
       child: Column(
         children: [
-          _InfoRow(icon: Icons.email_outlined, label: 'Email Address', value: widget.userEmail),
+          _InfoRow(icon: Icons.email_outlined,    label: 'Email Address', value: user.email.isNotEmpty ? user.email : '—'),
           _divider(),
-          _InfoRow(icon: Icons.phone_outlined, label: 'Phone Number', value: '+91 98765 43210'),
+          _InfoRow(icon: Icons.phone_outlined,    label: 'Phone Number',  value: phone.isNotEmpty ? phone : '—'),
           _divider(),
-          _InfoRow(icon: Icons.location_on_outlined, label: 'Region', value: 'Kerala, India'),
+          _InfoRow(icon: Icons.schedule_outlined, label: 'Timezone',      value: user.timezone.isNotEmpty ? user.timezone : '—'),
+          _divider(),
+          _InfoRow(icon: Icons.church_outlined,   label: 'Parish',        value: user.parish.isNotEmpty ? user.parish : '—'),
         ],
       ),
     );

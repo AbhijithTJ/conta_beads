@@ -10,12 +10,10 @@ import '../../theme/theme_notifier.dart';
 import '../../widgets/global_count_panel.dart';
 
 class CountingScreen extends StatefulWidget {
-  final String userEmail;
   final bool startWithChaplet;
 
   const CountingScreen({
     super.key,
-    required this.userEmail,
     this.startWithChaplet = false,
   });
 

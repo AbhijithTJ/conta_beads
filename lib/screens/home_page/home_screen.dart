@@ -10,8 +10,7 @@ import '../adopt_priest/adopt_priest_screen.dart';
 import '../everyday_prayers/everyday_prayers_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  final String userEmail;
-  const HomeScreen({super.key, required this.userEmail});
+  const HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -251,7 +250,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       top: size.height * 0.40,
       child: GestureDetector(
         onTap: () => Navigator.of(context).push(MaterialPageRoute(
-          builder: (_) => CountingScreen(userEmail: widget.userEmail),
+          builder: (_) => CountingScreen(),
         )),
         onHorizontalDragStart: (_) => setState(() { _dragging = true; _dragOffset = 0; }),
         onHorizontalDragUpdate: (d) {
@@ -261,7 +260,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         onHorizontalDragEnd: (_) {
           if (_dragOffset >= _dragThreshold) {
             Navigator.of(context).push(MaterialPageRoute(
-              builder: (_) => CountingScreen(userEmail: widget.userEmail),
+              builder: (_) => CountingScreen(),
             ));
           }
           setState(() { _dragOffset = 0; _dragging = false; });
@@ -453,7 +452,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           onTap: () {
             if (i == 0) {
               Navigator.of(context).push(MaterialPageRoute(
-                builder: (_) => CountingScreen(userEmail: widget.userEmail),
+                builder: (_) => CountingScreen(),
               ));
             } else if (i == 1) {
               Navigator.of(context).push(MaterialPageRoute(
@@ -461,7 +460,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               ));
             } else if (i == 2) {
               Navigator.of(context).push(MaterialPageRoute(
-                builder: (_) => CountingScreen(userEmail: widget.userEmail, startWithChaplet: true),
+                builder: (_) => CountingScreen(startWithChaplet: true),
               ));
             } else if (i == 3) {
               Navigator.of(context).push(MaterialPageRoute(

@@ -1,9 +1,13 @@
 import 'dart:ui';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
+import 'package:provider/provider.dart';
 import '../colors/colors.dart';
-import '../screens/bottom_nav_wrapper.dart';
+import '../providers/auth_provider.dart';
+import '../providers/user_provider.dart';
+import '../screens/onboarding/onboarding_wrapper.dart';
 import '../theme/theme_notifier.dart';
 import 'login_screen.dart';
 
@@ -15,19 +19,21 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
+  late TextEditingController _nameController;
   late TextEditingController _emailController;
   late TextEditingController _phoneController;
   late TextEditingController _passwordController;
   late TextEditingController _confirmPasswordController;
 
-  String _completePhoneNumber = '';
+  String _phoneNumber = '';       // digits only, e.g. "8946257878"
+  String _countryCode = '+91';    // e.g. "+91"
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
-  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
+    _nameController = TextEditingController();
     _emailController = TextEditingController();
     _phoneController = TextEditingController();
     _passwordController = TextEditingController();
@@ -36,6 +42,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   void dispose() {
+    _nameController.dispose();
     _emailController.dispose();
     _phoneController.dispose();
     _passwordController.dispose();
@@ -43,13 +50,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
     super.dispose();
   }
 
-  void _handleRegister() {
+  void _handleRegister() async {
+    final name = _nameController.text.trim();
     final email = _emailController.text.trim();
-    final phone = _phoneController.text.trim();
+    final phone = _phoneNumber.trim();
     final password = _passwordController.text;
     final confirmPassword = _confirmPasswordController.text;
 
-    if (email.isEmpty || phone.isEmpty || password.isEmpty) {
+    if (name.isEmpty || email.isEmpty || phone.isEmpty || password.isEmpty) {
       _showError('Please fill in all fields');
       return;
     }
@@ -62,15 +70,44 @@ class _RegisterScreenState extends State<RegisterScreen> {
       return;
     }
 
-    setState(() => _isLoading = true);
+    final auth = context.read<AuthProvider>();
+    final userProvider = context.read<UserProvider>();
 
-    Future.delayed(const Duration(milliseconds: 1200), () {
-      if (mounted) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => BottomNavWrapper(userEmail: email)),
-        );
-      }
-    });
+    // Derive timezone as IANA name from device UTC offset.
+    // DateTime.timeZoneName is OS-dependent ("IST", "GMT+5:30", etc.) — unreliable.
+    // UTC offset is always accurate on every device.
+    final now = DateTime.now();
+    final offset = now.timeZoneOffset;
+    final sign = offset.isNegative ? '-' : '+';
+    final hh = offset.inHours.abs().toString().padLeft(2, '0');
+    final mm = (offset.inMinutes.abs() % 60).toString().padLeft(2, '0');
+    final timezone = 'UTC$sign$hh:$mm'; // e.g. "UTC+05:30"
+
+    // Stable device identifier.
+    final deviceId =
+        '${Platform.operatingSystem}_${now.millisecondsSinceEpoch}';
+
+    final success = await auth.register(
+      name: name,
+      email: email,
+      countryCode: _countryCode,
+      phone: phone,
+      password: password,
+      timezone: timezone,
+      deviceId: deviceId,
+    );
+
+    if (!mounted) return;
+
+    if (success) {
+      if (auth.user != null) userProvider.setUser(auth.user!);
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const OnboardingWrapper()),
+        (route) => false,
+      );
+    } else {
+      _showError(auth.errorMessage ?? 'Registration failed');
+    }
   }
 
   void _showError(String message) {
@@ -95,6 +132,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Read provider state at the top of build() — never inside nested builders.
+    final isLoading = context.select<AuthProvider, bool>((a) => a.isLoading);
+
     return ValueListenableBuilder<bool>(
       valueListenable: themeNotifier,
       builder: (_, isDark, __) {
@@ -138,7 +178,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       const SizedBox(height: 48),
                       _buildHeader(logoAsset, subColor),
                       const SizedBox(height: 36),
-                      _buildGlassCard(isDark),
+                      _buildGlassCard(isDark, isLoading),
                       const SizedBox(height: 24),
                       _buildLoginLink(linkTextColor, linkColor),
                       const SizedBox(height: 40),
@@ -202,7 +242,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   // ── Frosted glass card ───────────────────────────────────────────────────────
-  Widget _buildGlassCard(bool isDark) {
+  Widget _buildGlassCard(bool isDark, bool isLoading) {
     final titleColor = const Color(0xFF624294);
     final subColor = const Color(0xFF624294).withOpacity(0.60);
 
@@ -215,6 +255,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
         Text('Become a disciple of prayer',
             style: GoogleFonts.poppins(fontSize: 12, color: subColor, letterSpacing: 0.3)),
         const SizedBox(height: 28),
+        _buildGlassField(controller: _nameController, label: 'Full Name', hint: 'Enter your name', icon: Icons.person_outline_rounded, isDark: isDark),
+        const SizedBox(height: 18),
         _buildGlassField(controller: _emailController, label: 'Email address', hint: 'Enter your email', icon: Icons.email_outlined, isDark: isDark),
         const SizedBox(height: 18),
         _buildPhoneField(isDark),
@@ -223,7 +265,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         const SizedBox(height: 18),
         _buildGlassField(controller: _confirmPasswordController, label: 'Confirm Password', hint: 'Repeat your password', icon: Icons.lock_reset_rounded, isPassword: true, obscure: _obscureConfirmPassword, onToggle: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword), isDark: isDark),
         const SizedBox(height: 28),
-        _buildRegisterButton(),
+        _buildRegisterButton(isLoading),
       ],
     );
 
@@ -368,7 +410,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
             child: IntlPhoneField(
               controller: _phoneController,
               initialCountryCode: 'IN',
-              onChanged: (phone) => _completePhoneNumber = phone.completeNumber,
+              onChanged: (phone) {
+                _countryCode = '+${phone.countryCode}';
+                _phoneNumber = phone.number;
+              },
               style: GoogleFonts.poppins(
                 color: const Color(0xFF624294),
                 fontWeight: FontWeight.w500,
@@ -415,10 +460,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   // ── Register button ──────────────────────────────────────────────────────────
-  Widget _buildRegisterButton() {
+  Widget _buildRegisterButton(bool isLoading) {
     final isDark = themeNotifier.isDark;
     return GestureDetector(
-      onTap: _isLoading ? null : _handleRegister,
+      onTap: isLoading ? null : _handleRegister,
       child: Container(
         width: double.infinity,
         height: 56,
@@ -433,11 +478,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
           ),
           borderRadius: BorderRadius.circular(30),
           border: Border.all(color: AppColors.goldPrimary.withOpacity(0.75), width: 1.5),
-          boxShadow: _isLoading ? [] : [
+          boxShadow: isLoading ? [] : [
             BoxShadow(color: AppColors.goldPrimary.withOpacity(0.15), blurRadius: 12, offset: const Offset(0, 6)),
           ],
         ),
-        child: _isLoading
+        child: isLoading
             ? const Center(child: SizedBox(width: 22, height: 22, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5)))
             : Stack(
                 alignment: Alignment.center,
