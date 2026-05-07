@@ -139,9 +139,46 @@ class ApiClient {
       return ApiResponse(data: body, statusCode: response.statusCode);
     }
 
-    final msg = body['message'] as String? ??
-        body['error'] as String? ??
-        'Something went wrong (${response.statusCode}).';
-    throw ApiException(message: msg, statusCode: response.statusCode);
+    throw ApiException(
+      message: _extractErrorMessage(body, response.statusCode),
+      statusCode: response.statusCode,
+    );
+  }
+
+  /// Extracts a human-readable message from the backend error body.
+  ///
+  /// Handles these shapes:
+  ///   { "error": { "message": "...", "details": { "field": ["msg"] } } }
+  ///   { "message": "..." }
+  ///   { "error": "plain string" }
+  String _extractErrorMessage(Map<String, dynamic> body, int statusCode) {
+    final error = body['error'];
+
+    if (error is Map<String, dynamic>) {
+      // Check for field-level validation details first.
+      final details = error['details'];
+      if (details is Map<String, dynamic> && details.isNotEmpty) {
+        // Collect all field messages into one readable string.
+        final messages = <String>[];
+        details.forEach((field, value) {
+          if (value is List && value.isNotEmpty) {
+            messages.add(value.first.toString());
+          } else if (value is String) {
+            messages.add(value);
+          }
+        });
+        if (messages.isNotEmpty) return messages.join('\n');
+      }
+      // Fall back to the top-level message inside the error object.
+      final msg = error['message'];
+      if (msg is String && msg.isNotEmpty) return msg;
+    }
+
+    if (error is String && error.isNotEmpty) return error;
+
+    final msg = body['message'];
+    if (msg is String && msg.isNotEmpty) return msg;
+
+    return 'Something went wrong ($statusCode).';
   }
 }
