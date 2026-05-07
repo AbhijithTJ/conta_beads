@@ -203,9 +203,61 @@ class _AdoptPriestScreenState extends State<AdoptPriestScreen> {
             : const Color(0xFF624294).withOpacity(0.6);
 
         return Scaffold(
-          backgroundColor: bgColor,
-          body: Column(
+          body: Stack(
             children: [
+              // ── Base dark bg ─────────────────────────────────────────
+              if (isDark)
+                Positioned.fill(
+                  child: Container(color: const Color(0xFF1c023d)),
+                ),
+              // ── Radial glow — behind priest cards ────────────────────
+              if (isDark)
+                Positioned.fill(
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      gradient: RadialGradient(
+                        center: Alignment(0.0, 0.5),
+                        radius: 0.6,
+                        colors: [
+                          Color(0xFF2A2050),
+                          Color(0xFF1E1640),
+                          Color(0xFF1c023d),
+                        ],
+                        stops: [0.0, 0.50, 1.0],
+                      ),
+                    ),
+                  ),
+                ),
+              // ── Linear fade at the bottom ────────────────────────────
+              if (isDark)
+                Positioned(
+                  bottom: 0, left: 0, right: 0,
+                  height: 260,
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Color(0x001c023d),
+                          Color(0xFF1c023d),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              // ── Light mode flat bg ───────────────────────────────────
+              if (!isDark)
+                Positioned.fill(
+                  child: Container(color: const Color(0xFFF0EBF0)),
+                ),
+              // ── Main content ─────────────────────────────────────────
+              Container(
+                width: double.infinity,
+                height: double.infinity,
+                color: Colors.transparent,
+                child: Column(
+                  children: [
               // ── Hero image ──────────────────────────────────────────────
               Stack(
                 children: [
@@ -228,16 +280,34 @@ class _AdoptPriestScreenState extends State<AdoptPriestScreen> {
                           end: Alignment.bottomCenter,
                           colors: isDark
                               ? [
-                                  Colors.transparent,
-                                  const Color(0xBB220850),
-                                  const Color(0xFF220850),
+                                  const Color(0x001c023d),
+                                  const Color(0xCC1c023d),
+                                  const Color(0xFF1c023d),
                                 ]
                               : [
-                                  Colors.transparent,
-                                  bgColor.withOpacity(0.7),
-                                  bgColor,
+                                  const Color(0x00F0EBF0),
+                                  const Color(0xCCF0EBF0),
+                                  const Color(0xFFF0EBF0),
                                 ],
                           stops: const [0.0, 0.6, 1.0],
+                        ),
+                      ),
+                    ),
+                  ),
+                  // Top fade — dark mode only
+                  if (isDark)
+                  Positioned(
+                    top: 0, left: 0, right: 0,
+                    child: Container(
+                      height: 80,
+                      decoration: const BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Color(0x881c023d),
+                            Color(0x001c023d),
+                          ],
                         ),
                       ),
                     ),
@@ -276,24 +346,9 @@ class _AdoptPriestScreenState extends State<AdoptPriestScreen> {
 
               // ── Content ─────────────────────────────────────────────────
               Expanded(
-                child: Container(
-                  decoration: isDark
-                      ? const BoxDecoration(
-                          gradient: RadialGradient(
-                            center: Alignment(0.0, -0.4),
-                            radius: 0.85,
-                            colors: [
-                              Color(0xFF321060),
-                              Color(0xFF220850),
-                              Color(0xFF1c023d),
-                            ],
-                            stops: [0.0, 0.5, 1.0],
-                          ),
-                        )
-                      : const BoxDecoration(color: Color(0xFFF0EBF0)),
-                  child: SingleChildScrollView(
-                    physics: const BouncingScrollPhysics(),
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
                     child: Column(
                       children: [
                         const SizedBox(height: 8),
@@ -465,9 +520,11 @@ class _AdoptPriestScreenState extends State<AdoptPriestScreen> {
                     ),
                   ),
                 ),
-              ),
-            ],
-          ),
+              ], // Column children
+            ), // Column
+          ), // inner Container
+            ], // outer Stack children
+          ), // outer Stack
         );
       },
     );
