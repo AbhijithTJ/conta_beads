@@ -220,39 +220,43 @@ class _LoginScreenState extends State<LoginScreen> {
         final registerLinkColor =
             isDark ? Colors.white : AppColors.authPurple;
 
-        return Scaffold(
-          resizeToAvoidBottomInset: true,
-          body: Container(
-            width: double.infinity,
-            height: double.infinity,
-            decoration: isDark
-                ? const BoxDecoration(
-                    gradient: RadialGradient(
-                      center: Alignment(0.0, -0.2),
-                      radius: 1.2,
-                      colors: [
-                        Color(0xFF4A4080),
-                        Color(0xFF2A1F5E),
-                        Color(0xFF100828),
-                      ],
-                      stops: [0.0, 0.50, 1.0],
-                    ),
-                  )
-                : const BoxDecoration(color: Color(0xFFF0EBF0)),
-            child: SafeArea(
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Column(
-                  children: [
-                    const SizedBox(height: 60),
-                    _buildHeader(logoAsset, subColor),
-                    const SizedBox(height: 48),
-                    _buildGlassCard(isDark, isLoading),
-                    const SizedBox(height: 28),
-                    _buildRegisterLink(registerTextColor, registerLinkColor),
-                    const SizedBox(height: 40),
-                  ],
+        return GestureDetector(
+          onTap: () => FocusScope.of(context).unfocus(),
+          behavior: HitTestBehavior.opaque,
+          child: Scaffold(
+            resizeToAvoidBottomInset: true,
+            body: Container(
+              width: double.infinity,
+              height: double.infinity,
+              decoration: isDark
+                  ? const BoxDecoration(
+                      gradient: RadialGradient(
+                        center: Alignment(0.0, -0.2),
+                        radius: 1.2,
+                        colors: [
+                          Color(0xFF4A4080),
+                          Color(0xFF2A1F5E),
+                          Color(0xFF100828),
+                        ],
+                        stops: [0.0, 0.50, 1.0],
+                      ),
+                    )
+                  : const BoxDecoration(color: Color(0xFFF0EBF0)),
+              child: SafeArea(
+                child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 60),
+                      _buildHeader(logoAsset, subColor),
+                      const SizedBox(height: 48),
+                      _buildGlassCard(isDark, isLoading),
+                      const SizedBox(height: 28),
+                      _buildRegisterLink(registerTextColor, registerLinkColor),
+                      const SizedBox(height: 40),
+                    ],
+                  ),
                 ),
               ),
             ),

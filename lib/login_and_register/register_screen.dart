@@ -25,8 +25,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
   late TextEditingController _passwordController;
   late TextEditingController _confirmPasswordController;
 
-  String _phoneNumber = '';       // digits only, e.g. "8946257878"
-  String _countryCode = '+91';    // e.g. "+91"
+  String _phoneNumber = '';        // digits only, e.g. "8946257878"
+  String _countryCode = '+91';     // with '+', e.g. "+91" — sent as-is to backend
+  bool _isPhoneValid = false;      // tracks if phone number is valid for selected country
+  String _selectedCountryName = 'India'; // for user-friendly error messages
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
 
@@ -59,6 +61,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     if (name.isEmpty || email.isEmpty || phone.isEmpty || password.isEmpty) {
       _showError('Please fill in all fields');
+      return;
+    }
+    if (!_isPhoneValid) {
+      final digits = _phoneNumber.length;
+      _showError(
+        'Phone number for $_selectedCountryName ($_countryCode) is invalid'
+        '${digits > 0 ? ' — you entered $digits digit${digits == 1 ? '' : 's'}' : ''}.',
+      );
       return;
     }
     if (!email.contains('@')) {
@@ -117,9 +127,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
           children: [
             const Icon(Icons.error_outline, color: Colors.white, size: 20),
             const SizedBox(width: 10),
-            Text(message,
-                style: const TextStyle(
-                    color: Colors.white, fontWeight: FontWeight.w600)),
+            Expanded(
+              child: Text(message,
+                  style: const TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.w600)),
+            ),
           ],
         ),
         backgroundColor: Colors.redAccent,
@@ -148,70 +160,74 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     return WillPopScope(
       onWillPop: () async => false,
-      child: Scaffold(
-        resizeToAvoidBottomInset: true,
-        body: Container(
-          width: double.infinity,
-          height: double.infinity,
-          decoration: isDark
-              ? const BoxDecoration(
-                  gradient: RadialGradient(
-                    center: Alignment(0.0, -0.2),
-                    radius: 1.2,
-                    colors: [
-                      Color(0xFF4A4080),
-                      Color(0xFF2A1F5E),
-                      Color(0xFF100828),
-                    ],
-                    stops: [0.0, 0.50, 1.0],
-                  ),
-                )
-              : const BoxDecoration(color: Color(0xFFF0EBF0)),
-          child: Stack(
-            children: [
-              SafeArea(
-                child: SingleChildScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: Column(
-                    children: [
-                      const SizedBox(height: 48),
-                      _buildHeader(logoAsset, subColor),
-                      const SizedBox(height: 36),
-                      _buildGlassCard(isDark, isLoading),
-                      const SizedBox(height: 24),
-                      _buildLoginLink(linkTextColor, linkColor),
-                      const SizedBox(height: 40),
-                    ],
+      child: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        behavior: HitTestBehavior.opaque,
+        child: Scaffold(
+          resizeToAvoidBottomInset: true,
+          body: Container(
+            width: double.infinity,
+            height: double.infinity,
+            decoration: isDark
+                ? const BoxDecoration(
+                    gradient: RadialGradient(
+                      center: Alignment(0.0, -0.2),
+                      radius: 1.2,
+                      colors: [
+                        Color(0xFF4A4080),
+                        Color(0xFF2A1F5E),
+                        Color(0xFF100828),
+                      ],
+                      stops: [0.0, 0.50, 1.0],
+                    ),
+                  )
+                : const BoxDecoration(color: Color(0xFFF0EBF0)),
+            child: Stack(
+              children: [
+                SafeArea(
+                  child: SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 48),
+                        _buildHeader(logoAsset, subColor),
+                        const SizedBox(height: 36),
+                        _buildGlassCard(isDark, isLoading),
+                        const SizedBox(height: 24),
+                        _buildLoginLink(linkTextColor, linkColor),
+                        const SizedBox(height: 40),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 16, top: 12),
-                  child: GestureDetector(
-                    onTap: () => Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(builder: (_) => const LoginScreen()),
-                    ),
-                    child: ClipOval(
-                      child: BackdropFilter(
-                        filter: ImageFilter.blur(sigmaX: isDark ? 10 : 0, sigmaY: isDark ? 10 : 0),
-                        child: Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: backBg,
-                            shape: BoxShape.circle,
-                            border: Border.all(color: backBorder, width: 1.5),
+                SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 16, top: 12),
+                    child: GestureDetector(
+                      onTap: () => Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(builder: (_) => const LoginScreen()),
+                      ),
+                      child: ClipOval(
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: isDark ? 10 : 0, sigmaY: isDark ? 10 : 0),
+                          child: Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: backBg,
+                              shape: BoxShape.circle,
+                              border: Border.all(color: backBorder, width: 1.5),
+                            ),
+                            child: Icon(Icons.arrow_back_rounded, color: backIconColor, size: 20),
                           ),
-                          child: Icon(Icons.arrow_back_rounded, color: backIconColor, size: 20),
                         ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -410,9 +426,32 @@ class _RegisterScreenState extends State<RegisterScreen> {
             child: IntlPhoneField(
               controller: _phoneController,
               initialCountryCode: 'IN',
+              // Disable ALL built-in inline validation — we validate on submit only.
+              autovalidateMode: AutovalidateMode.disabled,
+              disableLengthCheck: true,
+              invalidNumberMessage: null,
+              // onChanged fires on every keystroke — update state and validity.
               onChanged: (phone) {
-                _countryCode = '+${phone.countryCode}';
+                _countryCode = '+${phone.countryCode.replaceAll('+', '')}'; // always "+XX"
                 _phoneNumber = phone.number;
+                // isValidNumber() throws NumberTooShortException / NumberTooLongException
+                // while the user is still typing — catch and treat as invalid.
+                bool valid = false;
+                try {
+                  valid = phone.isValidNumber();
+                } catch (_) {
+                  valid = false;
+                }
+                setState(() => _isPhoneValid = valid);
+              },
+              // onCountryChanged fires when the user picks a different country —
+              // reset validity so the old number isn't silently accepted.
+              onCountryChanged: (country) {
+                setState(() {
+                  _isPhoneValid = false;
+                  _selectedCountryName = country.name;
+                  _countryCode = '+${country.dialCode}'; // always "+XX"
+                });
               },
               style: GoogleFonts.poppins(
                 color: const Color(0xFF624294),
