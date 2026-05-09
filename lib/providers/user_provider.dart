@@ -56,10 +56,12 @@ class UserProvider extends ChangeNotifier {
     final s = SessionService.instance;
     if (s.isLoggedIn) {
       _user = UserData(
-        id: s.userId,
-        name: s.name,
-        email: s.email,
-        phone: s.contact,
+        id:        s.userId,
+        name:      s.name,
+        email:     s.email,
+        phone:     s.contact,
+        timezone:  s.timezone,
+        createdAt: s.createdAt,
       );
       notifyListeners();
     }
@@ -74,9 +76,13 @@ class UserProvider extends ChangeNotifier {
 
     try {
       final res = await ApiClient.instance.get(AppConfig.userPath);
-      // Response shape: { "user": { ... } } or the object directly
       final data = res.data['user'] as Map<String, dynamic>? ?? res.data;
       _user = UserData.fromJson(data);
+      // Persist timezone + createdAt so they survive app restarts
+      await SessionService.instance.saveProfileExtras(
+        timezone:  _user?.timezone,
+        createdAt: _user?.createdAt,
+      );
     } on ApiException catch (e) {
       _errorMessage = e.message;
     } catch (_) {

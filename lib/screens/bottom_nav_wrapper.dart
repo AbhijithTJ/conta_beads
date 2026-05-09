@@ -79,7 +79,10 @@ class _BottomNavWrapperState extends State<BottomNavWrapper> {
           },
           child: Scaffold(
             backgroundColor: bgColor,
-            body: _screens[_selectedIndex],
+            body: IndexedStack(
+              index: _selectedIndex,
+              children: _screens,
+            ),
             bottomNavigationBar: CommonBottomNav(
               selectedIndex: _selectedIndex,
               onTap: _onNavTap,

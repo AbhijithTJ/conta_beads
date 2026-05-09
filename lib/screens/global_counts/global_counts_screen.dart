@@ -4,20 +4,13 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../colors/colors.dart';
 import '../../models/global_counts_model.dart';
+import '../../models/home_model.dart';
 import '../../providers/global_counts_provider.dart';
+import '../../providers/home_provider.dart';
 import '../../theme/theme_notifier.dart';
 
 class GlobalCountsScreen extends StatefulWidget {
-  // These constructor params are kept for backward-compat with BottomNavWrapper
-  // but are no longer used — real data comes from GlobalCountsProvider.
-  final int personalCount;
-  final int globalCount;
-
-  const GlobalCountsScreen({
-    super.key,
-    this.personalCount = 0,
-    this.globalCount = 0,
-  });
+  const GlobalCountsScreen({super.key});
 
   @override
   State<GlobalCountsScreen> createState() => _GlobalCountsScreenState();
@@ -35,14 +28,6 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
 
   static const int rosaryGoal      = 150000000;
   static const int divineMercyGoal = 100000000;
-
-  final List<Map<String, String>> quotes = [
-    {'text': 'Every bead is a whisper of love to heaven.',         'author': ''},
-    {'text': '"The rosary is the most excellent form of prayer."', 'author': 'Pope Paul VI'},
-    {'text': '"To pray is to let Jesus into our lives."',          'author': 'Ole Hallesby'},
-    {'text': '"Prayer is the key of the morning and the bolt of the evening."', 'author': 'Mahatma Gandhi'},
-    {'text': '"With God, all things are possible."',               'author': 'Matthew 19:26'},
-  ];
 
   @override
   void initState() {
@@ -86,13 +71,13 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
     if (cached == null) provider.fetchOne(typeId);
   }
 
-  void _advanceQuote(bool forward) {
+  void _advanceQuote(bool forward, int quoteCount) {
     _quoteFadeController.reverse().then((_) {
       if (!mounted) return;
       setState(() {
         _currentQuotePage = forward
-            ? (_currentQuotePage + 1) % quotes.length
-            : (_currentQuotePage - 1 + quotes.length) % quotes.length;
+            ? (_currentQuotePage + 1) % quoteCount
+            : (_currentQuotePage - 1 + quoteCount) % quoteCount;
       });
       _quoteFadeController.forward();
     });
@@ -126,6 +111,7 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
             child: SafeArea(
               child: Consumer<GlobalCountsProvider>(
                 builder: (_, provider, __) {
+                  final homeQuotes = context.read<HomeProvider>().data?.quotes ?? [];
                   return RefreshIndicator(
                     onRefresh: () => provider.fetchAll(),
                     color: AppColors.goldPrimary,
@@ -138,7 +124,7 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
                           const SizedBox(height: 24),
                           _buildHeader(isDark),
                           const SizedBox(height: 16),
-                          _buildQuoteCard(isDark),
+                          _buildQuoteCard(isDark, homeQuotes),
                           const SizedBox(height: 16),
                           _buildGlobalCountCard(provider, isDark),
                           const SizedBox(height: 16),
@@ -399,16 +385,32 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
 
   // ── Quote card ──────────────────────────────────────────────────────────────
 
-  Widget _buildQuoteCard(bool isDark) {
-    final quote          = quotes[_currentQuotePage];
+  Widget _buildQuoteCard(bool isDark, List<HomeQuote> quotes) {
+    // Fallback static quotes if HomeProvider hasn't loaded yet
+    final hasApiQuotes = quotes.isNotEmpty;
+    final quoteCount   = hasApiQuotes ? quotes.length : 1;
+    final safeIndex    = _currentQuotePage.clamp(0, quoteCount - 1);
+
     final shadowColor    = isDark ? AppColors.authBgBottom.withOpacity(0.20) : const Color(0xFF624294).withOpacity(0.15);
     final borderColor    = isDark ? Colors.white : const Color(0xFF624294).withOpacity(0.12);
     final activeDotColor = isDark ? const Color(0xFF624294) : AppColors.goldPrimary;
 
+    String quoteText;
+    String quoteAuthor;
+    if (hasApiQuotes) {
+      final q = quotes[safeIndex];
+      quoteText   = q.quotation;
+      final ref   = q.reference.trim();
+      quoteAuthor = ref.isEmpty ? '' : (ref.startsWith('—') ? ref : '— $ref');
+    } else {
+      quoteText   = '"With God, all things are possible."';
+      quoteAuthor = '— Matthew 19:26';
+    }
+
     return GestureDetector(
       onHorizontalDragEnd: (d) {
         if (d.primaryVelocity == null) return;
-        _advanceQuote(d.primaryVelocity! < 0);
+        _advanceQuote(d.primaryVelocity! < 0, quoteCount);
       },
       child: FadeTransition(
         opacity: _quoteFadeAnim,
@@ -436,7 +438,7 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
                       height: 1.0)),
               const SizedBox(height: 6),
               Text(
-                quote['text']!,
+                quoteText,
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
@@ -449,31 +451,32 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
                     letterSpacing: 0.2),
               ),
               const SizedBox(height: 8),
-              if (quote['author']!.isNotEmpty)
-                Text(quote['author']!,
+              if (quoteAuthor.isNotEmpty)
+                Text(quoteAuthor,
                     style: const TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w700,
                         color: Color(0xFF624294),
                         letterSpacing: 1.2)),
               const SizedBox(height: 10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(quotes.length, (i) {
-                  return AnimatedContainer(
-                    duration: const Duration(milliseconds: 300),
-                    width: i == _currentQuotePage ? 18 : 6,
-                    height: 6,
-                    margin: const EdgeInsets.symmetric(horizontal: 3),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(3),
-                      color: i == _currentQuotePage
-                          ? activeDotColor
-                          : const Color(0xFF624294).withOpacity(0.25),
-                    ),
-                  );
-                }),
-              ),
+              if (quoteCount > 1)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(quoteCount, (i) {
+                    return AnimatedContainer(
+                      duration: const Duration(milliseconds: 300),
+                      width: i == safeIndex ? 18 : 6,
+                      height: 6,
+                      margin: const EdgeInsets.symmetric(horizontal: 3),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(3),
+                        color: i == safeIndex
+                            ? activeDotColor
+                            : const Color(0xFF624294).withOpacity(0.25),
+                      ),
+                    );
+                  }),
+                ),
             ],
           ),
         ),
@@ -527,13 +530,27 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
 
   Widget _buildLeaderboardList(
       List<LeaderboardEntry> entries, String prayerLabel) {
-    return Column(
-      children: entries.map((entry) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 6),
-          child: _buildOfferingItem(entry, prayerLabel),
-        );
-      }).toList(),
+    const double itemHeight = 80.0;
+    final totalHeight = entries.length * itemHeight;
+
+    return SizedBox(
+      height: totalHeight,
+      child: Stack(
+        children: entries.map((entry) {
+          // position is 1-based from API — convert to 0-based top offset
+          final top = (entry.position - 1) * itemHeight;
+          return AnimatedPositioned(
+            key: ValueKey(entry.userId),
+            duration: const Duration(milliseconds: 600),
+            curve: Curves.easeInOutCubic,
+            top: top,
+            left: 0,
+            right: 0,
+            height: itemHeight,
+            child: _buildOfferingItem(entry, prayerLabel),
+          );
+        }).toList(),
+      ),
     );
   }
 

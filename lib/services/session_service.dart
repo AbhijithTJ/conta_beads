@@ -22,6 +22,8 @@ class SessionService {
   static const _kName       = 'user_name';
   static const _kEmail      = 'user_email';
   static const _kUserId     = 'user_id';
+  static const _kTimezone   = 'user_timezone';
+  static const _kCreatedAt  = 'user_created_at';
   static const _kBiometric  = 'biometric_enabled';
   static const _kDarkTheme  = 'isDarkTheme';
   static const _kOnboarded  = 'onboarding_complete';
@@ -41,6 +43,8 @@ class SessionService {
   String? _name;
   String? _email;
   int?    _userId;
+  String? _timezone;
+  String? _createdAt;
   bool    _biometricEnabled   = false;
   bool    _isDarkTheme        = true;
   bool    _onboardingComplete = false;
@@ -51,6 +55,8 @@ class SessionService {
   String? get name               => _name;
   String? get email              => _email;
   int?    get userId             => _userId;
+  String? get timezone           => _timezone;
+  String? get createdAt          => _createdAt;
   bool    get biometricEnabled   => _biometricEnabled;
   bool    get isDarkTheme        => _isDarkTheme;
   bool    get onboardingComplete => _onboardingComplete;
@@ -64,6 +70,8 @@ class SessionService {
     _name               = _prefs.getString(_kName);
     _email              = _prefs.getString(_kEmail);
     _userId             = _prefs.getInt(_kUserId);
+    _timezone           = _prefs.getString(_kTimezone);
+    _createdAt          = _prefs.getString(_kCreatedAt);
     _biometricEnabled   = _prefs.getBool(_kBiometric) ?? false;
     _isDarkTheme        = _prefs.getBool(_kDarkTheme) ?? true;
     _onboardingComplete = _prefs.getBool(_kOnboarded) ?? false;
@@ -88,6 +96,22 @@ class SessionService {
       if (response.user.id != null)
         _prefs.setInt(_kUserId, response.user.id!),
     ]);
+  }
+
+  /// Persists extra profile fields that aren't in the login response.
+  /// Call this after a successful [fetchProfile] so the data survives restarts.
+  Future<void> saveProfileExtras({
+    String? timezone,
+    String? createdAt,
+  }) async {
+    if (timezone != null && timezone.isNotEmpty) {
+      _timezone = timezone;
+      await _prefs.setString(_kTimezone, timezone);
+    }
+    if (createdAt != null && createdAt.isNotEmpty) {
+      _createdAt = createdAt;
+      await _prefs.setString(_kCreatedAt, createdAt);
+    }
   }
 
   /// Saves contact + password into the device Keystore/Keychain so
@@ -122,11 +146,13 @@ class SessionService {
   /// Clears the auth token + user info but keeps biometric credentials
   /// so the user can log back in with fingerprint after logout.
   Future<void> clearSession() async {
-    _token   = null;
-    _contact = null;
-    _name    = null;
-    _email   = null;
-    _userId  = null;
+    _token     = null;
+    _contact   = null;
+    _name      = null;
+    _email     = null;
+    _userId    = null;
+    _timezone  = null;
+    _createdAt = null;
 
     await Future.wait([
       _prefs.remove(_kToken),
@@ -134,9 +160,9 @@ class SessionService {
       _prefs.remove(_kName),
       _prefs.remove(_kEmail),
       _prefs.remove(_kUserId),
+      _prefs.remove(_kTimezone),
+      _prefs.remove(_kCreatedAt),
       // NOTE: _kBiometric is intentionally NOT removed here.
-      // Biometric credentials in secure storage are also kept so the
-      // user can log back in with fingerprint after logout.
     ]);
   }
 

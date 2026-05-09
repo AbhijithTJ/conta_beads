@@ -50,8 +50,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
       builder: (_) => const LogoutAlertDialog(),
     );
     if (confirmed == true && mounted) {
-      await context.read<AuthProvider>().logout();
-      context.read<UserProvider>().clear();
+      final auth = context.read<AuthProvider>();
+      final user = context.read<UserProvider>();
+      await auth.logout();
+      user.clear();
       if (mounted) {
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(builder: (_) => const LoginScreen()),
@@ -108,6 +110,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   return GestureDetector(
                     onTap: () async {
                       await loc.load(lang['name']!);
+                      if (!context.mounted) return;
                       setState(() => _selectedLanguage = lang['name']!);
                       Navigator.pop(ctx);
                     },
@@ -299,7 +302,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _buildAvatar() {
     final isDark = themeNotifier.isDark;
-    final name = context.read<UserProvider>().displayName;
+    final name = context.watch<UserProvider>().displayName;
     // Build initials from name (up to 2 chars)
     final parts = name.trim().split(RegExp(r'\s+'));
     final initials = parts.length >= 2
@@ -407,8 +410,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _InfoRow(icon: Icons.phone_outlined,    label: 'Phone Number',  value: phone.isNotEmpty ? phone : '—'),
           _divider(),
           _InfoRow(icon: Icons.schedule_outlined, label: 'Timezone',      value: user.timezone.isNotEmpty ? user.timezone : '—'),
-          _divider(),
-          _InfoRow(icon: Icons.church_outlined,   label: 'Parish',        value: user.parish.isNotEmpty ? user.parish : '—'),
         ],
       ),
     );

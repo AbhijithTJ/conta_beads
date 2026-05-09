@@ -39,9 +39,13 @@ class GlobalCountsProvider extends ChangeNotifier {
 
   // ── Fetch ─────────────────────────────────────────────────────────────────────
   /// Fetches both prayer types in parallel.
-  /// Pass [prayerTypeId] to fetch only one type (e.g. on toggle).
+  /// Only shows loading state on the very first fetch — refresh keeps data visible.
   Future<void> fetchAll() async {
-    _setLoading();
+    final isFirstLoad = _rosaryData == null && _divineMercyData == null;
+    if (isFirstLoad) {
+      _status = GlobalCountsStatus.loading;
+      notifyListeners();
+    }
     try {
       final results = await Future.wait([
         _fetchOne(PrayerType.rosary),
@@ -49,7 +53,7 @@ class GlobalCountsProvider extends ChangeNotifier {
       ]);
       _rosaryData      = results[0];
       _divineMercyData = results[1];
-      _status = GlobalCountsStatus.loaded;
+      _status       = GlobalCountsStatus.loaded;
       _errorMessage = null;
       notifyListeners();
     } on ApiException catch (e) {
@@ -60,8 +64,15 @@ class GlobalCountsProvider extends ChangeNotifier {
   }
 
   /// Fetches a single prayer type and updates only that cache slot.
+  /// Only shows loading if that type has no cached data yet.
   Future<void> fetchOne(int prayerTypeId) async {
-    _setLoading();
+    final isFirstLoad = prayerTypeId == PrayerType.rosary
+        ? _rosaryData == null
+        : _divineMercyData == null;
+    if (isFirstLoad) {
+      _status = GlobalCountsStatus.loading;
+      notifyListeners();
+    }
     try {
       final data = await _fetchOne(prayerTypeId);
       if (prayerTypeId == PrayerType.rosary) {
@@ -69,7 +80,7 @@ class GlobalCountsProvider extends ChangeNotifier {
       } else {
         _divineMercyData = data;
       }
-      _status = GlobalCountsStatus.loaded;
+      _status       = GlobalCountsStatus.loaded;
       _errorMessage = null;
       notifyListeners();
     } on ApiException catch (e) {
@@ -88,11 +99,6 @@ class GlobalCountsProvider extends ChangeNotifier {
   }
 
   // ── Helpers ───────────────────────────────────────────────────────────────────
-  void _setLoading() {
-    _status = GlobalCountsStatus.loading;
-    notifyListeners();
-  }
-
   void _setError(String message) {
     _status = GlobalCountsStatus.error;
     _errorMessage = message;

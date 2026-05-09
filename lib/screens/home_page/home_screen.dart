@@ -39,6 +39,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     {'code': 'ML', 'name': 'Malayalam'},
   ];
 
+  late HomeProvider _homeProvider;
+
   @override
   void initState() {
     super.initState();
@@ -50,7 +52,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     _quoteController.forward();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<HomeProvider>().fetch();
+      _homeProvider = context.read<HomeProvider>();
+      _homeProvider.fetch();
+      _homeProvider.addListener(_onHomeDataChanged);
     });
   }
 
@@ -80,8 +84,29 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     });
   }
 
+  void _onHomeDataChanged() {
+    if (!mounted) return;
+    if (_homeProvider.hasData && _quoteTimer == null) {
+      final count = _homeProvider.data!.quotes.length;
+      if (count > 1) _startQuoteTimer(count);
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Also check on dependency changes (e.g. provider already loaded)
+    if (!mounted) return;
+    final provider = context.read<HomeProvider>();
+    if (provider.hasData && _quoteTimer == null) {
+      final count = provider.data!.quotes.length;
+      if (count > 1) _startQuoteTimer(count);
+    }
+  }
+
   @override
   void dispose() {
+    _homeProvider.removeListener(_onHomeDataChanged);
     _quoteTimer?.cancel();
     _quoteController.dispose();
     super.dispose();
@@ -266,14 +291,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             SafeArea(
               child: Consumer<HomeProvider>(
                 builder: (_, provider, __) {
-                  // Start quote timer once data arrives
-                  if (provider.hasData) {
-                    final count = provider.data!.quotes.length;
-                    if (_quoteTimer == null && count > 1) {
-                      _startQuoteTimer(count);
-                    }
-                  }
-
                   return RefreshIndicator(
                     onRefresh: () => provider.fetch(),
                     color: AppColors.goldPrimary,
