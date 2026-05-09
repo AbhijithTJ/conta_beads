@@ -24,7 +24,7 @@ class _BottomNavWrapperState extends State<BottomNavWrapper> {
 
   static const List<Widget> _screens = [
     HomeScreen(),
-    GlobalCountsScreen(personalCount: 245, globalCount: 1245000),
+    GlobalCountsScreen(),
     IntentionsScreen(),
     AdoptPriestScreen(),
     EverydayPrayersScreen(),

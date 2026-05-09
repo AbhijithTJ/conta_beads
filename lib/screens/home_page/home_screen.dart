@@ -1,8 +1,12 @@
 import 'dart:async';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import '../../colors/colors.dart';
+import '../../models/home_model.dart';
+import '../../providers/home_provider.dart';
 import '../../services/localization_service.dart';
 import '../../theme/theme_notifier.dart';
 import 'counting_screen.dart';
@@ -35,37 +39,43 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     {'code': 'ML', 'name': 'Malayalam'},
   ];
 
-  final List<Map<String, String>> _quotes = [
-    {'text': '"God\'s love is a sea without a shore."', 'reference': '— St. Catherine of Siena'},
-    {'text': '"Prayer is the key of the morning and the bolt of the evening."', 'reference': '— Mahatma Gandhi'},
-    {'text': '"To pray is to let Jesus into our lives."', 'reference': '— Ole Hallesby'},
-    {'text': '"The rosary is the most excellent form of prayer."', 'reference': '— Pope Paul VI'},
-    {'text': '"With God, all things are possible."', 'reference': '— Matthew 19:26'},
-  ];
-
-  final List<Map<String, dynamic>> _features = [
-    {'title': 'Rosary', 'subtitle': 'Bank', 'image': 'assets/demo/mathav.png'},
-    {'title': 'Adopt a', 'subtitle': 'Priest', 'image': 'assets/demo/adopt a priest.png'},
-    {'title': 'Divine Mercy', 'subtitle': 'Chaplet', 'image': 'assets/demo/i trust you jesus.png'},
-    {'title': 'Daily', 'subtitle': 'Prayers', 'image': 'assets/demo/every day.png'},
-  ];
-
   @override
   void initState() {
     super.initState();
-    _quoteController = AnimationController(vsync: this, duration: const Duration(milliseconds: 600));
+    _quoteController = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 600));
     _quoteFadeAnim = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _quoteController, curve: Curves.easeInOut),
     );
     _quoteController.forward();
 
-    _quoteTimer = Timer.periodic(const Duration(seconds: 5), (_) => _nextQuote());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<HomeProvider>().fetch();
+    });
   }
 
-  void _nextQuote() {
+  void _startQuoteTimer(int quoteCount) {
+    _quoteTimer?.cancel();
+    if (quoteCount <= 1) return;
+    _quoteTimer = Timer.periodic(const Duration(seconds: 5), (_) => _nextQuote(quoteCount));
+  }
+
+  void _nextQuote(int quoteCount) {
     _quoteController.reverse().then((_) {
       if (!mounted) return;
-      setState(() => _currentQuoteIndex = (_currentQuoteIndex + 1) % _quotes.length);
+      setState(() => _currentQuoteIndex = (_currentQuoteIndex + 1) % quoteCount);
+      _quoteController.forward();
+    });
+  }
+
+  void _advanceQuote(bool forward, int quoteCount) {
+    _quoteController.reverse().then((_) {
+      if (!mounted) return;
+      setState(() {
+        _currentQuoteIndex = forward
+            ? (_currentQuoteIndex + 1) % quoteCount
+            : (_currentQuoteIndex - 1 + quoteCount) % quoteCount;
+      });
       _quoteController.forward();
     });
   }
@@ -84,7 +94,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       builder: (ctx) => Padding(
-        padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
+        padding:
+            EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
         child: Container(
           decoration: const BoxDecoration(
             gradient: RadialGradient(
@@ -104,7 +115,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                width: 40, height: 4,
+                width: 40,
+                height: 4,
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.3),
                   borderRadius: BorderRadius.circular(2),
@@ -112,9 +124,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               ),
               const SizedBox(height: 20),
               Row(children: [
-                const Icon(Icons.language_rounded, color: Colors.white, size: 22),
+                const Icon(Icons.language_rounded,
+                    color: Colors.white, size: 22),
                 const SizedBox(width: 10),
-                Text('Select Language', style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w700, color: Colors.white)),
+                Text('Select Language',
+                    style: GoogleFonts.poppins(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white)),
               ]),
               const SizedBox(height: 16),
               Column(
@@ -124,12 +141,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   return GestureDetector(
                     onTap: () async {
                       await loc.load(lang['name']!);
+                      if (!context.mounted) return;
                       setState(() => _selectedLanguage = lang['name']!);
                       Navigator.pop(ctx);
                     },
                     child: Container(
                       margin: const EdgeInsets.only(bottom: 10),
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 14),
                       decoration: BoxDecoration(
                         color: isSelected
                             ? Colors.white.withOpacity(0.18)
@@ -144,36 +163,32 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       ),
                       child: Row(children: [
                         Container(
-                          width: 38, height: 28,
+                          width: 38,
+                          height: 28,
                           decoration: BoxDecoration(
                             color: Colors.white.withOpacity(0.15),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Center(
-                            child: Text(
-                              lang['code']!,
-                              style: GoogleFonts.poppins(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w800,
-                                color: Colors.white,
-                                letterSpacing: 0.5,
-                              ),
-                            ),
+                            child: Text(lang['code']!,
+                                style: GoogleFonts.poppins(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w800,
+                                    color: Colors.white,
+                                    letterSpacing: 0.5)),
                           ),
                         ),
                         const SizedBox(width: 14),
                         Expanded(
-                          child: Text(
-                            lang['name']!,
-                            style: GoogleFonts.poppins(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white,
-                            ),
-                          ),
+                          child: Text(lang['name']!,
+                              style: GoogleFonts.poppins(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white)),
                         ),
                         if (isSelected)
-                          const Icon(Icons.check_rounded, color: Colors.white, size: 20),
+                          const Icon(Icons.check_rounded,
+                              color: Colors.white, size: 20),
                       ]),
                     ),
                   );
@@ -186,19 +201,48 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
+  // ── Navigation by section route ─────────────────────────────────────────────
+
+  void _navigateTo(HomeSection section) {
+    switch (section.route) {
+      case '/rosary_prayer':
+        Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => CountingScreen()));
+        break;
+      case '/chaplet_prayer':
+        Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => CountingScreen(startWithChaplet: true)));
+        break;
+      case '/adopt_priest':
+        Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const AdoptPriestScreen()));
+        break;
+      case '/daily_prayers':
+        Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const EverydayPrayersScreen()));
+        break;
+      default:
+        break;
+    }
+  }
+
+  // ── Build ───────────────────────────────────────────────────────────────────
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     return ValueListenableBuilder<bool>(
       valueListenable: themeNotifier,
       builder: (_, isDark, __) {
-        final bgColor = isDark ? const Color(0xFF22014D) : const Color(0xFFF0EBF0);
+        final bgColor =
+            isDark ? const Color(0xFF22014D) : const Color(0xFFF0EBF0);
         return _buildScaffold(context, size, isDark, bgColor);
       },
     );
   }
 
-  Widget _buildScaffold(BuildContext context, Size size, bool isDark, Color bgColor) {
+  Widget _buildScaffold(
+      BuildContext context, Size size, bool isDark, Color bgColor) {
     return Scaffold(
       body: Container(
         width: double.infinity,
@@ -220,21 +264,39 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         child: Stack(
           children: [
             SafeArea(
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 16),
-                    _buildHeader(),
-                    const SizedBox(height: 20),
-                    _buildQuoteCard(),
-                    const SizedBox(height: 24),
-                    _buildGrid(size, isDark),
-                    const SizedBox(height: 40),
-                  ],
-                ),
+              child: Consumer<HomeProvider>(
+                builder: (_, provider, __) {
+                  // Start quote timer once data arrives
+                  if (provider.hasData) {
+                    final count = provider.data!.quotes.length;
+                    if (_quoteTimer == null && count > 1) {
+                      _startQuoteTimer(count);
+                    }
+                  }
+
+                  return RefreshIndicator(
+                    onRefresh: () => provider.fetch(),
+                    color: AppColors.goldPrimary,
+                    child: SingleChildScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(
+                          parent: BouncingScrollPhysics()),
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: 20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 16),
+                          _buildHeader(provider, isDark),
+                          const SizedBox(height: 20),
+                          _buildQuoteCard(provider, isDark),
+                          const SizedBox(height: 24),
+                          _buildGrid(provider, size, isDark),
+                          const SizedBox(height: 40),
+                        ],
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
             _buildDragHandle(size),
@@ -244,48 +306,53 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
+  // ── Drag handle ─────────────────────────────────────────────────────────────
+
   Widget _buildDragHandle(Size size) {
     return Positioned(
       right: 0,
       top: size.height * 0.40,
       child: GestureDetector(
-        onTap: () => Navigator.of(context).push(MaterialPageRoute(
-          builder: (_) => CountingScreen(),
-        )),
-        onHorizontalDragStart: (_) => setState(() { _dragging = true; _dragOffset = 0; }),
+        onTap: () => Navigator.of(context)
+            .push(MaterialPageRoute(builder: (_) => CountingScreen())),
+        onHorizontalDragStart: (_) =>
+            setState(() { _dragging = true; _dragOffset = 0; }),
         onHorizontalDragUpdate: (d) {
-          // right-side tab: drag left (negative delta) to trigger
-          setState(() => _dragOffset = (_dragOffset - d.delta.dx).clamp(0, _dragThreshold + 20));
+          setState(() => _dragOffset =
+              (_dragOffset - d.delta.dx).clamp(0, _dragThreshold + 20));
         },
         onHorizontalDragEnd: (_) {
           if (_dragOffset >= _dragThreshold) {
-            Navigator.of(context).push(MaterialPageRoute(
-              builder: (_) => CountingScreen(),
-            ));
+            Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => CountingScreen()));
           }
           setState(() { _dragOffset = 0; _dragging = false; });
         },
         child: AnimatedContainer(
-          duration: _dragging ? Duration.zero : const Duration(milliseconds: 300),
+          duration:
+              _dragging ? Duration.zero : const Duration(milliseconds: 300),
           curve: Curves.easeOut,
           transform: Matrix4.translationValues(-_dragOffset, 0, 0),
           child: Row(
             children: [
-              // Progress indicator while dragging (appears to the left of tab)
               if (_dragging && _dragOffset > 8)
                 Container(
                   width: _dragOffset.clamp(0, _dragThreshold),
                   height: 80,
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      colors: [AppColors.chapletAccent.withOpacity(0.0), AppColors.chapletAccent.withOpacity(0.5)],
+                      colors: [
+                        AppColors.chapletAccent.withOpacity(0.0),
+                        AppColors.chapletAccent.withOpacity(0.5)
+                      ],
                     ),
                   ),
                   child: _dragOffset >= _dragThreshold
-                      ? const Center(child: Icon(Icons.auto_awesome_rounded, color: Colors.white, size: 20))
+                      ? const Center(
+                          child: Icon(Icons.auto_awesome_rounded,
+                              color: Colors.white, size: 20))
                       : null,
                 ),
-              // The pull tab
               Container(
                 width: 36,
                 height: 80,
@@ -295,28 +362,34 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                   ),
-                  borderRadius: const BorderRadius.horizontal(left: Radius.circular(18)),
+                  borderRadius:
+                      const BorderRadius.horizontal(left: Radius.circular(18)),
                   boxShadow: [
-                    BoxShadow(color: AppColors.chapletAccent.withOpacity(0.60), blurRadius: 16, spreadRadius: 2, offset: const Offset(3, 0)),
-                    BoxShadow(color: AppColors.authPurpleLight.withOpacity(0.35), blurRadius: 8, offset: const Offset(0, 4)),
+                    BoxShadow(
+                        color: AppColors.chapletAccent.withOpacity(0.60),
+                        blurRadius: 16,
+                        spreadRadius: 2,
+                        offset: const Offset(3, 0)),
+                    BoxShadow(
+                        color: AppColors.authPurpleLight.withOpacity(0.35),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4)),
                   ],
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.chevron_left_rounded, color: Colors.white, size: 22),
+                    const Icon(Icons.chevron_left_rounded,
+                        color: Colors.white, size: 22),
                     const SizedBox(height: 4),
                     RotatedBox(
                       quarterTurns: 3,
-                      child: Text(
-                        'ROSARY',
-                        style: GoogleFonts.poppins(
-                          color: Colors.white.withOpacity(0.90),
-                          fontSize: 8,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: 1.2,
-                        ),
-                      ),
+                      child: Text('ROSARY',
+                          style: GoogleFonts.poppins(
+                              color: Colors.white.withOpacity(0.90),
+                              fontSize: 8,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 1.2)),
                     ),
                   ],
                 ),
@@ -328,12 +401,19 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildHeader() {
-    final isDark = themeNotifier.isDark;
-    final logoAsset = isDark ? 'assets/splash/ur_logo.png' : 'assets/splash/ur_logo_light.png';
-    final langBg = isDark ? Colors.white.withOpacity(0.12) : const Color(0xFF624294).withOpacity(0.08);
+  // ── Header ──────────────────────────────────────────────────────────────────
+
+  Widget _buildHeader(HomeProvider provider, bool isDark) {
+    final logoAsset =
+        isDark ? 'assets/splash/ur_logo.png' : 'assets/splash/ur_logo_light.png';
+    final langBg = isDark
+        ? Colors.white.withOpacity(0.12)
+        : const Color(0xFF624294).withOpacity(0.08);
     final langText = isDark ? Colors.white : const Color(0xFF624294);
-    final borderColor = isDark ? Colors.white.withOpacity(0.30) : const Color(0xFF624294).withOpacity(0.25);
+    final borderColor = isDark
+        ? Colors.white.withOpacity(0.30)
+        : const Color(0xFF624294).withOpacity(0.25);
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -351,9 +431,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             child: Row(mainAxisSize: MainAxisSize.min, children: [
               Icon(Icons.language_rounded, color: langText, size: 16),
               const SizedBox(width: 6),
-              Text(_selectedLanguage, style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w700, color: langText)),
+              Text(_selectedLanguage,
+                  style: GoogleFonts.poppins(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: langText)),
               const SizedBox(width: 4),
-              Icon(Icons.keyboard_arrow_down_rounded, color: langText.withOpacity(0.7), size: 16),
+              Icon(Icons.keyboard_arrow_down_rounded,
+                  color: langText.withOpacity(0.7), size: 16),
             ]),
           ),
         ),
@@ -361,28 +446,36 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildQuoteCard() {
-    final isDark = themeNotifier.isDark;
-    final quote = _quotes[_currentQuoteIndex];
-    final quoteTextColor = const Color(0xFF624294);
-    final shadowColor = isDark ? AppColors.authBgBottom.withOpacity(0.20) : const Color(0xFF624294).withOpacity(0.15);
-    final borderColor = isDark ? Colors.white : const Color(0xFF624294).withOpacity(0.12);
-    final activeDotColor = isDark ? const Color(0xFF624294) : AppColors.goldPrimary;
+  // ── Quote card ──────────────────────────────────────────────────────────────
+
+  Widget _buildQuoteCard(HomeProvider provider, bool isDark) {
+    final shadowColor = isDark
+        ? AppColors.authBgBottom.withOpacity(0.20)
+        : const Color(0xFF624294).withOpacity(0.15);
+    final borderColor = isDark
+        ? Colors.white
+        : const Color(0xFF624294).withOpacity(0.12);
+    final activeDotColor =
+        isDark ? const Color(0xFF624294) : AppColors.goldPrimary;
+
+    // Loading skeleton
+    if (provider.isLoading && !provider.hasData) {
+      return _QuoteSkeleton(isDark: isDark);
+    }
+
+    // Error or empty — fall back to a static quote
+    final quotes = provider.data?.quotes ?? [];
+    if (quotes.isEmpty) {
+      return _buildStaticQuoteCard(isDark, shadowColor, borderColor);
+    }
+
+    final safeIndex = _currentQuoteIndex.clamp(0, quotes.length - 1);
+    final quote = quotes[safeIndex];
 
     return GestureDetector(
-      onHorizontalDragEnd: (details) {
-        if (details.primaryVelocity == null) return;
-        _quoteController.reverse().then((_) {
-          if (!mounted) return;
-          setState(() {
-            if (details.primaryVelocity! < 0) {
-              _currentQuoteIndex = (_currentQuoteIndex + 1) % _quotes.length;
-            } else {
-              _currentQuoteIndex = (_currentQuoteIndex - 1 + _quotes.length) % _quotes.length;
-            }
-          });
-          _quoteController.forward();
-        });
+      onHorizontalDragEnd: (d) {
+        if (d.primaryVelocity == null) return;
+        _advanceQuote(d.primaryVelocity! < 0, quotes.length);
       },
       child: FadeTransition(
         opacity: _quoteFadeAnim,
@@ -393,37 +486,64 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(22),
-            border: Border.all(color: isDark ? Colors.white : borderColor, width: isDark ? 2.0 : 1.5),
-            boxShadow: [BoxShadow(color: shadowColor, blurRadius: 20, offset: const Offset(0, 6))],
+            border: Border.all(
+                color: isDark ? Colors.white : borderColor,
+                width: isDark ? 2.0 : 1.5),
+            boxShadow: [
+              BoxShadow(
+                  color: shadowColor,
+                  blurRadius: 20,
+                  offset: const Offset(0, 6))
+            ],
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text('\u275D', style: TextStyle(fontSize: 20, color: const Color(0xFF624294).withOpacity(0.45), height: 1.0)),
+              Text('\u275D',
+                  style: TextStyle(
+                      fontSize: 20,
+                      color: const Color(0xFF624294).withOpacity(0.45),
+                      height: 1.0)),
               const SizedBox(height: 6),
               Text(
-                quote['text']!,
+                quote.quotation,
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(fontSize: 14.5, fontWeight: isDark ? FontWeight.w500 : FontWeight.w700, color: quoteTextColor, fontStyle: FontStyle.italic, height: 1.5, letterSpacing: 0.2),
+                style: TextStyle(
+                    fontSize: 14.5,
+                    fontWeight:
+                        isDark ? FontWeight.w500 : FontWeight.w700,
+                    color: const Color(0xFF624294),
+                    fontStyle: FontStyle.italic,
+                    height: 1.5,
+                    letterSpacing: 0.2),
               ),
               const SizedBox(height: 8),
-              if (quote['reference']!.isNotEmpty)
-                Text(quote['reference']!,
-                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Color(0xFF624294), letterSpacing: 1.2)),
+              if (quote.reference.isNotEmpty)
+                Text(
+                    quote.reference.startsWith('—')
+                        ? quote.reference
+                        : '— ${quote.reference}',
+                    style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF624294),
+                        letterSpacing: 1.2)),
               const SizedBox(height: 10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(_quotes.length, (i) {
+                children: List.generate(quotes.length, (i) {
                   return AnimatedContainer(
                     duration: const Duration(milliseconds: 300),
-                    width: i == _currentQuoteIndex ? 18 : 6,
+                    width: i == safeIndex ? 18 : 6,
                     height: 6,
                     margin: const EdgeInsets.symmetric(horizontal: 3),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(3),
-                      color: i == _currentQuoteIndex ? activeDotColor : const Color(0xFF624294).withOpacity(0.25),
+                      color: i == safeIndex
+                          ? activeDotColor
+                          : const Color(0xFF624294).withOpacity(0.25),
                     ),
                   );
                 }),
@@ -435,11 +555,67 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildGrid(Size size, bool isDark) {
+  Widget _buildStaticQuoteCard(
+      bool isDark, Color shadowColor, Color borderColor) {
+    return Container(
+      width: double.infinity,
+      height: 160,
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(
+            color: isDark ? Colors.white : borderColor,
+            width: isDark ? 2.0 : 1.5),
+        boxShadow: [
+          BoxShadow(color: shadowColor, blurRadius: 20, offset: const Offset(0, 6))
+        ],
+      ),
+      child: const Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text('\u275D',
+              style: TextStyle(
+                  fontSize: 20,
+                  color: Color(0xFF624294),
+                  height: 1.0)),
+          SizedBox(height: 6),
+          Text(
+            '"With God, all things are possible."',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+                fontSize: 14.5,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF624294),
+                fontStyle: FontStyle.italic,
+                height: 1.5),
+          ),
+          SizedBox(height: 8),
+          Text('Matthew 19:26',
+              style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF624294),
+                  letterSpacing: 1.2)),
+        ],
+      ),
+    );
+  }
+
+  // ── Feature grid ────────────────────────────────────────────────────────────
+
+  Widget _buildGrid(HomeProvider provider, Size size, bool isDark) {
+    // Loading skeleton
+    if (provider.isLoading && !provider.hasData) {
+      return _GridSkeleton(isDark: isDark);
+    }
+
+    final sections = provider.data?.sections ?? _fallbackSections();
+
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      itemCount: _features.length,
+      itemCount: sections.length,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
         crossAxisSpacing: 14,
@@ -447,27 +623,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         childAspectRatio: 0.72,
       ),
       itemBuilder: (context, i) {
-        final item = _features[i];
+        final section = sections[i];
         return GestureDetector(
-          onTap: () {
-            if (i == 0) {
-              Navigator.of(context).push(MaterialPageRoute(
-                builder: (_) => CountingScreen(),
-              ));
-            } else if (i == 1) {
-              Navigator.of(context).push(MaterialPageRoute(
-                builder: (_) => const AdoptPriestScreen(),
-              ));
-            } else if (i == 2) {
-              Navigator.of(context).push(MaterialPageRoute(
-                builder: (_) => CountingScreen(startWithChaplet: true),
-              ));
-            } else if (i == 3) {
-              Navigator.of(context).push(MaterialPageRoute(
-                builder: (_) => const EverydayPrayersScreen(),
-              ));
-            }
-          },
+          onTap: () => _navigateTo(section),
           child: Container(
             decoration: isDark
                 ? null
@@ -499,8 +657,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   child: ClipRRect(
                     borderRadius: isDark
                         ? BorderRadius.circular(16)
-                        : const BorderRadius.vertical(top: Radius.circular(18)),
-                    child: Image.asset(item['image']!, fit: BoxFit.cover, width: double.infinity),
+                        : const BorderRadius.vertical(
+                            top: Radius.circular(18)),
+                    child: _buildSectionImage(section, isDark),
                   ),
                 ),
                 const SizedBox(height: 6),
@@ -513,18 +672,24 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       children: [
                         Expanded(
                           child: Text(
-                            '${item['title']!} ${item['subtitle']!}',
+                            section.title,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: GoogleFonts.poppins(
                               fontSize: 13,
                               fontWeight: FontWeight.w700,
-                              color: isDark ? Colors.white : const Color(0xFF624294),
+                              color: isDark
+                                  ? Colors.white
+                                  : const Color(0xFF624294),
                               height: 1.3,
                             ),
                           ),
                         ),
-                        Icon(Icons.favorite_rounded, color: isDark ? Colors.white : const Color(0xFF624294), size: 20),
+                        Icon(Icons.favorite_rounded,
+                            color: isDark
+                                ? Colors.white
+                                : const Color(0xFF624294),
+                            size: 20),
                       ],
                     ),
                   ),
@@ -535,6 +700,120 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildSectionImage(HomeSection section, bool isDark) {
+    if (section.image.isNotEmpty) {
+      return CachedNetworkImage(
+        imageUrl: section.image,
+        fit: BoxFit.cover,
+        width: double.infinity,
+        placeholder: (_, __) => Container(
+          color: isDark
+              ? Colors.white.withOpacity(0.08)
+              : const Color(0xFF624294).withOpacity(0.06),
+          child: const Center(
+            child: SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(
+                  strokeWidth: 2, color: AppColors.goldPrimary),
+            ),
+          ),
+        ),
+        errorWidget: (_, __, ___) => _fallbackImage(section.route, isDark),
+      );
+    }
+    return _fallbackImage(section.route, isDark);
+  }
+
+  Widget _fallbackImage(String route, bool isDark) {
+    final assetMap = {
+      '/rosary_prayer':  'assets/demo/mathav.png',
+      '/adopt_priest':   'assets/demo/adopt a priest.png',
+      '/chaplet_prayer': 'assets/demo/i trust you jesus.png',
+      '/daily_prayers':  'assets/demo/every day.png',
+    };
+    final asset = assetMap[route];
+    if (asset != null) {
+      return Image.asset(asset, fit: BoxFit.cover, width: double.infinity);
+    }
+    return Container(
+      color: isDark
+          ? Colors.white.withOpacity(0.08)
+          : const Color(0xFF624294).withOpacity(0.06),
+      child: Icon(Icons.image_rounded,
+          color: isDark
+              ? Colors.white.withOpacity(0.3)
+              : const Color(0xFF624294).withOpacity(0.3),
+          size: 40),
+    );
+  }
+
+  // Fallback sections if API fails — mirrors the original hardcoded list
+  List<HomeSection> _fallbackSections() => [
+    HomeSection(id: 1,    title: 'Rosary',            description: '', image: '', route: '/rosary_prayer',  icon: 'rosary',  type: 'prayer', order: 1),
+    HomeSection(id: 1001, title: 'Adopt a Priest',    description: '', image: '', route: '/adopt_priest',   icon: 'priest',  type: 'other',  order: 2),
+    HomeSection(id: 2,    title: 'Divine Mercy Chaplet', description: '', image: '', route: '/chaplet_prayer', icon: 'chaplet', type: 'prayer', order: 3),
+    HomeSection(id: 1002, title: 'Every Day Prayers', description: '', image: '', route: '/daily_prayers',  icon: 'prayer',  type: 'other',  order: 4),
+  ];
+}
+
+// ── Skeleton widgets ─────────────────────────────────────────────────────────
+
+class _QuoteSkeleton extends StatelessWidget {
+  final bool isDark;
+  const _QuoteSkeleton({required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      height: 160,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(
+            color: isDark ? Colors.white : const Color(0xFF624294).withOpacity(0.12),
+            width: isDark ? 2.0 : 1.5),
+      ),
+      child: const Center(
+        child: SizedBox(
+          width: 28,
+          height: 28,
+          child: CircularProgressIndicator(
+              strokeWidth: 2.5, color: AppColors.goldPrimary),
+        ),
+      ),
+    );
+  }
+}
+
+class _GridSkeleton extends StatelessWidget {
+  final bool isDark;
+  const _GridSkeleton({required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: 4,
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 14,
+        mainAxisSpacing: 14,
+        childAspectRatio: 0.72,
+      ),
+      itemBuilder: (_, __) => Container(
+        decoration: BoxDecoration(
+          color: isDark
+              ? Colors.white.withOpacity(0.08)
+              : const Color(0xFF624294).withOpacity(0.06),
+          borderRadius: BorderRadius.circular(20),
+        ),
+      ),
     );
   }
 }

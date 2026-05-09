@@ -24,10 +24,12 @@ class AppConfig {
   }
 
   // ── API paths ───────────────────────────────────────────────────────────────
-  static const String loginPath = '/api/login';
-  static const String registerPath = '/api/register';
-  static const String userPath = '/api/user';
-  static const String logoutPath = '/api/logout';
+  static const String loginPath          = '/api/login';
+  static const String registerPath       = '/api/register';
+  static const String userPath           = '/api/user';
+  static const String logoutPath         = '/api/logout';
+  static const String globalCountsPath   = '/api/community/global-counts';
+  static const String homePath           = '/api/home';
 
   // ── Timeouts ────────────────────────────────────────────────────────────────
   static const Duration connectTimeout = Duration(seconds: 30);

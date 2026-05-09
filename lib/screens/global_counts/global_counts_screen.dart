@@ -1,19 +1,22 @@
-import 'dart:async';
-import 'dart:math';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import '../../colors/colors.dart';
+import '../../models/global_counts_model.dart';
+import '../../providers/global_counts_provider.dart';
 import '../../theme/theme_notifier.dart';
 
 class GlobalCountsScreen extends StatefulWidget {
+  // These constructor params are kept for backward-compat with BottomNavWrapper
+  // but are no longer used — real data comes from GlobalCountsProvider.
   final int personalCount;
   final int globalCount;
 
   const GlobalCountsScreen({
     super.key,
-    required this.personalCount,
-    required this.globalCount,
+    this.personalCount = 0,
+    this.globalCount = 0,
   });
 
   @override
@@ -22,27 +25,23 @@ class GlobalCountsScreen extends StatefulWidget {
 
 class _GlobalCountsScreenState extends State<GlobalCountsScreen>
     with TickerProviderStateMixin {
-  late List<Map<String, dynamic>> communityData;
   late AnimationController _blinkController;
   late Animation<double> _blinkAnimation;
   late AnimationController _quoteFadeController;
   late Animation<double> _quoteFadeAnim;
 
-  Timer? _shuffleTimer;
-  Timer? _quoteTimer;
   int _currentQuotePage = 0;
-  final _random = Random();
-  final int goalCount = 150000000;
-  
-  // Toggle state for Rosary vs Divine Mercy
   bool _isRosaryMode = true;
-  final int divineMercyGoalCount = 100000000;
+
+  static const int rosaryGoal      = 150000000;
+  static const int divineMercyGoal = 100000000;
+
   final List<Map<String, String>> quotes = [
-    {'text': 'Every bead is a whisper of love to heaven.', 'author': ''},
+    {'text': 'Every bead is a whisper of love to heaven.',         'author': ''},
     {'text': '"The rosary is the most excellent form of prayer."', 'author': 'Pope Paul VI'},
-    {'text': '"To pray is to let Jesus into our lives."', 'author': 'Ole Hallesby'},
+    {'text': '"To pray is to let Jesus into our lives."',          'author': 'Ole Hallesby'},
     {'text': '"Prayer is the key of the morning and the bolt of the evening."', 'author': 'Mahatma Gandhi'},
-    {'text': '"With God, all things are possible."', 'author': 'Matthew 19:26'},
+    {'text': '"With God, all things are possible."',               'author': 'Matthew 19:26'},
   ];
 
   @override
@@ -57,50 +56,46 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
       CurvedAnimation(parent: _blinkController, curve: Curves.easeInOut),
     );
 
-    _quoteFadeController = AnimationController(vsync: this, duration: const Duration(milliseconds: 600));
+    _quoteFadeController = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 600));
     _quoteFadeAnim = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _quoteFadeController, curve: Curves.easeInOut),
     );
     _quoteFadeController.forward();
 
-    communityData = [
-      {'name': 'Emma', 'count': 56, 'isYou': false},
-      {'name': 'Rachel', 'count': 42, 'isYou': false},
-      {'name': 'James T.', 'count': 38, 'isYou': false},
-      {'name': 'You', 'count': widget.personalCount, 'isYou': true},
-    ];
-
-    _shuffleTimer = Timer.periodic(const Duration(seconds: 3), (_) {
-      if (!mounted) return;
-      setState(() {
-        final nonYou = communityData
-            .where((e) => !(e['isYou'] as bool? ?? false))
-            .toList();
-        if (nonYou.isNotEmpty) {
-          final pick = nonYou[_random.nextInt(nonYou.length)];
-          pick['count'] = (pick['count'] as int) + _random.nextInt(3) + 1;
-        }
-        communityData.sort((a, b) => (b['count'] as int).compareTo(a['count'] as int));
-      });
-    });
-
-    _quoteTimer = Timer.periodic(const Duration(seconds: 5), (_) {
-      if (!mounted) return;
-      _quoteFadeController.reverse().then((_) {
-        if (!mounted) return;
-        setState(() => _currentQuotePage = (_currentQuotePage + 1) % quotes.length);
-        _quoteFadeController.forward();
-      });
+    // Fetch both prayer types on first load
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<GlobalCountsProvider>().fetchAll();
     });
   }
 
   @override
   void dispose() {
-    _shuffleTimer?.cancel();
-    _quoteTimer?.cancel();
-    _quoteFadeController.dispose();
     _blinkController.dispose();
+    _quoteFadeController.dispose();
     super.dispose();
+  }
+
+  void _onToggle(bool rosary) {
+    if (_isRosaryMode == rosary) return;
+    setState(() => _isRosaryMode = rosary);
+    // Fetch the newly selected type if not yet loaded
+    final provider = context.read<GlobalCountsProvider>();
+    final typeId = rosary ? PrayerType.rosary : PrayerType.divineMercy;
+    final cached = rosary ? provider.rosaryData : provider.divineMercyData;
+    if (cached == null) provider.fetchOne(typeId);
+  }
+
+  void _advanceQuote(bool forward) {
+    _quoteFadeController.reverse().then((_) {
+      if (!mounted) return;
+      setState(() {
+        _currentQuotePage = forward
+            ? (_currentQuotePage + 1) % quotes.length
+            : (_currentQuotePage - 1 + quotes.length) % quotes.length;
+      });
+      _quoteFadeController.forward();
+    });
   }
 
   @override
@@ -108,7 +103,8 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
     return ValueListenableBuilder<bool>(
       valueListenable: themeNotifier,
       builder: (_, isDark, __) {
-        final bgColor = isDark ? const Color(0xFF22014D) : const Color(0xFFF0EBF0);
+        final bgColor =
+            isDark ? const Color(0xFF22014D) : const Color(0xFFF0EBF0);
         return Scaffold(
           body: Container(
             width: double.infinity,
@@ -128,24 +124,33 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
                   )
                 : BoxDecoration(color: bgColor),
             child: SafeArea(
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Column(
-                  children: [
-                    const SizedBox(height: 24),
-                    _buildHeader(isDark),
-                    const SizedBox(height: 16),
-                    _buildQuoteCard(isDark),
-                    const SizedBox(height: 16),
-                    _buildGlobalCountCard(),
-                    const SizedBox(height: 16),
-                    _buildStatsRow(),
-                    const SizedBox(height: 16),
-                    _buildTopOfferingsCard(),
-                    const SizedBox(height: 40),
-                  ],
-                ),
+              child: Consumer<GlobalCountsProvider>(
+                builder: (_, provider, __) {
+                  return RefreshIndicator(
+                    onRefresh: () => provider.fetchAll(),
+                    color: AppColors.goldPrimary,
+                    child: SingleChildScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(
+                          parent: BouncingScrollPhysics()),
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: Column(
+                        children: [
+                          const SizedBox(height: 24),
+                          _buildHeader(isDark),
+                          const SizedBox(height: 16),
+                          _buildQuoteCard(isDark),
+                          const SizedBox(height: 16),
+                          _buildGlobalCountCard(provider, isDark),
+                          const SizedBox(height: 16),
+                          _buildStatsRow(provider),
+                          const SizedBox(height: 16),
+                          _buildTopOfferingsCard(provider),
+                          const SizedBox(height: 40),
+                        ],
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
           ),
@@ -154,12 +159,14 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
     );
   }
 
+  // ── Header ──────────────────────────────────────────────────────────────────
+
   Widget _buildHeader(bool isDark) {
-    final badgeBg = isDark ? Colors.white.withOpacity(0.1) : const Color(0xFF22014D).withOpacity(0.08);
+    final badgeBg     = isDark ? Colors.white.withOpacity(0.1)  : const Color(0xFF22014D).withOpacity(0.08);
     final badgeBorder = isDark ? Colors.white.withOpacity(0.15) : const Color(0xFF22014D).withOpacity(0.2);
-    final badgeText = isDark ? AppColors.goldLight : AppColors.goldDark;
-    final titleColor = isDark ? Colors.white : AppColors.authBgBottom;
-    final subColor = isDark ? Colors.white.withOpacity(0.5) : AppColors.authBgMid.withOpacity(0.5);
+    final badgeText   = isDark ? AppColors.goldLight : AppColors.goldDark;
+    final titleColor  = isDark ? Colors.white : AppColors.authBgBottom;
+    final subColor    = isDark ? Colors.white.withOpacity(0.5) : AppColors.authBgMid.withOpacity(0.5);
 
     return Column(
       children: [
@@ -171,14 +178,26 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
             border: Border.all(color: badgeBorder),
           ),
           child: Text('COMMUNITY PRAYER',
-              style: GoogleFonts.poppins(fontSize: 10, letterSpacing: 2, fontWeight: FontWeight.w800, color: badgeText)),
+              style: GoogleFonts.poppins(
+                  fontSize: 10,
+                  letterSpacing: 2,
+                  fontWeight: FontWeight.w800,
+                  color: badgeText)),
         ),
         const SizedBox(height: 18),
         Text('Global Count',
-            style: GoogleFonts.poppins(fontSize: 36, fontWeight: FontWeight.w900, color: titleColor, letterSpacing: -1)),
+            style: GoogleFonts.poppins(
+                fontSize: 36,
+                fontWeight: FontWeight.w900,
+                color: titleColor,
+                letterSpacing: -1)),
         const SizedBox(height: 6),
         Text('EVERY BEAD COUNTS',
-            style: GoogleFonts.poppins(fontSize: 10, letterSpacing: 1.5, fontWeight: FontWeight.w600, color: subColor)),
+            style: GoogleFonts.poppins(
+                fontSize: 10,
+                letterSpacing: 1.5,
+                fontWeight: FontWeight.w600,
+                color: subColor)),
         const SizedBox(height: 20),
         _buildToggleButton(isDark),
       ],
@@ -186,40 +205,42 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
   }
 
   Widget _buildToggleButton(bool isDark) {
-    // ── Dark mode colours (from reference image) ──
-    // Outer pill: deep dark purple background
-    // Active pill: white
-    // Active text: deep purple
-    // Inactive text: muted light grey
-
-    // ── Light mode colours (unchanged) ──
-    // Outer pill: white
-    // Active pill: deep dark purple (#3B0764)
-    // Active text: gold
-    // Inactive text: muted purple-grey
-
-    final outerBg = isDark
-        ? const Color(0xFF2D1B4E)          // dark purple pill track
-        : Colors.white;
+    final outerBg    = isDark ? const Color(0xFF2D1B4E) : Colors.white;
     final outerBorder = isDark
-        ? const Color(0xFF3D2560)          // slightly lighter purple border
+        ? const Color(0xFF3D2560)
         : const Color(0xFF22014D).withOpacity(0.18);
-
-    final activePillColor = isDark
-        ? Colors.white                     // white pill in dark mode
-        : const Color(0xFF3B0764);         // dark purple pill in light mode
-
-    final activeTextColor = isDark
-        ? const Color(0xFF3B0764)          // deep purple text on white pill
-        : AppColors.goldPrimary;           // gold text on dark pill
-
-    final inactiveTextColor = isDark
-        ? Colors.white.withOpacity(0.45)   // muted white in dark mode
+    final activePill = isDark ? Colors.white : const Color(0xFF3B0764);
+    final activeText = isDark ? const Color(0xFF3B0764) : AppColors.goldPrimary;
+    final inactiveText = isDark
+        ? Colors.white.withOpacity(0.45)
         : AppColors.authBgMid.withOpacity(0.55);
-
-    final activeShadowColor = isDark
+    final shadowColor = isDark
         ? Colors.white.withOpacity(0.20)
         : const Color(0xFF22014D).withOpacity(0.35);
+
+    Widget tab(String label, bool active, VoidCallback onTap) {
+      return GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 280),
+          curve: Curves.easeInOut,
+          padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 10),
+          decoration: BoxDecoration(
+            color: active ? activePill : Colors.transparent,
+            borderRadius: BorderRadius.circular(26),
+            boxShadow: active
+                ? [BoxShadow(color: shadowColor, blurRadius: 10, offset: const Offset(0, 3))]
+                : [],
+          ),
+          child: Text(label,
+              style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: active ? activeText : inactiveText,
+                  letterSpacing: 0.3)),
+        ),
+      );
+    }
 
     return Container(
       height: 52,
@@ -239,97 +260,64 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // ── Rosary tab ──
-          GestureDetector(
-            onTap: () => setState(() => _isRosaryMode = true),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 280),
-              curve: Curves.easeInOut,
-              padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 10),
-              decoration: BoxDecoration(
-                color: _isRosaryMode ? activePillColor : Colors.transparent,
-                borderRadius: BorderRadius.circular(26),
-                boxShadow: _isRosaryMode
-                    ? [BoxShadow(color: activeShadowColor, blurRadius: 10, offset: const Offset(0, 3))]
-                    : [],
-              ),
-              child: Text(
-                'Rosary',
-                style: GoogleFonts.poppins(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  color: _isRosaryMode ? activeTextColor : inactiveTextColor,
-                  letterSpacing: 0.3,
-                ),
-              ),
-            ),
-          ),
-          // ── Chaplet tab ──
-          GestureDetector(
-            onTap: () => setState(() => _isRosaryMode = false),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 280),
-              curve: Curves.easeInOut,
-              padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 10),
-              decoration: BoxDecoration(
-                color: !_isRosaryMode ? activePillColor : Colors.transparent,
-                borderRadius: BorderRadius.circular(26),
-                boxShadow: !_isRosaryMode
-                    ? [BoxShadow(color: activeShadowColor, blurRadius: 10, offset: const Offset(0, 3))]
-                    : [],
-              ),
-              child: Text(
-                'Chaplet',
-                style: GoogleFonts.poppins(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  color: !_isRosaryMode ? activeTextColor : inactiveTextColor,
-                  letterSpacing: 0.3,
-                ),
-              ),
-            ),
-          ),
+          tab('Rosary',  _isRosaryMode,  () => _onToggle(true)),
+          tab('Chaplet', !_isRosaryMode, () => _onToggle(false)),
         ],
       ),
     );
   }
 
-  Widget _buildGlobalCountCard() {
-    final currentGoal = _isRosaryMode ? goalCount : divineMercyGoalCount;
-    final currentGlobalCount = _isRosaryMode ? widget.globalCount : (widget.globalCount * 80 ~/ 100); // Divine Mercy is 80% of Rosary for demo
-    final double percentage = currentGoal > 0 ? (currentGlobalCount / currentGoal) * 100 : 0;
-    final countLabel = _isRosaryMode ? 'ROSARIES PRAYED WORLDWIDE' : 'TOTAL DIVINE MERCY CHAPLETS OFFERED';
+  // ── Global count card ───────────────────────────────────────────────────────
+
+  Widget _buildGlobalCountCard(GlobalCountsProvider provider, bool isDark) {
+    final data        = provider.dataFor(_isRosaryMode ? PrayerType.rosary : PrayerType.divineMercy);
+    final goal        = _isRosaryMode ? rosaryGoal : divineMercyGoal;
+    final total       = data.communityTotal;
+    final percentage  = goal > 0 ? (total / goal) * 100 : 0.0;
+    final countLabel  = _isRosaryMode
+        ? 'ROSARIES PRAYED WORLDWIDE'
+        : 'TOTAL DIVINE MERCY CHAPLETS OFFERED';
 
     return _GlassCard(
       child: Column(
         children: [
-          Text(
-            countLabel,
-            style: GoogleFonts.poppins(fontSize: 10, letterSpacing: 2, color: AppColors.authBgMid.withOpacity(0.5), fontWeight: FontWeight.w800),
-          ),
+          Text(countLabel,
+              style: GoogleFonts.poppins(
+                  fontSize: 10,
+                  letterSpacing: 2,
+                  color: AppColors.authBgMid.withOpacity(0.5),
+                  fontWeight: FontWeight.w800)),
           const SizedBox(height: 12),
-          Text(
-            _formatNumber(currentGlobalCount),
-            style: const TextStyle(
-              fontSize: 56,
-              fontWeight: FontWeight.w900,
-              color: AppColors.authBgBottom,
-              letterSpacing: -2,
-              height: 1,
-            ),
-          ),
+          provider.isLoading
+              ? const SizedBox(
+                  height: 56,
+                  child: Center(
+                      child: CircularProgressIndicator(
+                          color: AppColors.goldPrimary, strokeWidth: 2)))
+              : Text(
+                  _formatNumber(total),
+                  style: const TextStyle(
+                    fontSize: 56,
+                    fontWeight: FontWeight.w900,
+                    color: AppColors.authBgBottom,
+                    letterSpacing: -2,
+                    height: 1,
+                  ),
+                ),
           const SizedBox(height: 24),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Goal: ${_formatNumber(currentGoal)}',
-                style: GoogleFonts.poppins(fontSize: 12, color: AppColors.authBgMid.withOpacity(0.5), fontWeight: FontWeight.w700),
-              ),
-              Text(
-                '${percentage.toStringAsFixed(1)}%',
-                style: GoogleFonts.poppins(fontSize: 12, color: AppColors.goldDark, fontWeight: FontWeight.w800),
-              ),
+              Text('Goal: ${_formatNumber(goal)}',
+                  style: GoogleFonts.poppins(
+                      fontSize: 12,
+                      color: AppColors.authBgMid.withOpacity(0.5),
+                      fontWeight: FontWeight.w700)),
+              Text('${percentage.toStringAsFixed(1)}%',
+                  style: GoogleFonts.poppins(
+                      fontSize: 12,
+                      color: AppColors.goldDark,
+                      fontWeight: FontWeight.w800)),
             ],
           ),
           const SizedBox(height: 10),
@@ -339,81 +327,88 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
               value: (percentage / 100).clamp(0.0, 1.0),
               minHeight: 8,
               backgroundColor: const Color(0xFF22014D).withOpacity(0.1),
-              valueColor: const AlwaysStoppedAnimation<Color>(AppColors.goldPrimary),
+              valueColor:
+                  const AlwaysStoppedAnimation<Color>(AppColors.goldPrimary),
             ),
           ),
-          const SizedBox(height: 18),
-          Text(
-            _isRosaryMode 
-              ? ''
-              : '',
-            style: GoogleFonts.poppins(fontSize: 13, color: AppColors.authBgMid.withOpacity(0.6), fontStyle: FontStyle.italic, fontWeight: FontWeight.w500),
-          ),
+          if (provider.errorMessage != null) ...[
+            const SizedBox(height: 12),
+            Text(provider.errorMessage!,
+                style: GoogleFonts.poppins(
+                    fontSize: 12,
+                    color: Colors.red.shade400,
+                    fontWeight: FontWeight.w500)),
+          ],
         ],
       ),
     );
   }
 
-  Widget _buildStatsRow() {
-    final personalCountDisplay = _isRosaryMode 
-      ? widget.personalCount 
-      : (widget.personalCount * 75 ~/ 100); // Divine Mercy is 75% of Rosary for demo
-    final label = _isRosaryMode ? 'Rosaries' : 'chaplets';
+  // ── Your contribution ───────────────────────────────────────────────────────
+
+  Widget _buildStatsRow(GlobalCountsProvider provider) {
+    final data  = provider.dataFor(_isRosaryMode ? PrayerType.rosary : PrayerType.divineMercy);
+    final label = _isRosaryMode ? 'Rosaries' : 'Chaplets';
 
     return _GlassCard(
       child: Column(
         children: [
-          Text(
-            'YOUR CONTRIBUTION',
-            style: GoogleFonts.poppins(fontSize: 10, letterSpacing: 2, color: AppColors.authBgMid.withOpacity(0.5), fontWeight: FontWeight.w800),
-          ),
+          Text('YOUR CONTRIBUTION',
+              style: GoogleFonts.poppins(
+                  fontSize: 10,
+                  letterSpacing: 2,
+                  color: AppColors.authBgMid.withOpacity(0.5),
+                  fontWeight: FontWeight.w800)),
           const SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
-            children: [
-              Text(
-                personalCountDisplay.toString(),
-                style: const TextStyle(
-                  fontSize: 42,
-                  fontWeight: FontWeight.w900,
-                  color: AppColors.authBgBottom,
+          provider.isLoading
+              ? const SizedBox(
+                  height: 42,
+                  child: Center(
+                      child: CircularProgressIndicator(
+                          color: AppColors.goldPrimary, strokeWidth: 2)))
+              : Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
+                  children: [
+                    Text(data.yourTotal.toString(),
+                        style: const TextStyle(
+                            fontSize: 42,
+                            fontWeight: FontWeight.w900,
+                            color: AppColors.authBgBottom)),
+                    const SizedBox(width: 8),
+                    Text(label,
+                        style: GoogleFonts.poppins(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.authBgMid.withOpacity(0.5))),
+                  ],
                 ),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                label,
-                style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.authBgMid.withOpacity(0.5)),
-              ),
-            ],
-          ),
+          if (data.yourPosition > 0) ...[
+            const SizedBox(height: 6),
+            Text('Rank #${data.yourPosition}',
+                style: GoogleFonts.poppins(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.goldDark)),
+          ],
         ],
       ),
     );
   }
 
+  // ── Quote card ──────────────────────────────────────────────────────────────
+
   Widget _buildQuoteCard(bool isDark) {
-    final quote = quotes[_currentQuotePage];
-    final quoteTextColor = const Color(0xFF624294);
-    final shadowColor = isDark ? AppColors.authBgBottom.withOpacity(0.20) : const Color(0xFF624294).withOpacity(0.15);
-    final borderColor = isDark ? Colors.white : const Color(0xFF624294).withOpacity(0.12);
+    final quote          = quotes[_currentQuotePage];
+    final shadowColor    = isDark ? AppColors.authBgBottom.withOpacity(0.20) : const Color(0xFF624294).withOpacity(0.15);
+    final borderColor    = isDark ? Colors.white : const Color(0xFF624294).withOpacity(0.12);
     final activeDotColor = isDark ? const Color(0xFF624294) : AppColors.goldPrimary;
 
     return GestureDetector(
-      onHorizontalDragEnd: (details) {
-        if (details.primaryVelocity == null) return;
-        _quoteFadeController.reverse().then((_) {
-          if (!mounted) return;
-          setState(() {
-            if (details.primaryVelocity! < 0) {
-              _currentQuotePage = (_currentQuotePage + 1) % quotes.length;
-            } else {
-              _currentQuotePage = (_currentQuotePage - 1 + quotes.length) % quotes.length;
-            }
-          });
-          _quoteFadeController.forward();
-        });
+      onHorizontalDragEnd: (d) {
+        if (d.primaryVelocity == null) return;
+        _advanceQuote(d.primaryVelocity! < 0);
       },
       child: FadeTransition(
         opacity: _quoteFadeAnim,
@@ -424,25 +419,43 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(22),
-            border: Border.all(color: isDark ? Colors.white : borderColor, width: isDark ? 2.0 : 1.5),
-            boxShadow: [BoxShadow(color: shadowColor, blurRadius: 20, offset: const Offset(0, 6))],
+            border: Border.all(
+                color: isDark ? Colors.white : borderColor,
+                width: isDark ? 2.0 : 1.5),
+            boxShadow: [
+              BoxShadow(color: shadowColor, blurRadius: 20, offset: const Offset(0, 6))
+            ],
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text('\u275D', style: TextStyle(fontSize: 20, color: const Color(0xFF624294).withOpacity(0.45), height: 1.0)),
+              Text('\u275D',
+                  style: TextStyle(
+                      fontSize: 20,
+                      color: const Color(0xFF624294).withOpacity(0.45),
+                      height: 1.0)),
               const SizedBox(height: 6),
               Text(
                 quote['text']!,
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(fontSize: 14.5, fontWeight: isDark ? FontWeight.w500 : FontWeight.w700, color: quoteTextColor, fontStyle: FontStyle.italic, height: 1.5, letterSpacing: 0.2),
+                style: TextStyle(
+                    fontSize: 14.5,
+                    fontWeight: isDark ? FontWeight.w500 : FontWeight.w700,
+                    color: const Color(0xFF624294),
+                    fontStyle: FontStyle.italic,
+                    height: 1.5,
+                    letterSpacing: 0.2),
               ),
               const SizedBox(height: 8),
               if (quote['author']!.isNotEmpty)
                 Text(quote['author']!,
-                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Color(0xFF624294), letterSpacing: 1.2)),
+                    style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF624294),
+                        letterSpacing: 1.2)),
               const SizedBox(height: 10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -454,7 +467,9 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
                     margin: const EdgeInsets.symmetric(horizontal: 3),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(3),
-                      color: i == _currentQuotePage ? activeDotColor : const Color(0xFF624294).withOpacity(0.25),
+                      color: i == _currentQuotePage
+                          ? activeDotColor
+                          : const Color(0xFF624294).withOpacity(0.25),
                     ),
                   );
                 }),
@@ -465,7 +480,14 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
       ),
     );
   }
-  Widget _buildTopOfferingsCard() {
+
+  // ── Top offerings / leaderboard ─────────────────────────────────────────────
+
+  Widget _buildTopOfferingsCard(GlobalCountsProvider provider) {
+    final data        = provider.dataFor(_isRosaryMode ? PrayerType.rosary : PrayerType.divineMercy);
+    final leaderboard = data.leaderboard;
+    final prayerLabel = _isRosaryMode ? 'Rosaries offered' : 'Chaplets offered';
+
     return _GlassCard(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -473,20 +495,175 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Top Offerings',
-                style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.authBgBottom),
-              ),
+              Text('Top Offerings',
+                  style: GoogleFonts.poppins(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w900,
+                      color: AppColors.authBgBottom)),
               _buildLiveBadge(),
             ],
           ),
           const SizedBox(height: 24),
-          _LiveLeaderboard(
-            items: communityData,
-            buildItem: _buildOfferingItem,
-            itemHeight: 80.0,
+          if (provider.isLoading)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 24),
+              child: CircularProgressIndicator(
+                  color: AppColors.goldPrimary, strokeWidth: 2),
+            )
+          else if (leaderboard.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 24),
+              child: Text('No data yet',
+                  style: GoogleFonts.poppins(
+                      fontSize: 14,
+                      color: AppColors.authBgMid.withOpacity(0.5))),
+            )
+          else
+            _buildLeaderboardList(leaderboard, prayerLabel),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLeaderboardList(
+      List<LeaderboardEntry> entries, String prayerLabel) {
+    return Column(
+      children: entries.map((entry) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          child: _buildOfferingItem(entry, prayerLabel),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildOfferingItem(LeaderboardEntry entry, String prayerLabel) {
+    final isYou = entry.isCurrentUser;
+    return Container(
+      padding: isYou
+          ? const EdgeInsets.symmetric(horizontal: 14, vertical: 12)
+          : const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+      decoration: isYou
+          ? BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  AppColors.goldPrimary.withOpacity(0.15),
+                  AppColors.goldLight.withOpacity(0.05),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(
+                  color: AppColors.goldPrimary.withOpacity(0.4), width: 1.5),
+              boxShadow: [
+                BoxShadow(
+                    color: AppColors.goldPrimary.withOpacity(0.15),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4)),
+              ],
+            )
+          : null,
+      child: Row(
+        children: [
+          _buildRankBadge(entry.position, isYou),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Row(
+                  children: [
+                    Flexible(
+                      child: Text(entry.name,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.poppins(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w800,
+                              color: isYou
+                                  ? AppColors.goldDark
+                                  : AppColors.authBgBottom)),
+                    ),
+                    if (isYou) ...[
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                              colors: [AppColors.goldDark, AppColors.goldPrimary]),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: const Text('YOU',
+                            style: TextStyle(
+                                fontSize: 8,
+                                fontWeight: FontWeight.w900,
+                                color: Colors.white,
+                                letterSpacing: 0.5)),
+                      ),
+                    ],
+                  ],
+                ),
+                Text(prayerLabel,
+                    style: GoogleFonts.poppins(
+                        fontSize: 11,
+                        color: isYou
+                            ? AppColors.goldDark.withOpacity(0.6)
+                            : AppColors.authBgMid.withOpacity(0.4),
+                        fontWeight: FontWeight.w600)),
+              ],
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(entry.totalCount.toString(),
+                  style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w900,
+                      color: isYou ? AppColors.goldDark : AppColors.authBgBottom)),
+              Text('today: ${entry.todayCount}',
+                  style: GoogleFonts.poppins(
+                      fontSize: 10,
+                      color: isYou
+                          ? AppColors.goldDark.withOpacity(0.6)
+                          : AppColors.authBgMid.withOpacity(0.4),
+                      fontWeight: FontWeight.w600)),
+            ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildRankBadge(int rank, bool isYou) {
+    Color bg     = const Color(0xFF22014D).withOpacity(0.05);
+    Color border = const Color(0xFF22014D).withOpacity(0.15);
+    Color text   = AppColors.authBgBottom;
+
+    if (rank == 1) {
+      bg     = AppColors.goldPrimary.withOpacity(0.1);
+      border = AppColors.goldPrimary.withOpacity(0.3);
+      text   = AppColors.goldDark;
+    } else if (isYou) {
+      bg     = AppColors.goldPrimary.withOpacity(0.08);
+      border = AppColors.goldPrimary.withOpacity(0.25);
+      text   = AppColors.goldDark;
+    }
+
+    return Container(
+      width: 40,
+      height: 40,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: bg,
+        border: Border.all(color: border, width: 1.5),
+      ),
+      child: Center(
+        child: Text('$rank',
+            style: TextStyle(
+                fontSize: 16, fontWeight: FontWeight.w900, color: text)),
       ),
     );
   }
@@ -504,166 +681,46 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
         children: [
           AnimatedBuilder(
             animation: _blinkAnimation,
-            builder: (context, _) {
-              return Container(
-                width: 6,
-                height: 6,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.red.withOpacity(_blinkAnimation.value),
-                  boxShadow: [
-                    if (_blinkAnimation.value > 0.5)
-                      BoxShadow(
-                        color: Colors.red.withOpacity(0.5),
-                        blurRadius: 4,
-                      ),
-                  ],
-                ),
-              );
-            },
+            builder: (_, __) => Container(
+              width: 6,
+              height: 6,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.red.withOpacity(_blinkAnimation.value),
+                boxShadow: [
+                  if (_blinkAnimation.value > 0.5)
+                    BoxShadow(
+                        color: Colors.red.withOpacity(0.5), blurRadius: 4),
+                ],
+              ),
+            ),
           ),
           const SizedBox(width: 6),
-          const Text(
-            'LIVE',
-            style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: Colors.red, letterSpacing: 1),
-          ),
+          const Text('LIVE',
+              style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w900,
+                  color: Colors.red,
+                  letterSpacing: 1)),
         ],
       ),
     );
   }
 
-  Widget _buildOfferingItem(int index) {
-    final item = communityData[index];
-    final rank = index + 1;
-    final name = item['name'] as String;
-    final count = item['count'] as int;
-    final isYou = (item['isYou'] as bool?) ?? false;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Container(
-        padding: isYou ? const EdgeInsets.symmetric(horizontal: 14, vertical: 12) : const EdgeInsets.symmetric(horizontal: 4),
-        decoration: isYou
-            ? BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    AppColors.goldPrimary.withOpacity(0.15),
-                    AppColors.goldLight.withOpacity(0.05),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(
-                  color: AppColors.goldPrimary.withOpacity(0.4),
-                  width: 1.5,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.goldPrimary.withOpacity(0.15),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              )
-            : null,
-        child: Row(
-          children: [
-            _buildRankBadge(rank, isYou),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Row(
-                    children: [
-                      Text(
-                        name,
-                        style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w800, color: isYou ? AppColors.goldDark : AppColors.authBgBottom),
-                      ),
-                      if (isYou) ...[
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              colors: [AppColors.goldDark, AppColors.goldPrimary],
-                            ),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: const Text('YOU', style: TextStyle(fontSize: 8, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 0.5)),
-                        ),
-                      ],
-                    ],
-                  ),
-                  Text(
-                    'Rosaries offered today',
-                    style: GoogleFonts.poppins(fontSize: 11, color: isYou ? AppColors.goldDark.withOpacity(0.6) : AppColors.authBgMid.withOpacity(0.4), fontWeight: FontWeight.w600),
-                  ),
-                ],
-              ),
-            ),
-            Text(
-              count.toString(),
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w900,
-                color: isYou ? AppColors.goldDark : AppColors.authBgBottom,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildRankBadge(int rank, bool isYou) {
-    Color bg = const Color(0xFF22014D).withOpacity(0.05);
-    Color border = const Color(0xFF22014D).withOpacity(0.15);
-    Color text = AppColors.authBgBottom;
-
-    if (rank == 1) {
-      bg = AppColors.goldPrimary.withOpacity(0.1);
-      border = AppColors.goldPrimary.withOpacity(0.3);
-      text = AppColors.goldDark;
-    }
-
-    return Container(
-      width: 40,
-      height: 40,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: bg,
-        border: Border.all(color: border, width: 1.5),
-      ),
-      child: Center(
-        child: Text(
-          '$rank',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w900,
-            color: text,
-          ),
-        ),
-      ),
-    );
-  }
+  // ── Helpers ─────────────────────────────────────────────────────────────────
 
   String _formatNumber(int number) {
     if (number >= 1000000) {
-      final millions = number / 1000000;
-      // If it's a whole number, don't show decimal
-      if (millions == millions.toInt()) {
-        return '${millions.toInt()}M';
-      }
-      return '${millions.toStringAsFixed(1)}M';
+      final m = number / 1000000;
+      return m == m.toInt() ? '${m.toInt()}M' : '${m.toStringAsFixed(1)}M';
     } else if (number >= 1000) {
       return '${(number / 1000).toStringAsFixed(0)},${(number % 1000).toString().padLeft(3, '0')}';
     }
     return number.toString();
   }
 }
+
+// ── _GlassCard ───────────────────────────────────────────────────────────────
 
 class _GlassCard extends StatelessWidget {
   final Widget child;
@@ -681,18 +738,18 @@ class _GlassCard extends StatelessWidget {
           filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
           child: Container(
             width: double.infinity,
-            padding: padding ?? const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+            padding: padding ??
+                const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
             decoration: BoxDecoration(
               color: Colors.white.withOpacity(0.92),
               borderRadius: BorderRadius.circular(28),
               border: Border.all(color: Colors.white, width: 2.0),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.20),
-                  blurRadius: 40,
-                  spreadRadius: 2,
-                  offset: const Offset(0, 12),
-                ),
+                    color: Colors.black.withOpacity(0.20),
+                    blurRadius: 40,
+                    spreadRadius: 2,
+                    offset: const Offset(0, 12)),
               ],
             ),
             child: child,
@@ -701,95 +758,28 @@ class _GlassCard extends StatelessWidget {
       );
     }
 
-    // Light mode — matches home screen card style
     return Container(
       width: double.infinity,
-      padding: padding ?? const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+      padding:
+          padding ?? const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(22),
         border: Border.all(
-          color: const Color(0xFF624294).withOpacity(0.15),
-          width: 1.5,
-        ),
+            color: const Color(0xFF624294).withOpacity(0.15), width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF624294).withOpacity(0.10),
-            blurRadius: 16,
-            spreadRadius: 1,
-            offset: const Offset(0, 6),
-          ),
+              color: const Color(0xFF624294).withOpacity(0.10),
+              blurRadius: 16,
+              spreadRadius: 1,
+              offset: const Offset(0, 6)),
           BoxShadow(
-            color: Colors.white.withOpacity(0.80),
-            blurRadius: 4,
-            offset: const Offset(0, -2),
-          ),
+              color: Colors.white.withOpacity(0.80),
+              blurRadius: 4,
+              offset: const Offset(0, -2)),
         ],
       ),
       child: child,
-    );
-  }
-}
-
-class _LiveLeaderboard extends StatefulWidget {
-  final List<Map<String, dynamic>> items;
-  final Widget Function(int index) buildItem;
-  final double itemHeight;
-
-  const _LiveLeaderboard({
-    required this.items,
-    required this.buildItem,
-    required this.itemHeight,
-  });
-
-  @override
-  State<_LiveLeaderboard> createState() => _LiveLeaderboardState();
-}
-
-class _LiveLeaderboardState extends State<_LiveLeaderboard> {
-  late Map<String, double> _positions;
-
-  @override
-  void initState() {
-    super.initState();
-    _positions = {
-      for (int i = 0; i < widget.items.length; i++)
-        widget.items[i]['name'] as String: i * widget.itemHeight,
-    };
-  }
-
-  @override
-  void didUpdateWidget(_LiveLeaderboard oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    setState(() {
-      for (int i = 0; i < widget.items.length; i++) {
-        _positions[widget.items[i]['name'] as String] = i * widget.itemHeight;
-      }
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final totalHeight = widget.items.length * widget.itemHeight;
-    return SizedBox(
-      height: totalHeight,
-      child: Stack(
-        children: widget.items.map((item) {
-          final name = item['name'] as String;
-          final index = widget.items.indexOf(item);
-          final top = _positions[name] ?? index * widget.itemHeight;
-          return AnimatedPositioned(
-            key: ValueKey(name),
-            duration: const Duration(milliseconds: 700),
-            curve: Curves.easeInOutCubic,
-            top: top,
-            left: 0,
-            right: 0,
-            height: widget.itemHeight,
-            child: widget.buildItem(index),
-          );
-        }).toList(),
-      ),
     );
   }
 }
