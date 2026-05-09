@@ -1,23 +1,9 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../theme/theme_notifier.dart';
-
-// Full pool of priests to randomly pick from
-const List<Map<String, String>> _priestPool = [
-  {'name': 'Fr. Thomas'},
-  {'name': 'Fr. Joseph'},
-  {'name': 'Fr. Michael'},
-  {'name': 'Fr. Anthony'},
-  {'name': 'Fr. Sebastian'},
-  {'name': 'Fr. George'},
-  {'name': 'Fr. Paul'},
-  {'name': 'Fr. James'},
-  {'name': 'Fr. Peter'},
-  {'name': 'Fr. Francis'},
-  {'name': 'Fr. David'},
-  {'name': 'Fr. John'},
-];
+import '../../config/app_config.dart';
+import '../../services/api_client.dart';
+import '../../models/priest_model.dart';
 
 class AdoptPriestScreen extends StatefulWidget {
   const AdoptPriestScreen({super.key});
@@ -29,31 +15,86 @@ class AdoptPriestScreen extends StatefulWidget {
 class _AdoptPriestScreenState extends State<AdoptPriestScreen> {
   static const int _maxSlots = 3;
 
-  // Each slot holds either null (empty) or a priest map
-  final List<Map<String, String>?> _slots = [null, null, null];
+  // Each slot holds either null (empty) or a priest
+  final List<Priest?> _slots = [null, null, null];
+
+  // Loading state for the picker
+  bool _isLoadingPriests = false;
+
+  // Returns priest IDs already chosen in any slot
+  Set<int> _chosenPriestIds() {
+    return _slots
+        .where((s) => s != null)
+        .map((s) => s!.id)
+        .toSet();
+  }
 
   // Returns priests not already chosen in any slot
-  List<Map<String, String>> _availablePriests() {
-    final chosen = _slots
-        .where((s) => s != null)
-        .map((s) => s!['name'])
-        .toSet();
-    return _priestPool.where((p) => !chosen.contains(p['name'])).toList();
+  List<Priest> _availablePriests(List<Priest> allPriests) {
+    final chosen = _chosenPriestIds();
+    return allPriests.where((p) => !chosen.contains(p.id)).toList();
   }
 
-  // Returns a shuffled random subset (up to 6) from available priests
-  List<Map<String, String>> _randomSubset() {
-    final available = _availablePriests();
-    available.shuffle(Random());
-    return available.take(6).toList();
-  }
-
-  void _openPickerForSlot(int slotIndex) {
-    final candidates = _randomSubset();
-    if (candidates.isEmpty) return;
-
+  Future<void> _openPickerForSlot(int slotIndex) async {
     final isDark = themeNotifier.isDark;
 
+    // Show loading state
+    setState(() {
+      _isLoadingPriests = true;
+    });
+
+    try {
+      // Fetch random priests from API
+      final response = await ApiClient.instance.get(
+        AppConfig.priestsPath,
+        query: {'type': 'random'},
+      );
+      
+      if (!mounted) return;
+
+      final priestsData = PriestsData.fromJson(response.data);
+      
+      // Filter out already chosen priests
+      final candidates = _availablePriests(priestsData.priests);
+      
+      if (candidates.isEmpty) {
+        setState(() {
+          _isLoadingPriests = false;
+        });
+        return;
+      }
+
+      setState(() {
+        _isLoadingPriests = false;
+      });
+
+      // Show the picker
+      if (mounted) {
+        _showPriestPicker(slotIndex, candidates, isDark);
+      }
+    } on ApiException catch (e) {
+      setState(() {
+        _isLoadingPriests = false;
+      });
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Error: ${e.message}',
+              style: GoogleFonts.poppins(color: Colors.white),
+            ),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+            margin: const EdgeInsets.all(16),
+          ),
+        );
+      }
+    }
+  }
+
+  void _showPriestPicker(int slotIndex, List<Priest> candidates, bool isDark) {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -147,7 +188,7 @@ class _AdoptPriestScreenState extends State<AdoptPriestScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                priest['name']!,
+                                priest.displayName,
                                 style: GoogleFonts.poppins(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w700,
@@ -196,7 +237,6 @@ class _AdoptPriestScreenState extends State<AdoptPriestScreen> {
     return ValueListenableBuilder<bool>(
       valueListenable: themeNotifier,
       builder: (_, isDark, __) {
-        final bgColor = isDark ? const Color(0xFF1c023d) : const Color(0xFFF0EBF0);
         final titleColor = isDark ? Colors.white : const Color(0xFF624294);
         final subColor = isDark
             ? Colors.white.withOpacity(0.65)
@@ -362,7 +402,7 @@ class _AdoptPriestScreenState extends State<AdoptPriestScreen> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'Pray for God’s anointed ones',
+                          "Pray for God's anointed ones",
                           style: GoogleFonts.poppins(
                             fontSize: 13,
                             fontWeight: FontWeight.w500,
@@ -393,10 +433,11 @@ class _AdoptPriestScreenState extends State<AdoptPriestScreen> {
                                     ? _EmptySlot(
                                         slotNumber: i + 1,
                                         isDark: isDark,
+                                        isLoading: _isLoadingPriests,
                                         onAdd: () => _openPickerForSlot(i),
                                       )
                                     : _FilledCard(
-                                        name: _slots[i]!['name']!,
+                                        priest: _slots[i]!,
                                         slotLabel: '${i + 1}/$_maxSlots',
                                         isDark: isDark,
                                         onRemove: () => _removeSlot(i),
@@ -535,18 +576,20 @@ class _AdoptPriestScreenState extends State<AdoptPriestScreen> {
 class _EmptySlot extends StatelessWidget {
   final int slotNumber;
   final bool isDark;
+  final bool isLoading;
   final VoidCallback onAdd;
 
   const _EmptySlot({
     required this.slotNumber,
     required this.isDark,
+    required this.isLoading,
     required this.onAdd,
   });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onAdd,
+      onTap: isLoading ? null : onAdd,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         decoration: BoxDecoration(
@@ -580,7 +623,7 @@ class _EmptySlot extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 8),
         child: Column(
           children: [
-            // Dashed circle with + icon
+            // Dashed circle with + icon or loading
             Container(
               width: 64, height: 64,
               decoration: BoxDecoration(
@@ -595,13 +638,26 @@ class _EmptySlot extends StatelessWidget {
                   width: 1.5,
                 ),
               ),
-              child: Icon(
-                Icons.add_rounded,
-                size: 32,
-                color: isDark
-                    ? Colors.white.withOpacity(0.6)
-                    : const Color(0xFF624294).withOpacity(0.6),
-              ),
+              child: isLoading
+                  ? SizedBox(
+                      width: 32,
+                      height: 32,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          isDark
+                              ? Colors.white.withOpacity(0.6)
+                              : const Color(0xFF624294).withOpacity(0.6),
+                        ),
+                      ),
+                    )
+                  : Icon(
+                      Icons.add_rounded,
+                      size: 32,
+                      color: isDark
+                          ? Colors.white.withOpacity(0.6)
+                          : const Color(0xFF624294).withOpacity(0.6),
+                    ),
             ),
             const SizedBox(height: 10),
             Text(
@@ -635,13 +691,13 @@ class _EmptySlot extends StatelessWidget {
 
 // ── Filled priest card with remove button ────────────────────────────────────
 class _FilledCard extends StatelessWidget {
-  final String name;
+  final Priest priest;
   final String slotLabel;
   final bool isDark;
   final VoidCallback onRemove;
 
   const _FilledCard({
-    required this.name,
+    required this.priest,
     required this.slotLabel,
     required this.isDark,
     required this.onRemove,
@@ -729,7 +785,7 @@ class _FilledCard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            name,
+            priest.displayName,
             textAlign: TextAlign.center,
             style: GoogleFonts.poppins(
               fontSize: 11,
