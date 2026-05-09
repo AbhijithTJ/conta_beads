@@ -24,22 +24,51 @@ class _AdoptPriestScreenState extends State<AdoptPriestScreen> {
   // Loading state for the picker
   bool _isLoadingPriests = false;
 
-  // Returns priest IDs already chosen in any slot
-  Set<int> _chosenPriestIds() {
-    return _slots
+  @override
+  void initState() {
+    super.initState();
+    // Fetch saved priests when screen loads
+    _loadSavedPriests();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // This gets called when dependencies change, including when returning from another screen
+    _loadSavedPriests();
+  }
+
+  void _loadSavedPriests() {
+    Future.microtask(() {
+      if (mounted) {
+        context.read<AdoptPriestProvider>().fetchSavedPriests();
+      }
+    });
+  }
+
+  // Returns priest IDs already chosen in any slot (including saved priests)
+  Set<int> _chosenPriestIds(List<AdoptedPriest> savedPriests) {
+    final newlySelected = _slots
         .where((s) => s != null)
         .map((s) => s!.id)
         .toSet();
+    
+    final saved = savedPriests
+        .map((p) => p.id)
+        .toSet();
+    
+    return {...newlySelected, ...saved};
   }
 
   // Returns priests not already chosen in any slot
-  List<Priest> _availablePriests(List<Priest> allPriests) {
-    final chosen = _chosenPriestIds();
+  List<Priest> _availablePriests(List<Priest> allPriests, List<AdoptedPriest> savedPriests) {
+    final chosen = _chosenPriestIds(savedPriests);
     return allPriests.where((p) => !chosen.contains(p.id)).toList();
   }
 
   Future<void> _openPickerForSlot(int slotIndex) async {
     final isDark = themeNotifier.isDark;
+    final provider = context.read<AdoptPriestProvider>();
 
     // Show loading state
     setState(() {
@@ -57,8 +86,8 @@ class _AdoptPriestScreenState extends State<AdoptPriestScreen> {
 
       final priestsData = PriestsData.fromJson(response.data);
       
-      // Filter out already chosen priests
-      final candidates = _availablePriests(priestsData.priests);
+      // Filter out already chosen priests (including saved ones)
+      final candidates = _availablePriests(priestsData.priests, provider.savedPriests);
       
       if (candidates.isEmpty) {
         setState(() {
@@ -249,15 +278,21 @@ class _AdoptPriestScreenState extends State<AdoptPriestScreen> {
 
     // Check the result from the provider
     if (provider.isSuccess && provider.response != null) {
-      // Navigate to success screen
+      // Navigate to success screen and wait for it to pop
       if (mounted) {
-        Navigator.of(context).push(
+        await Navigator.of(context).push(
           MaterialPageRoute(
             builder: (_) => AdoptPriestSuccessScreen(
               response: provider.response!,
             ),
           ),
         );
+        
+        // When returning from success screen, refresh the data
+        if (mounted) {
+          _loadSavedPriests();
+          _resetSlots();
+        }
       }
     } else if (provider.isError) {
       // Show error snackbar
@@ -282,13 +317,29 @@ class _AdoptPriestScreenState extends State<AdoptPriestScreen> {
 
   int get _filledCount => _slots.where((s) => s != null).length;
 
+  void _resetSlots() {
+    setState(() {
+      _slots[0] = null;
+      _slots[1] = null;
+      _slots[2] = null;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<bool>(
-      valueListenable: themeNotifier,
-      builder: (_, isDark, __) {
-        final titleColor = isDark ? Colors.white : const Color(0xFF624294);
-        final subColor = isDark
+    return PopScope(
+      canPop: true,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) {
+          // Clear slots when leaving the screen
+          _resetSlots();
+        }
+      },
+      child: ValueListenableBuilder<bool>(
+        valueListenable: themeNotifier,
+        builder: (_, isDark, __) {
+          final titleColor = isDark ? Colors.white : const Color(0xFF624294);
+          final subColor = isDark
             ? Colors.white.withOpacity(0.65)
             : const Color(0xFF624294).withOpacity(0.6);
 
@@ -470,31 +521,80 @@ class _AdoptPriestScreenState extends State<AdoptPriestScreen> {
                         ),
                         const SizedBox(height: 16),
 
-                        // ── 3 Slots ────────────────────────────────────────
-                        Row(
-                          children: List.generate(_maxSlots, (i) {
-                            return Expanded(
-                              child: Padding(
-                                padding: EdgeInsets.only(
-                                  left: i == 0 ? 0 : 6,
-                                  right: i == _maxSlots - 1 ? 0 : 6,
-                                ),
-                                child: _slots[i] == null
-                                    ? _EmptySlot(
+                        // ── 3 Slots (Saved + New Selection) ────────────────
+                        Consumer<AdoptPriestProvider>(
+                          builder: (context, provider, _) {
+                            return Row(
+                              children: List.generate(_maxSlots, (i) {
+                                // Check if this slot has a saved priest
+                                final hasSavedPriest = i < provider.savedPriests.length;
+                                final savedPriest = hasSavedPriest 
+                                    ? provider.savedPriests[i] 
+                                    : null;
+
+                                // If there's a saved priest, show it
+                                if (savedPriest != null) {
+                                  return Expanded(
+                                    child: Padding(
+                                      padding: EdgeInsets.only(
+                                        left: i == 0 ? 0 : 6,
+                                        right: i == _maxSlots - 1 ? 0 : 6,
+                                      ),
+                                      child: _SavedSlotCard(
+                                        priest: savedPriest,
                                         slotNumber: i + 1,
                                         isDark: isDark,
-                                        isLoading: _isLoadingPriests,
-                                        onAdd: () => _openPickerForSlot(i),
-                                      )
-                                    : _FilledCard(
-                                        priest: _slots[i]!,
-                                        slotLabel: '${i + 1}/$_maxSlots',
-                                        isDark: isDark,
-                                        onRemove: () => _removeSlot(i),
+                                        onUnadopt: () async {
+                                          final success = await provider.unadoptPriest(savedPriest.id);
+                                          if (success && mounted) {
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              SnackBar(
+                                                content: Text(
+                                                  'Priest unadopted',
+                                                  style: GoogleFonts.poppins(
+                                                      color: Colors.white),
+                                                ),
+                                                backgroundColor: Colors.green,
+                                                behavior: SnackBarBehavior.floating,
+                                                shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(14)),
+                                                margin: const EdgeInsets.all(16),
+                                              ),
+                                            );
+                                          }
+                                        },
                                       ),
-                              ),
+                                    ),
+                                  );
+                                }
+
+                                // Otherwise, show empty slot or newly selected priest
+                                final newSlotIndex = i - provider.savedPriests.length;
+                                return Expanded(
+                                  child: Padding(
+                                    padding: EdgeInsets.only(
+                                      left: i == 0 ? 0 : 6,
+                                      right: i == _maxSlots - 1 ? 0 : 6,
+                                    ),
+                                    child: _slots[newSlotIndex] == null
+                                        ? _EmptySlot(
+                                            slotNumber: i + 1,
+                                            isDark: isDark,
+                                            isLoading: _isLoadingPriests,
+                                            onAdd: () => _openPickerForSlot(newSlotIndex),
+                                          )
+                                        : _FilledCard(
+                                            priest: _slots[newSlotIndex]!,
+                                            slotLabel: '${i + 1}/$_maxSlots',
+                                            isDark: isDark,
+                                            onRemove: () => _removeSlot(newSlotIndex),
+                                          ),
+                                  ),
+                                );
+                              }),
                             );
-                          }),
+                          },
                         ),
 
                         const SizedBox(height: 24),
@@ -616,7 +716,8 @@ class _AdoptPriestScreenState extends State<AdoptPriestScreen> {
             ], // outer Stack children
           ), // outer Stack
         );
-      },
+        },
+      ),
     );
   }
 }
@@ -877,6 +978,280 @@ class _FilledCard extends StatelessWidget {
               fontSize: 10,
               fontWeight: FontWeight.w600,
               color: const Color(0xFF624294).withOpacity(0.4),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Saved Slot Card Widget ──────────────────────────────────────────────────
+class _SavedSlotCard extends StatelessWidget {
+  final AdoptedPriest priest;
+  final int slotNumber;
+  final bool isDark;
+  final VoidCallback onUnadopt;
+
+  const _SavedSlotCard({
+    required this.priest,
+    required this.slotNumber,
+    required this.isDark,
+    required this.onUnadopt,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isDark
+              ? const Color(0xFF624294)
+              : const Color(0xFF624294).withOpacity(0.15),
+          width: isDark ? 2.0 : 1.5,
+        ),
+        boxShadow: isDark
+            ? [
+                BoxShadow(
+                  color: const Color(0xFF624294).withOpacity(0.3),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ]
+            : [
+                BoxShadow(
+                  color: const Color(0xFF624294).withOpacity(0.10),
+                  blurRadius: 16,
+                  spreadRadius: 1,
+                  offset: const Offset(0, 6),
+                ),
+                BoxShadow(
+                  color: Colors.white.withOpacity(0.80),
+                  blurRadius: 4,
+                  offset: const Offset(0, -2),
+                ),
+              ],
+      ),
+      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
+      child: Column(
+        children: [
+          // Avatar with remove button overlay
+          Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Container(
+                width: 64, height: 64,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: const Color(0xFFEDE0ED),
+                  border: Border.all(
+                    color: const Color(0xFF624294).withOpacity(0.15),
+                    width: 1.5,
+                  ),
+                ),
+                child: const Icon(
+                  Icons.person_rounded,
+                  size: 36,
+                  color: Color(0xFF624294),
+                ),
+              ),
+              // Remove (×) button — top-right of avatar
+              Positioned(
+                top: -4, right: -4,
+                child: GestureDetector(
+                  onTap: onUnadopt,
+                  child: Container(
+                    width: 22, height: 22,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: const Color(0xFFE53935),
+                      border: Border.all(color: Colors.white, width: 1.5),
+                    ),
+                    child: const Icon(
+                      Icons.close_rounded,
+                      size: 13,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            priest.displayName,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.poppins(
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
+              color: const Color(0xFF624294),
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            'Pray for me',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.poppins(
+              fontSize: 9,
+              color: const Color(0xFF624294).withOpacity(0.55),
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 10),
+          // "SAVED" badge
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+            decoration: BoxDecoration(
+              color: const Color(0xFF4CAF50),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              'SAVED',
+              style: GoogleFonts.poppins(
+                fontSize: 9,
+                fontWeight: FontWeight.w800,
+                color: Colors.white,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            '$slotNumber/3',
+            style: GoogleFonts.poppins(
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+              color: const Color(0xFF624294).withOpacity(0.4),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Saved Priest Card Widget ─────────────────────────────────────────────────
+class _SavedPriestCard extends StatelessWidget {
+  final AdoptedPriest priest;
+  final bool isDark;
+  final VoidCallback onUnadopt;
+
+  const _SavedPriestCard({
+    required this.priest,
+    required this.isDark,
+    required this.onUnadopt,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        color: isDark
+            ? Colors.white.withOpacity(0.07)
+            : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isDark
+              ? Colors.white.withOpacity(0.12)
+              : const Color(0xFF624294).withOpacity(0.15),
+        ),
+        boxShadow: isDark
+            ? null
+            : [
+                BoxShadow(
+                  color: const Color(0xFF624294).withOpacity(0.10),
+                  blurRadius: 16,
+                  spreadRadius: 1,
+                  offset: const Offset(0, 6),
+                ),
+              ],
+      ),
+      child: Row(
+        children: [
+          // ── Avatar ──────────────────────────────────────────────────
+          Container(
+            width: 50,
+            height: 50,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: const Color(0xFFEDE0ED),
+              border: Border.all(
+                color: const Color(0xFF624294).withOpacity(0.2),
+                width: 1.5,
+              ),
+            ),
+            child: const Icon(
+              Icons.person_rounded,
+              size: 24,
+              color: Color(0xFF624294),
+            ),
+          ),
+
+          const SizedBox(width: 14),
+
+          // ── Priest Info ─────────────────────────────────────────────
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  priest.displayName,
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: isDark ? Colors.white : const Color(0xFF624294),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  priest.originalName,
+                  style: GoogleFonts.poppins(
+                    fontSize: 12,
+                    color: isDark
+                        ? Colors.white.withOpacity(0.5)
+                        : const Color(0xFF624294).withOpacity(0.5),
+                  ),
+                ),
+                if (priest.note.isNotEmpty) ...[
+                  const SizedBox(height: 6),
+                  Text(
+                    priest.note,
+                    style: GoogleFonts.poppins(
+                      fontSize: 11,
+                      color: isDark
+                          ? Colors.white.withOpacity(0.4)
+                          : const Color(0xFF624294).withOpacity(0.4),
+                      fontStyle: FontStyle.italic,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ],
+            ),
+          ),
+
+          const SizedBox(width: 12),
+
+          // ── Unadopt Button ──────────────────────────────────────────
+          GestureDetector(
+            onTap: onUnadopt,
+            child: Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.red.withOpacity(0.15),
+              ),
+              child: const Icon(
+                Icons.close_rounded,
+                size: 18,
+                color: Colors.red,
+              ),
             ),
           ),
         ],

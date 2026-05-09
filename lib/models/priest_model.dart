@@ -72,12 +72,14 @@ class AdoptedPriest {
   final String displayName;
   final String originalName;
   final String note;
+  final String? adoptedAt;
 
   const AdoptedPriest({
     required this.id,
     required this.displayName,
     required this.originalName,
     required this.note,
+    this.adoptedAt,
   });
 
   factory AdoptedPriest.fromJson(Map<String, dynamic> json) {
@@ -86,6 +88,7 @@ class AdoptedPriest {
       displayName: json['display_name'] as String,
       originalName: json['original_name'] as String,
       note: json['note'] as String? ?? '',
+      adoptedAt: json['adopted_at'] as String?,
     );
   }
 }
@@ -123,6 +126,34 @@ class AdoptPriestsResponse {
       totalAdopted: data['total_adopted'] as int? ?? 0,
       remainingSlots: data['remaining_slots'] as int? ?? 0,
       errors: List<String>.from(data['errors'] as List<dynamic>? ?? []),
+    );
+  }
+}
+
+class SavedPriestsResponse {
+  final bool success;
+  final List<AdoptedPriest> priests;
+  final int count;
+  final int remainingSlots;
+
+  const SavedPriestsResponse({
+    required this.success,
+    required this.priests,
+    required this.count,
+    required this.remainingSlots,
+  });
+
+  factory SavedPriestsResponse.fromJson(Map<String, dynamic> json) {
+    final data = json['data'] as Map<String, dynamic>? ?? {};
+    final rawPriests = data['priests'] as List<dynamic>? ?? [];
+
+    return SavedPriestsResponse(
+      success: json['success'] as bool? ?? false,
+      priests: rawPriests
+          .map((p) => AdoptedPriest.fromJson(p as Map<String, dynamic>))
+          .toList(),
+      count: data['count'] as int? ?? 0,
+      remainingSlots: data['remaining_slots'] as int? ?? 0,
     );
   }
 }

@@ -34,6 +34,7 @@ class AppConfig {
   static const String rosariesPath       = '/api/rosaries';
   static const String priestsPath        = '/api/priests';
   static const String priestsAdoptPath   = '/api/priests/adopt';
+  static const String myPriestsPath      = '/api/priests/my-priests';
 
   // ── Timeouts ────────────────────────────────────────────────────────────────
   static const Duration connectTimeout = Duration(seconds: 30);
