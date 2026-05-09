@@ -7,7 +7,10 @@ import 'package:flutter_html/flutter_html.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../colors/colors.dart';
+import '../../config/app_config.dart';
+import '../../models/rosary_entry_model.dart';
 import '../../providers/daily_prayer_provider.dart';
+import '../../services/api_client.dart';
 import '../../services/localization_service.dart';
 import '../../theme/theme_notifier.dart';
 import '../../widgets/global_count_panel.dart';
@@ -230,40 +233,142 @@ class _CountingScreenState extends State<CountingScreen>
     );
   }
 
-  void _save() {
+  void _save() async {
     HapticFeedback.selectionClick();
-    final noteText = _noteController.text.trim();
-    final msg = noteText.isEmpty
-        ? loc.tr('count_saved', args: {'count': '$_activeCount'})
-        : loc.tr('count_saved_note', args: {'count': '$_activeCount', 'note': noteText});
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const Icon(Icons.check_circle, color: Colors.white, size: 20),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(msg, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 14)),
-            ),
-          ],
+    
+    // Don't save if count is 0
+    if (_activeCount == 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Please add at least one count before saving.'),
+          backgroundColor: Colors.red.shade600,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          margin: const EdgeInsets.all(16),
+          duration: const Duration(seconds: 2),
         ),
-        backgroundColor: AppColors.goldDark,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-        margin: const EdgeInsets.all(16),
-        duration: const Duration(seconds: 2),
-      ),
-    );
+      );
+      return;
+    }
 
-    Future.delayed(const Duration(milliseconds: 500), () {
-      if (mounted) {
-        setState(() {
-          if (_isRosary) _count = 0; else _chapletCount = 0;
-          _noteController.clear();
-        });
-      }
-    });
+    final noteText = _noteController.text.trim();
+    final prayerTypeId = _isRosary ? 1 : 2;
+
+    try {
+      // Show loading indicator
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Row(
+            children: [
+              SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation(Colors.white)),
+              ),
+              SizedBox(width: 10),
+              Text('Saving...', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+            ],
+          ),
+          backgroundColor: AppColors.goldDark,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          margin: const EdgeInsets.all(16),
+          duration: const Duration(seconds: 30),
+        ),
+      );
+
+      // Call API
+      final response = await ApiClient.instance.post(
+        AppConfig.rosariesPath,
+        body: {
+          'count': _activeCount,
+          'intention_text': noteText,
+          'prayer_type_id': prayerTypeId,
+        },
+      );
+
+      if (!mounted) return;
+
+      // Parse response
+      final entryResponse = RosaryEntryResponse.fromJson(response.data);
+
+      // Show success message
+      final msg = noteText.isEmpty
+          ? loc.tr('count_saved', args: {'count': '$_activeCount'})
+          : loc.tr('count_saved_note', args: {'count': '$_activeCount', 'note': noteText});
+
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(Icons.check_circle, color: Colors.white, size: 20),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(msg, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 14)),
+              ),
+            ],
+          ),
+          backgroundColor: AppColors.goldDark,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          margin: const EdgeInsets.all(16),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+
+      // Reset after delay
+      Future.delayed(const Duration(milliseconds: 500), () {
+        if (mounted) {
+          setState(() {
+            if (_isRosary) _count = 0; else _chapletCount = 0;
+            _noteController.clear();
+          });
+        }
+      });
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(Icons.error_outline, color: Colors.white, size: 20),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(e.message, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 14)),
+              ),
+            ],
+          ),
+          backgroundColor: Colors.red.shade600,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          margin: const EdgeInsets.all(16),
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Row(
+            children: [
+              Icon(Icons.error_outline, color: Colors.white, size: 20),
+              SizedBox(width: 10),
+              Expanded(
+                child: Text('Failed to save. Please try again.', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 14)),
+              ),
+            ],
+          ),
+          backgroundColor: Colors.red.shade600,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          margin: const EdgeInsets.all(16),
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    }
   }
 
   @override
