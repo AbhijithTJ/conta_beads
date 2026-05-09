@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import '../../theme/theme_notifier.dart';
 import '../../config/app_config.dart';
 import '../../services/api_client.dart';
 import '../../models/priest_model.dart';
+import '../../providers/adopt_priest_provider.dart';
+import 'adopt_priest_success_screen.dart';
 
 class AdoptPriestScreen extends StatefulWidget {
   const AdoptPriestScreen({super.key});
@@ -228,6 +231,53 @@ class _AdoptPriestScreenState extends State<AdoptPriestScreen> {
     setState(() {
       _slots[slotIndex] = null;
     });
+  }
+
+  Future<void> _adoptPriests() async {
+    final priestIds = _slots
+        .where((s) => s != null)
+        .map((s) => s!.id)
+        .toList();
+
+    if (priestIds.isEmpty) return;
+
+    // Call the provider to handle adoption
+    final provider = context.read<AdoptPriestProvider>();
+    await provider.adoptPriests(priestIds);
+
+    if (!mounted) return;
+
+    // Check the result from the provider
+    if (provider.isSuccess && provider.response != null) {
+      // Navigate to success screen
+      if (mounted) {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => AdoptPriestSuccessScreen(
+              response: provider.response!,
+            ),
+          ),
+        );
+      }
+    } else if (provider.isError) {
+      // Show error snackbar
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              provider.errorMessage,
+              style: GoogleFonts.poppins(color: Colors.white),
+            ),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+            ),
+            margin: const EdgeInsets.all(16),
+          ),
+        );
+      }
+    }
   }
 
   int get _filledCount => _slots.where((s) => s != null).length;
@@ -500,60 +550,59 @@ class _AdoptPriestScreenState extends State<AdoptPriestScreen> {
 
                         // ── Adopt button (visible when ≥1 filled) ──────────
                         if (_filledCount > 0)
-                          GestureDetector(
-                            onTap: () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    '$_filledCount priest${_filledCount > 1 ? 's' : ''} adopted!',
-                                    style: GoogleFonts.poppins(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w600,
+                          Consumer<AdoptPriestProvider>(
+                            builder: (context, provider, _) {
+                              return GestureDetector(
+                                onTap: provider.isLoading ? null : _adoptPriests,
+                                child: Container(
+                                  width: double.infinity,
+                                  height: 54,
+                                  decoration: BoxDecoration(
+                                    gradient: const LinearGradient(
+                                      colors: [Color(0xFF7B55A8), Color(0xFF624294)],
+                                      begin: Alignment.topCenter,
+                                      end: Alignment.bottomCenter,
                                     ),
+                                    borderRadius: BorderRadius.circular(30),
+                                    boxShadow: [
+                                      const BoxShadow(
+                                        color: Color(0xFF2A0A5E),
+                                        blurRadius: 0,
+                                        offset: Offset(0, 5),
+                                      ),
+                                      BoxShadow(
+                                        color: const Color(0xFF624294).withOpacity(0.45),
+                                        blurRadius: 14,
+                                        offset: const Offset(0, 8),
+                                      ),
+                                    ],
                                   ),
-                                  backgroundColor: const Color(0xFF22014D),
-                                  behavior: SnackBarBehavior.floating,
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(14)),
-                                  margin: const EdgeInsets.all(16),
+                                  child: Center(
+                                    child: provider.isLoading
+                                        ? SizedBox(
+                                            width: 24,
+                                            height: 24,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                              valueColor:
+                                                  AlwaysStoppedAnimation<Color>(
+                                                Colors.white.withOpacity(0.8),
+                                              ),
+                                            ),
+                                          )
+                                        : Text(
+                                            'Adopt $_filledCount Priest${_filledCount > 1 ? 's' : ''}',
+                                            style: GoogleFonts.poppins(
+                                              color: Colors.white,
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w700,
+                                              letterSpacing: 0.5,
+                                            ),
+                                          ),
+                                  ),
                                 ),
                               );
                             },
-                            child: Container(
-                              width: double.infinity,
-                              height: 54,
-                              decoration: BoxDecoration(
-                                gradient: const LinearGradient(
-                                  colors: [Color(0xFF7B55A8), Color(0xFF624294)],
-                                  begin: Alignment.topCenter,
-                                  end: Alignment.bottomCenter,
-                                ),
-                                borderRadius: BorderRadius.circular(30),
-                                boxShadow: [
-                                  const BoxShadow(
-                                    color: Color(0xFF2A0A5E),
-                                    blurRadius: 0,
-                                    offset: Offset(0, 5),
-                                  ),
-                                  BoxShadow(
-                                    color: const Color(0xFF624294).withOpacity(0.45),
-                                    blurRadius: 14,
-                                    offset: const Offset(0, 8),
-                                  ),
-                                ],
-                              ),
-                              child: Center(
-                                child: Text(
-                                  'Adopt $_filledCount Priest${_filledCount > 1 ? 's' : ''}',
-                                  style: GoogleFonts.poppins(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w700,
-                                    letterSpacing: 0.5,
-                                  ),
-                                ),
-                              ),
-                            ),
                           ),
 
                         const SizedBox(height: 40),

@@ -5,6 +5,7 @@ import 'providers/user_provider.dart';
 import 'providers/global_counts_provider.dart';
 import 'providers/home_provider.dart';
 import 'providers/daily_prayer_provider.dart';
+import 'providers/adopt_priest_provider.dart';
 import 'screens/splash/splash_screen.dart';
 import 'screens/theme_select/theme_select_screen.dart';
 import 'services/localization_service.dart';
@@ -38,6 +39,7 @@ class AppRoot extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => GlobalCountsProvider()),
         ChangeNotifierProvider(create: (_) => HomeProvider()),
         ChangeNotifierProvider(create: (_) => DailyPrayerProvider()),
+        ChangeNotifierProvider(create: (_) => AdoptPriestProvider()),
       ],
       child: const _AppView(),
     );
