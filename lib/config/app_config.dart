@@ -32,6 +32,7 @@ class AppConfig {
   static const String homePath           = '/api/home';
   static const String dailyPrayersPath   = '/api/daily-prayers';
   static const String rosariesPath       = '/api/rosaries';
+  static const String rosariesBorrowPath = '/api/rosaries/borrow';
   static const String priestsPath        = '/api/priests';
   static const String priestsAdoptPath   = '/api/priests/adopt';
   static const String myPriestsPath      = '/api/priests/my-priests';

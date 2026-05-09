@@ -22,11 +22,31 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
   final FocusNode _intentionFocus = FocusNode();
   final FocusNode _rosaryCountFocus = FocusNode();
   int _myTotal = 300;
+  bool _isRosaryMode = true;
 
   late AnimationController _quoteFadeController;
   late Animation<double> _quoteFadeAnim;
   Timer? _quoteTimer;
   int _currentQuoteIndex = 0;
+
+  int _getTotalCount() {
+    final data = context.read<IntentionsProvider>().data;
+    if (data == null) return 300;
+    
+    if (_isRosaryMode) {
+      final rosary = data.personalPrayers.firstWhere(
+        (p) => p.prayerType.toLowerCase() == 'rosary',
+        orElse: () => const PersonalPrayer(prayerType: 'Rosary', personalCount: 0),
+      );
+      return rosary.personalCount;
+    } else {
+      final chaplet = data.personalPrayers.firstWhere(
+        (p) => p.prayerType.toLowerCase() == 'chaplet',
+        orElse: () => const PersonalPrayer(prayerType: 'Chaplet', personalCount: 0),
+      );
+      return chaplet.personalCount;
+    }
+  }
 
   @override
   void initState() {
@@ -555,7 +575,7 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('BORROW ROSARIES',
+                    Text('BORROW ${_isRosaryMode ? 'ROSARIES' : 'CHAPLETS'}',
                         style: GoogleFonts.poppins(fontSize: 10, fontWeight: FontWeight.w800, color: const Color(0xFF624294).withOpacity(0.8), letterSpacing: 1.8)),
                     const SizedBox(height: 2),
                     Text('Share your intention',
@@ -565,6 +585,8 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
               ),
             ],
           ),
+          const SizedBox(height: 20),
+          _buildPrayerToggleButton(),
           const SizedBox(height: 20),
           Text('Borrow prayers from the community. (Your intention remains private while the community entrusts you to Mother Mary.)',
               style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.authBgMid.withOpacity(0.7), height: 1.6)),
@@ -633,15 +655,15 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
                     decoration: BoxDecoration(
-                      color: _myTotal < 0 ? Colors.red.withOpacity(0.1) : const Color(0xFF624294).withOpacity(0.08),
+                      color: _getTotalCount() < 0 ? Colors.red.withOpacity(0.1) : const Color(0xFF624294).withOpacity(0.08),
                       borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: _myTotal < 0 ? Colors.red.withOpacity(0.4) : Colors.white, width: 2.0),
+                      border: Border.all(color: _getTotalCount() < 0 ? Colors.red.withOpacity(0.4) : Colors.white, width: 2.0),
                     ),
                     child: Text(
-                      '$_myTotal',
+                      '${_getTotalCount()}',
                       style: GoogleFonts.poppins(
                         fontSize: 22, fontWeight: FontWeight.w900,
-                        color: _myTotal < 0 ? Colors.red : const Color(0xFF624294),
+                        color: _getTotalCount() < 0 ? Colors.red : const Color(0xFF624294),
                       ),
                     ),
                   ),
@@ -658,16 +680,8 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
 
   Widget _buildSubmitButton(bool isDark) {
     return GestureDetector(
-      onTap: () {
-        if (_intentionController.text.isNotEmpty) {
-          final count = int.tryParse(_rosaryCountController.text.trim()) ?? 0;
-          setState(() => _myTotal -= count);
-          Navigator.of(context).push(MaterialPageRoute(
-            builder: (context) => IntentionSuccessScreen(intention: _intentionController.text),
-          ));
-          _intentionController.clear();
-          _rosaryCountController.clear();
-        } else {
+      onTap: () async {
+        if (_intentionController.text.isEmpty) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Row(children: const [
               Icon(Icons.info_outline, color: Colors.white, size: 20),
@@ -679,23 +693,157 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
             margin: const EdgeInsets.all(16),
           ));
+          return;
+        }
+
+        final count = int.tryParse(_rosaryCountController.text.trim()) ?? 0;
+        if (count <= 0) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Row(children: const [
+              Icon(Icons.info_outline, color: Colors.white, size: 20),
+              SizedBox(width: 10),
+              Text('Please enter a valid count', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+            ]),
+            backgroundColor: Colors.redAccent,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+            margin: const EdgeInsets.all(16),
+          ));
+          return;
+        }
+
+        final prayerTypeId = _isRosaryMode ? 1 : 2;
+        final intentionText = _intentionController.text;
+        final provider = context.read<IntentionsProvider>();
+        
+        final borrowResponse = await provider.borrowPrayers(
+          count: count,
+          intentionText: intentionText,
+          prayerTypeId: prayerTypeId,
+        );
+
+        if (borrowResponse != null && mounted) {
+          _intentionController.clear();
+          _rosaryCountController.clear();
+          
+          // Navigate to success screen
+          await Navigator.of(context).push(MaterialPageRoute(
+            builder: (context) => IntentionSuccessScreen(intention: intentionText),
+          ));
+          
+          // When returning from success screen, refresh the intentions data
+          if (mounted) {
+            provider.resetBorrowStatus();
+            provider.fetch(); // Refresh to get updated personal prayer counts
+          }
+        } else if (mounted) {
+          final errorMessage = provider.errorMessage ?? 'Failed to borrow prayers';
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Row(children: [
+              const Icon(Icons.error_outline, color: Colors.white, size: 20),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(errorMessage, 
+                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ]),
+            backgroundColor: Colors.redAccent,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+            margin: const EdgeInsets.all(16),
+          ));
         }
       },
-      child: Container(
-        width: double.infinity,
-        height: 56,
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [Color(0xFF7B55A8), Color(0xFF624294)],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
+      child: Consumer<IntentionsProvider>(
+        builder: (context, provider, _) {
+          return Container(
+            width: double.infinity,
+            height: 56,
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFF7B55A8), Color(0xFF624294)],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
+              borderRadius: BorderRadius.circular(30),
+              boxShadow: [BoxShadow(color: const Color(0xFF624294).withOpacity(0.35), blurRadius: 15, offset: const Offset(0, 8))],
+            ),
+            child: Center(
+              child: provider.isBorrowLoading
+                  ? SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          Colors.white.withOpacity(0.8),
+                        ),
+                      ),
+                    )
+                  : Text('Borrow ${_isRosaryMode ? 'Rosaries' : 'Chaplets'}',
+                      style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w800, color: Colors.white, letterSpacing: 0.5)),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildPrayerToggleButton() {
+    final activePill = const Color(0xFF3B0764);
+    final activeText = AppColors.goldPrimary;
+    final inactiveText = const Color(0xFF624294).withOpacity(0.55);
+    final shadowColor = const Color(0xFF624294).withOpacity(0.35);
+
+    Widget tab(String label, bool active, VoidCallback onTap) {
+      return GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 280),
+          curve: Curves.easeInOut,
+          padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 10),
+          decoration: BoxDecoration(
+            color: active ? activePill : Colors.transparent,
+            borderRadius: BorderRadius.circular(26),
+            boxShadow: active
+                ? [BoxShadow(color: shadowColor, blurRadius: 10, offset: const Offset(0, 3))]
+                : [],
           ),
-          borderRadius: BorderRadius.circular(30),
-          boxShadow: [BoxShadow(color: const Color(0xFF624294).withOpacity(0.35), blurRadius: 15, offset: const Offset(0, 8))],
+          child: Text(label,
+              style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: active ? activeText : inactiveText,
+                  letterSpacing: 0.3)),
         ),
-        child: Center(
-          child: Text('Borrow Rosaries',
-              style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w800, color: Colors.white, letterSpacing: 0.5)),
+      );
+    }
+
+    return Center(
+      child: Container(
+        height: 52,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(30),
+          border: Border.all(color: const Color(0xFF624294).withOpacity(0.18), width: 1.5),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF624294).withOpacity(0.08),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        padding: const EdgeInsets.all(4),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            tab('Rosary', _isRosaryMode, () => setState(() => _isRosaryMode = true)),
+            tab('Chaplet', !_isRosaryMode, () => setState(() => _isRosaryMode = false)),
+          ],
         ),
       ),
     );
