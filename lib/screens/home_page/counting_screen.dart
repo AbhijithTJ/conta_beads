@@ -91,9 +91,10 @@ class _CountingScreenState extends State<CountingScreen>
     super.initState();
     _isRosary = !widget.startWithChaplet;
 
-    // Fetch daily prayer for this prayer type
+    // Fetch daily prayers for both Rosary (1) and Chaplet (2)
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<DailyPrayerProvider>().fetch(widget.prayerTypeId);
+      context.read<DailyPrayerProvider>().fetch(1); // Rosary
+      context.read<DailyPrayerProvider>().fetch(2); // Chaplet
     });
 
     _pulseController = AnimationController(
@@ -577,7 +578,12 @@ class _CountingScreenState extends State<CountingScreen>
 
     return Expanded(
       child: GestureDetector(
-        onTap: () => setState(() => _isRosary = isRosary),
+        onTap: () {
+          setState(() => _isRosary = isRosary);
+          // Fetch the prayer for the new mode
+          final newTypeId = isRosary ? 1 : 2; // Rosary = 1, Chaplet = 2
+          context.read<DailyPrayerProvider>().fetch(newTypeId);
+        },
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 250),
           curve: Curves.easeInOut,
@@ -654,10 +660,13 @@ class _CountingScreenState extends State<CountingScreen>
   }
 
   Widget _buildQuoteCard() {
+    // Determine which prayer type to fetch based on current mode
+    final currentTypeId = _isRosary ? 1 : 2; // Rosary = 1, Chaplet = 2
+    
     return Consumer<DailyPrayerProvider>(
       builder: (context, provider, _) {
-        final data = provider.dataFor(widget.prayerTypeId);
-        final isLoading = provider.isLoadingFor(widget.prayerTypeId);
+        final data = provider.dataFor(currentTypeId);
+        final isLoading = provider.isLoadingFor(currentTypeId);
 
         // Loading state
         if (isLoading && data == null) {
