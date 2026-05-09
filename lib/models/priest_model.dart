@@ -157,3 +157,58 @@ class SavedPriestsResponse {
     );
   }
 }
+
+
+// Models for the POST /api/priests endpoint (Suggest a Priest).
+
+class SuggestedPriest {
+  final int id;
+  final String originalName;
+  final String displayName;
+  final String note;
+  final String status;
+  final int addedBy;
+
+  const SuggestedPriest({
+    required this.id,
+    required this.originalName,
+    required this.displayName,
+    required this.note,
+    required this.status,
+    required this.addedBy,
+  });
+
+  factory SuggestedPriest.fromJson(Map<String, dynamic> json) {
+    return SuggestedPriest(
+      id: json['id'] as int,
+      originalName: json['original_name'] as String? ?? '',
+      displayName: json['display_name'] as String? ?? '',
+      note: json['note'] as String? ?? '',
+      status: json['status'] as String? ?? '',
+      addedBy: json['added_by'] as int? ?? 0,
+    );
+  }
+}
+
+class SuggestPriestResponse {
+  final bool success;
+  final String message;
+  final SuggestedPriest priest;
+
+  const SuggestPriestResponse({
+    required this.success,
+    required this.message,
+    required this.priest,
+  });
+
+  factory SuggestPriestResponse.fromJson(Map<String, dynamic> json) {
+    final data = json['data'] as Map<String, dynamic>? ?? {};
+    final priestData = data['priest'] as Map<String, dynamic>? ?? {};
+
+    return SuggestPriestResponse(
+      success: json['success'] as bool? ?? false,
+      message: json['message'] as String? ?? '',
+      priest: SuggestedPriest.fromJson(priestData),
+    );
+  }
+}

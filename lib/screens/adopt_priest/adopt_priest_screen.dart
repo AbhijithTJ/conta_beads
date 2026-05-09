@@ -7,6 +7,7 @@ import '../../services/api_client.dart';
 import '../../models/priest_model.dart';
 import '../../providers/adopt_priest_provider.dart';
 import 'adopt_priest_success_screen.dart';
+import 'suggest_priest_screen.dart';
 
 class AdoptPriestScreen extends StatefulWidget {
   const AdoptPriestScreen({super.key});
@@ -704,6 +705,44 @@ class _AdoptPriestScreenState extends State<AdoptPriestScreen> {
                               );
                             },
                           ),
+
+                        const SizedBox(height: 40),
+                        
+                        // ── Suggest a Priest button ──────────────────────
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.of(context).push(MaterialPageRoute(
+                              builder: (_) => const SuggestPriestScreen(),
+                            ));
+                          },
+                          child: Container(
+                            width: double.infinity,
+                            height: 54,
+                            decoration: BoxDecoration(
+                              color: isDark
+                                  ? Colors.white.withOpacity(0.1)
+                                  : const Color(0xFF624294).withOpacity(0.08),
+                              borderRadius: BorderRadius.circular(30),
+                              border: Border.all(
+                                color: isDark
+                                    ? Colors.white.withOpacity(0.2)
+                                    : const Color(0xFF624294).withOpacity(0.2),
+                                width: 1.5,
+                              ),
+                            ),
+                            child: Center(
+                              child: Text(
+                                'Suggest a Priest',
+                                style: GoogleFonts.poppins(
+                                  color: titleColor,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
 
                         const SizedBox(height: 40),
                       ],
