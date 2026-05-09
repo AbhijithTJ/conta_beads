@@ -2,8 +2,11 @@ import 'dart:async';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import '../../colors/colors.dart';
 import '../../theme/theme_notifier.dart';
+import '../../providers/intentions_provider.dart';
+import '../../models/intentions_model.dart';
 import 'intention_success_screen.dart';
 
 class IntentionsScreen extends StatefulWidget {
@@ -18,23 +21,12 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
   final TextEditingController _rosaryCountController = TextEditingController();
   final FocusNode _intentionFocus = FocusNode();
   final FocusNode _rosaryCountFocus = FocusNode();
-  int _myTotal = 300; // user's rosary total
+  int _myTotal = 300;
 
   late AnimationController _quoteFadeController;
   late Animation<double> _quoteFadeAnim;
   Timer? _quoteTimer;
   int _currentQuoteIndex = 0;
-
-  final List<Map<String, String>> _quotes = [
-    {'text': '"Prayer joined to sacrifice constitutes the most powerful force in human history."', 'author': '— St. John Paul II'},
-    {'text': '"The rosary is the most excellent form of prayer."', 'author': 'Pope Paul VI'},
-    {'text': '"To pray is to let Jesus into our lives."', 'author': 'Ole Hallesby'},
-    {'text': '"Prayer is the key of the morning and the bolt of the evening."', 'author': 'Mahatma Gandhi'},
-    {'text': '"With God, all things are possible."', 'author': 'Matthew 19:26'},
-  ];
-
-  final String todayIntention = 'For the Healing of the Sick';
-  final int prayerRequests = 23;
 
   @override
   void initState() {
@@ -44,15 +36,12 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
       CurvedAnimation(parent: _quoteFadeController, curve: Curves.easeInOut),
     );
     _quoteFadeController.forward();
-    _quoteTimer = Timer.periodic(const Duration(seconds: 5), (_) {
-      _quoteFadeController.reverse().then((_) {
-        if (!mounted) return;
-        setState(() => _currentQuoteIndex = (_currentQuoteIndex + 1) % _quotes.length);
-        _quoteFadeController.forward();
-      });
-    });
     _intentionFocus.addListener(() => setState(() {}));
     _rosaryCountFocus.addListener(() => setState(() {}));
+    
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<IntentionsProvider>().fetch();
+    });
   }
 
   @override
@@ -66,12 +55,37 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
     super.dispose();
   }
 
+  void _startQuoteTimer(int quoteCount) {
+    _quoteTimer?.cancel();
+    if (quoteCount > 0) {
+      _quoteTimer = Timer.periodic(const Duration(seconds: 5), (_) {
+        _quoteFadeController.reverse().then((_) {
+          if (!mounted) return;
+          setState(() => _currentQuoteIndex = (_currentQuoteIndex + 1) % quoteCount);
+          _quoteFadeController.forward();
+        });
+      });
+    }
+  }
+
+  Color _getStatusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'active':
+        return Colors.green;
+      case 'scheduled':
+        return Colors.blue;
+      case 'completed':
+        return Colors.grey;
+      default:
+        return const Color(0xFF624294);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<bool>(
       valueListenable: themeNotifier,
       builder: (_, isDark, __) {
-        final bgColor = isDark ? const Color(0xFF22014D) : const Color(0xFFF0EBF0);
         return Scaffold(
           body: Container(
             width: double.infinity,
@@ -91,31 +105,82 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
                   )
                 : const BoxDecoration(color: Color(0xFFF0EBF0)),
             child: SafeArea(
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 32),
-                    _buildHeader(isDark),
-                    const SizedBox(height: 32),
-                    _buildQuoteCard(isDark),
-                    const SizedBox(height: 16),
-                    Row(
+              child: Consumer<IntentionsProvider>(
+                builder: (context, provider, _) {
+                  if (provider.isLoading) {
+                    return Center(
+                      child: CircularProgressIndicator(
+                        color: AppColors.goldPrimary,
+                      ),
+                    );
+                  }
+
+                  if (provider.isError) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.error_outline, size: 48, color: Colors.red.withOpacity(0.7)),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Failed to load intentions',
+                            style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.red),
+                          ),
+                          const SizedBox(height: 8),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 24),
+                            child: Text(
+                              provider.errorMessage ?? 'Unknown error',
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.poppins(fontSize: 12, color: Colors.red.withOpacity(0.7)),
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          ElevatedButton(
+                            onPressed: () => provider.fetch(),
+                            child: const Text('Retry'),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  final data = provider.data;
+                  if (data == null) {
+                    return Center(
+                      child: Text('No data available', style: GoogleFonts.poppins()),
+                    );
+                  }
+
+                  if (data.quotes.isNotEmpty && _quoteTimer == null) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      _startQuoteTimer(data.quotes.length);
+                    });
+                  }
+
+                  return SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Expanded(child: _buildTodayIntentionCard()),
-                        const SizedBox(width: 12),
-                        Expanded(child: _buildPrayerRequestsCard()),
+                        const SizedBox(height: 32),
+                        _buildHeader(isDark),
+                        const SizedBox(height: 32),
+                        _buildQuoteCard(isDark, data),
+                        const SizedBox(height: 24),
+                        _buildIntentionsGrid(data),
+                        const SizedBox(height: 16),
+                        _buildPrayerRequestsCard(data),
+                        const SizedBox(height: 32),
+                        _buildDivider(isDark),
+                        const SizedBox(height: 32),
+                        _buildRequestRosaryCard(isDark),
+                        const SizedBox(height: 48),
                       ],
                     ),
-                    const SizedBox(height: 32),
-                    _buildDivider(isDark),
-                    const SizedBox(height: 32),
-                    _buildRequestRosaryCard(isDark),
-                    const SizedBox(height: 48),
-                  ],
-                ),
+                  );
+                },
               ),
             ),
           ),
@@ -149,8 +214,23 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
     );
   }
 
-  Widget _buildQuoteCard(bool isDark) {
-    final q = _quotes[_currentQuoteIndex];
+  Widget _buildQuoteCard(bool isDark, IntentionsData data) {
+    if (data.quotes.isEmpty) {
+      return Container(
+        width: double.infinity,
+        height: 160,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(color: isDark ? Colors.white : const Color(0xFF624294).withOpacity(0.12), width: isDark ? 2.0 : 1.5),
+        ),
+        child: Center(
+          child: Text('No quotes available', style: GoogleFonts.poppins(color: const Color(0xFF624294).withOpacity(0.5))),
+        ),
+      );
+    }
+
+    final q = data.quotes[_currentQuoteIndex];
     final quoteTextColor = const Color(0xFF624294);
     final shadowColor = isDark ? AppColors.authBgBottom.withOpacity(0.20) : const Color(0xFF624294).withOpacity(0.15);
     final borderColor = isDark ? Colors.white : const Color(0xFF624294).withOpacity(0.12);
@@ -163,9 +243,9 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
           if (!mounted) return;
           setState(() {
             if (details.primaryVelocity! < 0) {
-              _currentQuoteIndex = (_currentQuoteIndex + 1) % _quotes.length;
+              _currentQuoteIndex = (_currentQuoteIndex + 1) % data.quotes.length;
             } else {
-              _currentQuoteIndex = (_currentQuoteIndex - 1 + _quotes.length) % _quotes.length;
+              _currentQuoteIndex = (_currentQuoteIndex - 1 + data.quotes.length) % data.quotes.length;
             }
           });
           _quoteFadeController.forward();
@@ -189,20 +269,20 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
               Text('\u275D', style: TextStyle(fontSize: 20, color: const Color(0xFF624294).withOpacity(0.45), height: 1.0)),
               const SizedBox(height: 6),
               Text(
-                q['text']!,
+                q.quotation,
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(fontSize: 14.5, fontWeight: isDark ? FontWeight.w500 : FontWeight.w700, color: quoteTextColor, fontStyle: FontStyle.italic, height: 1.5, letterSpacing: 0.2),
               ),
               const SizedBox(height: 8),
-              if (q['author']!.isNotEmpty)
-                Text(q['author']!,
+              if (q.reference.isNotEmpty)
+                Text('— ${q.reference}',
                     style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Color(0xFF624294), letterSpacing: 1.2)),
               const SizedBox(height: 10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(_quotes.length, (i) {
+                children: List.generate(data.quotes.length, (i) {
                   return AnimatedContainer(
                     duration: const Duration(milliseconds: 300),
                     width: i == _currentQuoteIndex ? 18 : 6,
@@ -221,87 +301,225 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
       ),
     );
   }
-  Widget _buildTodayIntentionCard() {
+
+  Widget _buildIntentionsGrid(IntentionsData data) {
+    if (data.adminIntentions.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: const Color(0xFF624294).withOpacity(0.15), width: 1.5),
+        ),
+        child: Center(
+          child: Text('No intentions available', style: GoogleFonts.poppins(color: const Color(0xFF624294).withOpacity(0.5))),
+        ),
+      );
+    }
+
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 12,
+        mainAxisSpacing: 12,
+        childAspectRatio: 1.0,
+      ),
+      itemCount: data.adminIntentions.length,
+      itemBuilder: (context, index) {
+        final intention = data.adminIntentions[index];
+        return _buildIntentionGridCard(intention);
+      },
+    );
+  }
+
+  Widget _buildIntentionGridCard(AdminIntention intention) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: const Color(0xFF624294).withOpacity(0.15), width: 1.5),
         boxShadow: [
-          BoxShadow(color: const Color(0xFF624294).withOpacity(0.10), blurRadius: 16, spreadRadius: 1, offset: const Offset(0, 6)),
-          BoxShadow(color: Colors.white.withOpacity(0.80), blurRadius: 4, offset: const Offset(0, -2)),
+          BoxShadow(color: const Color(0xFF624294).withOpacity(0.10), blurRadius: 12, spreadRadius: 0, offset: const Offset(0, 4)),
+          BoxShadow(color: Colors.white.withOpacity(0.80), blurRadius: 2, offset: const Offset(0, -1)),
         ],
       ),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Row(
+          Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                width: 48, height: 48,
+                width: 36,
+                height: 36,
                 decoration: BoxDecoration(
                   color: const Color(0xFFFFB347),
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Icon(Icons.church_rounded, color: Colors.white, size: 26),
+                child: const Icon(Icons.church_rounded, color: Colors.white, size: 20),
               ),
-              const Spacer(),
-              Icon(Icons.chevron_right_rounded, color: const Color(0xFF624294).withOpacity(0.35), size: 22),
+              const SizedBox(height: 10),
+              Text(
+                intention.title,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w800, color: const Color(0xFF624294)),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                intention.description,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.poppins(fontSize: 10, fontWeight: FontWeight.w500, color: const Color(0xFF624294).withOpacity(0.6)),
+              ),
             ],
           ),
-          const SizedBox(height: 14),
-          Text("Today's Intention",
-              style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w800, color: const Color(0xFF624294))),
-          const SizedBox(height: 4),
-          Text(todayIntention,
-              style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w500, color: const Color(0xFF624294).withOpacity(0.5))),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: _getStatusColor(intention.status).withOpacity(0.15),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Text(
+              intention.status,
+              style: GoogleFonts.poppins(
+                fontSize: 9,
+                fontWeight: FontWeight.w700,
+                color: _getStatusColor(intention.status),
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildPrayerRequestsCard() {
+  Widget _buildPrayerRequestsCard(IntentionsData data) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(22),
         border: Border.all(color: const Color(0xFF624294).withOpacity(0.15), width: 1.5),
         boxShadow: [
           BoxShadow(color: const Color(0xFF624294).withOpacity(0.10), blurRadius: 16, spreadRadius: 1, offset: const Offset(0, 6)),
           BoxShadow(color: Colors.white.withOpacity(0.80), blurRadius: 4, offset: const Offset(0, -2)),
         ],
       ),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                width: 48, height: 48,
+                width: 48,
+                height: 48,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFB57BEA),
+                  color: const Color(0xFFB57BEA).withOpacity(0.15),
                   borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: const Color(0xFFB57BEA).withOpacity(0.3), width: 1.5),
                 ),
-                child: const Icon(Icons.people_alt_rounded, color: Colors.white, size: 26),
+                child: const Icon(Icons.people_alt_rounded, color: Color(0xFFB57BEA), size: 26),
               ),
-              const Spacer(),
-              Icon(Icons.chevron_right_rounded, color: const Color(0xFF624294).withOpacity(0.35), size: 22),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Community Prayers',
+                        style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w900, color: const Color(0xFF624294), letterSpacing: -0.5)),
+                    const SizedBox(height: 4),
+                    Text('Active prayer requests',
+                        style: GoogleFonts.poppins(fontSize: 11, fontWeight: FontWeight.w500, color: const Color(0xFF624294).withOpacity(0.6))),
+                  ],
+                ),
+              ),
             ],
           ),
-          const SizedBox(height: 14),
-          Text('Community Prayers',
-              style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w800, color: const Color(0xFF624294))),
-          const SizedBox(height: 4),
-          Row(
+          const SizedBox(height: 20),
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 14,
+              mainAxisSpacing: 14,
+              childAspectRatio: 0.9,
+            ),
+            itemCount: data.communityPrayers.length,
+            itemBuilder: (context, index) {
+              final prayer = data.communityPrayers[index];
+              return _buildPrayerCard(prayer);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPrayerCard(PrayerCount prayer) {
+    final bgColor = prayer.prayerType.toLowerCase() == 'rosary'
+        ? const Color(0xFFFFB347).withOpacity(0.12)
+        : const Color(0xFFB57BEA).withOpacity(0.12);
+    final iconColor = prayer.prayerType.toLowerCase() == 'rosary'
+        ? const Color(0xFFFFB347)
+        : const Color(0xFFB57BEA);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: iconColor.withOpacity(0.25), width: 1.5),
+        boxShadow: [
+          BoxShadow(color: iconColor.withOpacity(0.08), blurRadius: 12, spreadRadius: 0, offset: const Offset(0, 4)),
+        ],
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: iconColor.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              prayer.prayerType.toLowerCase() == 'rosary' ? Icons.favorite_rounded : Icons.spa_rounded,
+              color: iconColor,
+              size: 22,
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(width: 6, height: 6, decoration: const BoxDecoration(shape: BoxShape.circle, color: Colors.green)),
-              const SizedBox(width: 6),
-              Text('$prayerRequests active requests',
-                  style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w500, color: const Color(0xFF624294).withOpacity(0.5))),
+              Text(
+                prayer.prayerType,
+                style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w800, color: const Color(0xFF624294)),
+              ),
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.green.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.green.withOpacity(0.3), width: 1),
+                ),
+                child: Text(
+                  '${prayer.activeRequests} requests',
+                  style: GoogleFonts.poppins(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.green,
+                  ),
+                ),
+              ),
             ],
           ),
         ],
@@ -377,7 +595,6 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
             ),
           ),
           const SizedBox(height: 24),
-          // Rosary count row
           Row(
             children: [
               Expanded(
@@ -485,7 +702,6 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
   }
 }
 
-// ── Glassmorphic Card (Matches Login/Profile Style) ─────────────────────────
 class _GlassCard extends StatelessWidget {
   final Widget child;
   final EdgeInsets? padding;
@@ -522,7 +738,6 @@ class _GlassCard extends StatelessWidget {
       );
     }
 
-    // Light mode — matches home screen card style
     return Container(
       width: double.infinity,
       padding: padding ?? const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
@@ -552,7 +767,6 @@ class _GlassCard extends StatelessWidget {
   }
 }
 
-// ── Icon Box (Consistent with Profile Screen) ───────────────────────────────
 class _IconBox extends StatelessWidget {
   final IconData icon;
   const _IconBox({required this.icon});
@@ -571,4 +785,3 @@ class _IconBox extends StatelessWidget {
     );
   }
 }
-
