@@ -3,18 +3,25 @@ import 'package:flutter/services.dart';
 import 'dart:async';
 import 'dart:math';
 import 'dart:ui';
+import 'package:flutter_html/flutter_html.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import '../../colors/colors.dart';
+import '../../providers/daily_prayer_provider.dart';
 import '../../services/localization_service.dart';
 import '../../theme/theme_notifier.dart';
 import '../../widgets/global_count_panel.dart';
 
 class CountingScreen extends StatefulWidget {
   final bool startWithChaplet;
+  /// The prayer_type_id from the home API sections list.
+  /// Used to fetch the correct daily prayer from /api/daily-prayers.
+  final int prayerTypeId;
 
   const CountingScreen({
     super.key,
     this.startWithChaplet = false,
+    this.prayerTypeId = 1,
   });
 
   @override
@@ -83,6 +90,11 @@ class _CountingScreenState extends State<CountingScreen>
   void initState() {
     super.initState();
     _isRosary = !widget.startWithChaplet;
+
+    // Fetch daily prayer for this prayer type
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<DailyPrayerProvider>().fetch(widget.prayerTypeId);
+    });
 
     _pulseController = AnimationController(
       vsync: this,
@@ -642,19 +654,49 @@ class _CountingScreenState extends State<CountingScreen>
   }
 
   Widget _buildQuoteCard() {
-    final prayer = _isRosary ? _rosaryPrayer : _chapletPrayer;
-    final title  = _isRosary ? 'Rosary Prayers' : 'Divine Mercy Chaplet';
-    return _PrayerInlineCard(
-      prayer: prayer,
-      title: title,
-      accentColor: _accent,
-      darkColor: _dark,
-      bgBottom: _bgBottom,
-      onExpand: (speed) => _showPrayerExpanded(title, prayer, speed),
+    return Consumer<DailyPrayerProvider>(
+      builder: (context, provider, _) {
+        final data = provider.dataFor(widget.prayerTypeId);
+        final isLoading = provider.isLoadingFor(widget.prayerTypeId);
+
+        // Loading state
+        if (isLoading && data == null) {
+          return _PrayerCardSkeleton(accentColor: _accent);
+        }
+
+        // Use API data when available
+        if (data != null) {
+          final title = '${data.prayer.title} · ${data.dayName}';
+          final prayer = data.prayer.prayerText;
+          final isHtml = prayer.contains('<');
+          return _PrayerInlineCard(
+            prayer: prayer,
+            title: title,
+            isHtml: isHtml,
+            accentColor: _accent,
+            darkColor: _dark,
+            bgBottom: _bgBottom,
+            onExpand: (speed) => _showPrayerExpanded(title, prayer, speed, isHtml: isHtml),
+          );
+        }
+
+        // Fallback to hardcoded strings
+        final prayer = _isRosary ? _rosaryPrayer : _chapletPrayer;
+        final title  = _isRosary ? 'Rosary Prayers' : 'Divine Mercy Chaplet';
+        return _PrayerInlineCard(
+          prayer: prayer,
+          title: title,
+          isHtml: false,
+          accentColor: _accent,
+          darkColor: _dark,
+          bgBottom: _bgBottom,
+          onExpand: (speed) => _showPrayerExpanded(title, prayer, speed),
+        );
+      },
     );
   }
 
-  void _showPrayerExpanded(String title, String prayer, double initialSpeed) {
+  void _showPrayerExpanded(String title, String prayer, double initialSpeed, {bool isHtml = false}) {
     showGeneralDialog(
       context: context,
       barrierDismissible: true,
@@ -677,6 +719,7 @@ class _CountingScreenState extends State<CountingScreen>
                   child: _PrayerExpandedModal(
                     title: title,
                     prayer: prayer,
+                    isHtml: isHtml,
                     accentColor: _accent,
                     darkColor: _dark,
                     bgBottom: _bgBottom,
@@ -910,7 +953,40 @@ class _CountingScreenState extends State<CountingScreen>
   }
 }
 
-// ── Ripple ring (water-drop effect) ──────────────────────────────────────────
+// ── Prayer card loading skeleton ──────────────────────────────────────────────
+class _PrayerCardSkeleton extends StatelessWidget {
+  final Color accentColor;
+  const _PrayerCardSkeleton({required this.accentColor});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      height: 220,
+      decoration: BoxDecoration(
+        color: const Color(0xFFFAF6FF),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(
+          color: themeNotifier.isDark ? Colors.white : const Color(0xFF624294).withOpacity(0.15),
+          width: themeNotifier.isDark ? 2.0 : 1.5,
+        ),
+      ),
+      child: Center(
+        child: SizedBox(
+          width: 28,
+          height: 28,
+          child: CircularProgressIndicator(
+            strokeWidth: 2.5,
+            color: accentColor,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+
+
 class _RippleRing extends StatelessWidget {
   const _RippleRing({required this.animation, required this.baseSize, required this.color});
 
@@ -992,6 +1068,7 @@ class _CircleActionButton extends StatelessWidget {
 class _PrayerInlineCard extends StatefulWidget {
   final String prayer;
   final String title;
+  final bool isHtml;
   final Color accentColor;
   final Color darkColor;
   final Color bgBottom;
@@ -1004,6 +1081,7 @@ class _PrayerInlineCard extends StatefulWidget {
     required this.darkColor,
     required this.bgBottom,
     required this.onExpand,
+    this.isHtml = false,
   });
 
   @override
@@ -1104,16 +1182,38 @@ class _PrayerInlineCardState extends State<_PrayerInlineCard> {
                 controller: _scrollController,
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
                 physics: const BouncingScrollPhysics(),
-              child: Text(
-                widget.prayer,
-                style: TextStyle(
-                  fontSize: _fontSize,
-                  fontWeight: FontWeight.w400,
-                  color: const Color(0xFF333333).withOpacity(0.88),
-                  height: 1.7,
-                  letterSpacing: 0.2,
-                ),
-              ),
+                child: widget.isHtml
+                    ? Html(
+                        data: widget.prayer,
+                        style: {
+                          'body': Style(
+                            fontSize: FontSize(_fontSize),
+                            color: const Color(0xFF333333),
+                            lineHeight: const LineHeight(1.7),
+                            margin: Margins.zero,
+                            padding: HtmlPaddings.zero,
+                          ),
+                          'h1,h2,h3': Style(
+                            color: const Color(0xFF333333),
+                            fontWeight: FontWeight.w700,
+                          ),
+                          'li': Style(
+                            color: const Color(0xFF333333),
+                            fontSize: FontSize(_fontSize),
+                            lineHeight: const LineHeight(1.8),
+                          ),
+                        },
+                      )
+                    : Text(
+                        widget.prayer,
+                        style: TextStyle(
+                          fontSize: _fontSize,
+                          fontWeight: FontWeight.w400,
+                          color: const Color(0xFF333333).withOpacity(0.88),
+                          height: 1.7,
+                          letterSpacing: 0.2,
+                        ),
+                      ),
               ),
             ),
           ),
@@ -1166,6 +1266,7 @@ class _PrayerInlineCardState extends State<_PrayerInlineCard> {
 class _PrayerExpandedModal extends StatefulWidget {
   final String title;
   final String prayer;
+  final bool isHtml;
   final Color accentColor;
   final Color darkColor;
   final Color bgBottom;
@@ -1178,6 +1279,7 @@ class _PrayerExpandedModal extends StatefulWidget {
     required this.darkColor,
     required this.bgBottom,
     required this.initialSpeed,
+    this.isHtml = false,
   });
 
   @override
@@ -1265,16 +1367,38 @@ class _PrayerExpandedModalState extends State<_PrayerExpandedModal> {
                 controller: _scrollController,
                 padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
                 physics: const BouncingScrollPhysics(),
-                child: Text(
-                  widget.prayer,
-                  style: TextStyle(
-                    fontSize: _fontSize,
-                    fontWeight: FontWeight.w400,
-                    color: const Color(0xFF222222).withOpacity(0.90),
-                    height: 1.8,
-                    letterSpacing: 0.2,
-                  ),
-                ),
+                child: widget.isHtml
+                    ? Html(
+                        data: widget.prayer,
+                        style: {
+                          'body': Style(
+                            fontSize: FontSize(_fontSize),
+                            color: const Color(0xFF222222),
+                            lineHeight: const LineHeight(1.8),
+                            margin: Margins.zero,
+                            padding: HtmlPaddings.zero,
+                          ),
+                          'h1,h2,h3': Style(
+                            color: const Color(0xFF222222),
+                            fontWeight: FontWeight.w700,
+                          ),
+                          'li': Style(
+                            color: const Color(0xFF222222),
+                            fontSize: FontSize(_fontSize),
+                            lineHeight: const LineHeight(1.9),
+                          ),
+                        },
+                      )
+                    : Text(
+                        widget.prayer,
+                        style: TextStyle(
+                          fontSize: _fontSize,
+                          fontWeight: FontWeight.w400,
+                          color: const Color(0xFF222222).withOpacity(0.90),
+                          height: 1.8,
+                          letterSpacing: 0.2,
+                        ),
+                      ),
               ),
             ),
             Container(

@@ -30,6 +30,7 @@ class AppConfig {
   static const String logoutPath         = '/api/logout';
   static const String globalCountsPath   = '/api/community/global-counts';
   static const String homePath           = '/api/home';
+  static const String dailyPrayersPath   = '/api/daily-prayers';
 
   // ── Timeouts ────────────────────────────────────────────────────────────────
   static const Duration connectTimeout = Duration(seconds: 30);

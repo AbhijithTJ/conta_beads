@@ -232,11 +232,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     switch (section.route) {
       case '/rosary_prayer':
         Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => CountingScreen()));
+            MaterialPageRoute(builder: (_) => CountingScreen(prayerTypeId: section.id)));
         break;
       case '/chaplet_prayer':
         Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => CountingScreen(startWithChaplet: true)));
+            MaterialPageRoute(builder: (_) => CountingScreen(startWithChaplet: true, prayerTypeId: section.id)));
         break;
       case '/adopt_priest':
         Navigator.of(context).push(
@@ -331,7 +331,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       top: size.height * 0.40,
       child: GestureDetector(
         onTap: () => Navigator.of(context)
-            .push(MaterialPageRoute(builder: (_) => CountingScreen())),
+            .push(MaterialPageRoute(builder: (_) => CountingScreen(prayerTypeId: 1))),
         onHorizontalDragStart: (_) =>
             setState(() { _dragging = true; _dragOffset = 0; }),
         onHorizontalDragUpdate: (d) {
@@ -341,7 +341,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         onHorizontalDragEnd: (_) {
           if (_dragOffset >= _dragThreshold) {
             Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => CountingScreen()));
+                MaterialPageRoute(builder: (_) => CountingScreen(prayerTypeId: 1)));
           }
           setState(() { _dragOffset = 0; _dragging = false; });
         },
