@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -36,7 +37,20 @@ class _PrayerHistoryScreenState extends State<PrayerHistoryScreen> {
     return ValueListenableBuilder<bool>(
       valueListenable: themeNotifier,
       builder: (_, isDark, __) {
-        final bgColor = isDark ? const Color(0xFF22014D) : const Color(0xFFF0EBF0);
+        final bgColor = isDark
+            ? const BoxDecoration(
+                gradient: RadialGradient(
+                  center: Alignment(0.0, -0.2),
+                  radius: 1.2,
+                  colors: [
+                    Color(0xFF4A4080),
+                    Color(0xFF2A1F5E),
+                    Color(0xFF100828),
+                  ],
+                  stops: [0.0, 0.50, 1.0],
+                ),
+              )
+            : const BoxDecoration(color: Color(0xFFF0EBF0));
         return Scaffold(
           appBar: AppBar(
             title: Text('Prayer History', style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w700)),
@@ -48,7 +62,7 @@ class _PrayerHistoryScreenState extends State<PrayerHistoryScreen> {
           body: Container(
             width: double.infinity,
             height: double.infinity,
-            color: bgColor,
+            decoration: bgColor,
             child: SafeArea(
               child: Consumer<PrayerHistoryProvider>(
                 builder: (_, provider, __) {
@@ -162,14 +176,123 @@ class _PrayerHistoryScreenState extends State<PrayerHistoryScreen> {
   }
 
   Widget _buildHistoryCard(PrayerHistoryEntry entry, bool isDark) {
+    if (isDark) {
+      return Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(24),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.92),
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: Colors.white, width: 2.0),
+                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.20), blurRadius: 40, spreadRadius: 2, offset: const Offset(0, 12))],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              entry.userName,
+                              style: GoogleFonts.poppins(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.authBgBottom,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              _formatDate(entry.dateKey),
+                              style: GoogleFonts.poppins(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w500,
+                                color: AppColors.authBgMid.withOpacity(0.6),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            '${entry.countAdded}',
+                            style: GoogleFonts.poppins(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.goldDark,
+                            ),
+                          ),
+                          if (entry.isBorrowed)
+                            Container(
+                              margin: const EdgeInsets.only(top: 4),
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: Colors.orange.withOpacity(0.15),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                'Borrowed',
+                                style: GoogleFonts.poppins(
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.orange[700],
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  if (entry.intentionText != null && entry.intentionText!.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF624294).withOpacity(0.05),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        entry.intentionText!,
+                        style: GoogleFonts.poppins(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.authBgMid.withOpacity(0.6),
+                          fontStyle: FontStyle.italic,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Light mode
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isDark ? Colors.white.withOpacity(0.08) : Colors.white,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isDark ? Colors.white.withOpacity(0.15) : const Color(0xFF624294).withOpacity(0.15),
+          color: const Color(0xFF624294).withOpacity(0.15),
           width: 1,
         ),
       ),
@@ -188,7 +311,7 @@ class _PrayerHistoryScreenState extends State<PrayerHistoryScreen> {
                       style: GoogleFonts.poppins(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
-                        color: isDark ? Colors.white : AppColors.authBgBottom,
+                        color: AppColors.authBgBottom,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -199,9 +322,7 @@ class _PrayerHistoryScreenState extends State<PrayerHistoryScreen> {
                       style: GoogleFonts.poppins(
                         fontSize: 11,
                         fontWeight: FontWeight.w500,
-                        color: isDark
-                            ? Colors.white.withOpacity(0.6)
-                            : AppColors.authBgMid.withOpacity(0.6),
+                        color: AppColors.authBgMid.withOpacity(0.6),
                       ),
                     ),
                   ],
@@ -215,7 +336,7 @@ class _PrayerHistoryScreenState extends State<PrayerHistoryScreen> {
                     style: GoogleFonts.poppins(
                       fontSize: 20,
                       fontWeight: FontWeight.w800,
-                      color: isDark ? AppColors.goldLight : AppColors.goldDark,
+                      color: AppColors.goldDark,
                     ),
                   ),
                   if (entry.isBorrowed)
@@ -231,7 +352,7 @@ class _PrayerHistoryScreenState extends State<PrayerHistoryScreen> {
                         style: GoogleFonts.poppins(
                           fontSize: 9,
                           fontWeight: FontWeight.w700,
-                          color: isDark ? Colors.orange[300] : Colors.orange[700],
+                          color: Colors.orange[700],
                         ),
                       ),
                     ),
@@ -244,9 +365,7 @@ class _PrayerHistoryScreenState extends State<PrayerHistoryScreen> {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: isDark
-                    ? Colors.white.withOpacity(0.05)
-                    : const Color(0xFF624294).withOpacity(0.05),
+                color: const Color(0xFF624294).withOpacity(0.05),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Text(
@@ -254,9 +373,7 @@ class _PrayerHistoryScreenState extends State<PrayerHistoryScreen> {
                 style: GoogleFonts.poppins(
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
-                  color: isDark
-                      ? Colors.white.withOpacity(0.6)
-                      : AppColors.authBgMid.withOpacity(0.6),
+                  color: AppColors.authBgMid.withOpacity(0.6),
                   fontStyle: FontStyle.italic,
                 ),
                 maxLines: 2,
@@ -270,13 +387,63 @@ class _PrayerHistoryScreenState extends State<PrayerHistoryScreen> {
   }
 
   Widget _buildPaginationInfo(PrayerHistoryProvider provider, bool isDark) {
+    if (isDark) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.92),
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: Colors.white, width: 2.0),
+              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.20), blurRadius: 40, spreadRadius: 2, offset: const Offset(0, 12))],
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Page ${provider.currentPage} of ${provider.totalPages}',
+                      style: GoogleFonts.poppins(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.authBgBottom,
+                      ),
+                    ),
+                    Text(
+                      'Total: ${provider.totalEntries} entries',
+                      style: GoogleFonts.poppins(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.authBgMid.withOpacity(0.6),
+                      ),
+                    ),
+                  ],
+                ),
+                Icon(
+                  Icons.info_outline,
+                  color: AppColors.authBgMid.withOpacity(0.6),
+                  size: 20,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Light mode
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isDark ? Colors.white.withOpacity(0.08) : Colors.white,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isDark ? Colors.white.withOpacity(0.15) : const Color(0xFF624294).withOpacity(0.15),
+          color: const Color(0xFF624294).withOpacity(0.15),
           width: 1,
         ),
       ),
@@ -291,7 +458,7 @@ class _PrayerHistoryScreenState extends State<PrayerHistoryScreen> {
                 style: GoogleFonts.poppins(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
-                  color: isDark ? Colors.white : AppColors.authBgBottom,
+                  color: AppColors.authBgBottom,
                 ),
               ),
               Text(
@@ -299,18 +466,14 @@ class _PrayerHistoryScreenState extends State<PrayerHistoryScreen> {
                 style: GoogleFonts.poppins(
                   fontSize: 11,
                   fontWeight: FontWeight.w500,
-                  color: isDark
-                      ? Colors.white.withOpacity(0.6)
-                      : AppColors.authBgMid.withOpacity(0.6),
+                  color: AppColors.authBgMid.withOpacity(0.6),
                 ),
               ),
             ],
           ),
           Icon(
             Icons.info_outline,
-            color: isDark
-                ? Colors.white.withOpacity(0.6)
-                : AppColors.authBgMid.withOpacity(0.6),
+            color: AppColors.authBgMid.withOpacity(0.6),
             size: 20,
           ),
         ],
@@ -319,9 +482,9 @@ class _PrayerHistoryScreenState extends State<PrayerHistoryScreen> {
   }
 
   Widget _buildPaginationControls(PrayerHistoryProvider provider, bool isDark) {
-    final buttonBg = isDark ? Colors.white.withOpacity(0.12) : const Color(0xFF624294).withOpacity(0.08);
-    final buttonBorder = isDark ? Colors.white.withOpacity(0.2) : const Color(0xFF624294).withOpacity(0.2);
-    final buttonText = isDark ? Colors.white : AppColors.authBgBottom;
+    final buttonBg = isDark ? Colors.white.withOpacity(0.92) : Colors.white;
+    final buttonBorder = isDark ? Colors.white : const Color(0xFF624294).withOpacity(0.15);
+    final buttonText = isDark ? AppColors.authBgBottom : AppColors.authBgBottom;
     final disabledOpacity = 0.4;
 
     return Row(
@@ -333,10 +496,21 @@ class _PrayerHistoryScreenState extends State<PrayerHistoryScreen> {
               padding: const EdgeInsets.symmetric(vertical: 12),
               decoration: BoxDecoration(
                 color: buttonBg.withOpacity(provider.hasPreviousPage ? 1.0 : disabledOpacity),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(isDark ? 24 : 12),
                 border: Border.all(
                   color: buttonBorder.withOpacity(provider.hasPreviousPage ? 1.0 : disabledOpacity),
+                  width: isDark ? 2.0 : 1.5,
                 ),
+                boxShadow: isDark
+                    ? [BoxShadow(color: Colors.black.withOpacity(0.20), blurRadius: 40, spreadRadius: 2, offset: const Offset(0, 12))]
+                    : [
+                        BoxShadow(
+                          color: const Color(0xFF624294).withOpacity(0.10),
+                          blurRadius: 16,
+                          spreadRadius: 1,
+                          offset: const Offset(0, 6),
+                        ),
+                      ],
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -368,10 +542,21 @@ class _PrayerHistoryScreenState extends State<PrayerHistoryScreen> {
               padding: const EdgeInsets.symmetric(vertical: 12),
               decoration: BoxDecoration(
                 color: buttonBg.withOpacity(provider.hasNextPage ? 1.0 : disabledOpacity),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(isDark ? 24 : 12),
                 border: Border.all(
                   color: buttonBorder.withOpacity(provider.hasNextPage ? 1.0 : disabledOpacity),
+                  width: isDark ? 2.0 : 1.5,
                 ),
+                boxShadow: isDark
+                    ? [BoxShadow(color: Colors.black.withOpacity(0.20), blurRadius: 40, spreadRadius: 2, offset: const Offset(0, 12))]
+                    : [
+                        BoxShadow(
+                          color: const Color(0xFF624294).withOpacity(0.10),
+                          blurRadius: 16,
+                          spreadRadius: 1,
+                          offset: const Offset(0, 6),
+                        ),
+                      ],
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
