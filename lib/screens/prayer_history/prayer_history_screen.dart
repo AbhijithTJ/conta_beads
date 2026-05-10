@@ -16,13 +16,32 @@ class PrayerHistoryScreen extends StatefulWidget {
 
 class _PrayerHistoryScreenState extends State<PrayerHistoryScreen> {
   bool _isRosaryMode = true;
+  late ScrollController _scrollController;
 
   @override
   void initState() {
     super.initState();
+    _scrollController = ScrollController();
+    _scrollController.addListener(_onScroll);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<PrayerHistoryProvider>().fetch();
     });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
+      final provider = context.read<PrayerHistoryProvider>();
+      if (!provider.isLoading && provider.hasNextPage) {
+        provider.nextPage();
+      }
+    }
   }
 
   void _onToggle(bool rosary) {
@@ -70,6 +89,7 @@ class _PrayerHistoryScreenState extends State<PrayerHistoryScreen> {
                     onRefresh: () => provider.fetch(),
                     color: AppColors.goldPrimary,
                     child: SingleChildScrollView(
+                      controller: _scrollController,
                       physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                       child: Column(
@@ -161,10 +181,18 @@ class _PrayerHistoryScreenState extends State<PrayerHistoryScreen> {
     return Column(
       children: [
         _buildHistoryList(data.data, isDark),
-        const SizedBox(height: 24),
-        _buildPaginationInfo(provider, isDark),
-        const SizedBox(height: 16),
-        _buildPaginationControls(provider, isDark),
+        if (provider.isLoading)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 24),
+            child: SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: AppColors.goldPrimary,
+              ),
+            ),
+          ),
       ],
     );
   }
@@ -386,203 +414,7 @@ class _PrayerHistoryScreenState extends State<PrayerHistoryScreen> {
     );
   }
 
-  Widget _buildPaginationInfo(PrayerHistoryProvider provider, bool isDark) {
-    if (isDark) {
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(24),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.92),
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: Colors.white, width: 2.0),
-              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.20), blurRadius: 40, spreadRadius: 2, offset: const Offset(0, 12))],
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Page ${provider.currentPage} of ${provider.totalPages}',
-                      style: GoogleFonts.poppins(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.authBgBottom,
-                      ),
-                    ),
-                    Text(
-                      'Total: ${provider.totalEntries} entries',
-                      style: GoogleFonts.poppins(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.authBgMid.withOpacity(0.6),
-                      ),
-                    ),
-                  ],
-                ),
-                Icon(
-                  Icons.info_outline,
-                  color: AppColors.authBgMid.withOpacity(0.6),
-                  size: 20,
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-    }
 
-    // Light mode
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: const Color(0xFF624294).withOpacity(0.15),
-          width: 1,
-        ),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Page ${provider.currentPage} of ${provider.totalPages}',
-                style: GoogleFonts.poppins(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.authBgBottom,
-                ),
-              ),
-              Text(
-                'Total: ${provider.totalEntries} entries',
-                style: GoogleFonts.poppins(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.authBgMid.withOpacity(0.6),
-                ),
-              ),
-            ],
-          ),
-          Icon(
-            Icons.info_outline,
-            color: AppColors.authBgMid.withOpacity(0.6),
-            size: 20,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPaginationControls(PrayerHistoryProvider provider, bool isDark) {
-    final buttonBg = isDark ? Colors.white.withOpacity(0.92) : Colors.white;
-    final buttonBorder = isDark ? Colors.white : const Color(0xFF624294).withOpacity(0.15);
-    final buttonText = isDark ? AppColors.authBgBottom : AppColors.authBgBottom;
-    final disabledOpacity = 0.4;
-
-    return Row(
-      children: [
-        Expanded(
-          child: GestureDetector(
-            onTap: provider.hasPreviousPage ? () => provider.previousPage() : null,
-            child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              decoration: BoxDecoration(
-                color: buttonBg.withOpacity(provider.hasPreviousPage ? 1.0 : disabledOpacity),
-                borderRadius: BorderRadius.circular(isDark ? 24 : 12),
-                border: Border.all(
-                  color: buttonBorder.withOpacity(provider.hasPreviousPage ? 1.0 : disabledOpacity),
-                  width: isDark ? 2.0 : 1.5,
-                ),
-                boxShadow: isDark
-                    ? [BoxShadow(color: Colors.black.withOpacity(0.20), blurRadius: 40, spreadRadius: 2, offset: const Offset(0, 12))]
-                    : [
-                        BoxShadow(
-                          color: const Color(0xFF624294).withOpacity(0.10),
-                          blurRadius: 16,
-                          spreadRadius: 1,
-                          offset: const Offset(0, 6),
-                        ),
-                      ],
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.arrow_back_ios_rounded,
-                    size: 14,
-                    color: buttonText.withOpacity(provider.hasPreviousPage ? 1.0 : disabledOpacity),
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    'Previous',
-                    style: GoogleFonts.poppins(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: buttonText.withOpacity(provider.hasPreviousPage ? 1.0 : disabledOpacity),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: GestureDetector(
-            onTap: provider.hasNextPage ? () => provider.nextPage() : null,
-            child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              decoration: BoxDecoration(
-                color: buttonBg.withOpacity(provider.hasNextPage ? 1.0 : disabledOpacity),
-                borderRadius: BorderRadius.circular(isDark ? 24 : 12),
-                border: Border.all(
-                  color: buttonBorder.withOpacity(provider.hasNextPage ? 1.0 : disabledOpacity),
-                  width: isDark ? 2.0 : 1.5,
-                ),
-                boxShadow: isDark
-                    ? [BoxShadow(color: Colors.black.withOpacity(0.20), blurRadius: 40, spreadRadius: 2, offset: const Offset(0, 12))]
-                    : [
-                        BoxShadow(
-                          color: const Color(0xFF624294).withOpacity(0.10),
-                          blurRadius: 16,
-                          spreadRadius: 1,
-                          offset: const Offset(0, 6),
-                        ),
-                      ],
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'Next',
-                    style: GoogleFonts.poppins(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: buttonText.withOpacity(provider.hasNextPage ? 1.0 : disabledOpacity),
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  Icon(
-                    Icons.arrow_forward_ios_rounded,
-                    size: 14,
-                    color: buttonText.withOpacity(provider.hasNextPage ? 1.0 : disabledOpacity),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
 
   Widget _buildEmptyState(bool isDark) {
     final textColor = isDark ? Colors.white : AppColors.authBgBottom;

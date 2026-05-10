@@ -42,6 +42,7 @@ class PrayerHistoryProvider extends ChangeNotifier {
   // ── Fetch ─────────────────────────────────────────────────────────────────────
   /// Fetches prayer history for the current page and prayer type.
   /// Only shows loading state on the very first fetch — refresh keeps data visible.
+  /// For infinite scroll, appends new data instead of replacing.
   Future<void> fetch() async {
     final isFirstLoad = _data == null;
     if (isFirstLoad) {
@@ -61,7 +62,20 @@ class PrayerHistoryProvider extends ChangeNotifier {
         query: query,
       );
       
-      _data = PrayerHistoryResponse.fromJson(response.data);
+      final newData = PrayerHistoryResponse.fromJson(response.data);
+      
+      // For infinite scroll: append new data instead of replacing
+      if (isFirstLoad) {
+        _data = newData;
+      } else {
+        // Append new entries to existing data and create new response with updated meta
+        final combinedEntries = [..._data!.data, ...newData.data];
+        _data = PrayerHistoryResponse(
+          data: combinedEntries,
+          meta: newData.meta,
+        );
+      }
+      
       _status = PrayerHistoryStatus.loaded;
       _errorMessage = '';
     } on ApiException catch (e) {
@@ -105,6 +119,7 @@ class PrayerHistoryProvider extends ChangeNotifier {
     if (prayerTypeId != _prayerTypeId) {
       _prayerTypeId = prayerTypeId;
       _currentPage = 1;
+      _data = null; // Reset data when switching prayer types
       await fetch();
     }
   }
