@@ -167,7 +167,7 @@ class _ThemeSelectScreenState extends State<ThemeSelectScreen>
                             const SizedBox(width: 12),
                             Expanded(
                               child: Text(
-                                'Make it yours',
+                                loc.tr('make_it_yours'),
                                 style: GoogleFonts.poppins(
                                   fontSize: 18,
                                   fontWeight: FontWeight.w800,
@@ -180,7 +180,7 @@ class _ThemeSelectScreenState extends State<ThemeSelectScreen>
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          'Choose how the app looks and the language for your prayers. You can always change this later from your profile.',
+                          loc.tr('choose_appearance_language'),
                           style: GoogleFonts.poppins(
                             fontSize: 12.5,
                             height: 1.6,
@@ -195,13 +195,13 @@ class _ThemeSelectScreenState extends State<ThemeSelectScreen>
                           children: [
                             _IntroChip(
                               icon: Icons.dark_mode_outlined,
-                              label: 'Appearance',
+                              label: loc.tr('appearance'),
                               isDark: isDark,
                             ),
                             const SizedBox(width: 8),
                             _IntroChip(
                               icon: Icons.language_rounded,
-                              label: 'Language',
+                              label: loc.tr('language'),
                               isDark: isDark,
                             ),
                           ],
@@ -245,9 +245,11 @@ class _ThemeSelectScreenState extends State<ThemeSelectScreen>
                         isDark: isDark,
                         selectedLanguage: languageProvider.selectedLanguage,
                         languages: _languages,
-                        onSelect: (lang) {
+                        onSelect: (lang) async {
                           HapticFeedback.selectionClick();
-                          languageProvider.setLanguage(lang);
+                          await languageProvider.setLanguage(lang);
+                          // Rebuild entire page with new language
+                          if (mounted) setState(() {});
                         },
                       );
                     },
@@ -274,7 +276,7 @@ class _ThemeSelectScreenState extends State<ThemeSelectScreen>
                         const SizedBox(width: 10),
                         Expanded(
                           child: Text(
-                            'You can change appearance & language anytime from Profile → Settings.',
+                            loc.tr('change_anytime_profile'),
                             style: GoogleFonts.poppins(fontSize: 11, height: 1.5, color: noteTextColor),
                           ),
                         ),
@@ -308,7 +310,7 @@ class _ThemeSelectScreenState extends State<ThemeSelectScreen>
                           ],
                         ),
                         child: Center(
-                          child: Text('CONTINUE',
+                          child: Text(loc.tr('continue'),
                               style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w900, letterSpacing: 2.0, color: Colors.white)),
                         ),
                       ),
@@ -394,7 +396,7 @@ class _ThemeCard extends StatelessWidget {
     final bg = isDarkOption ? const Color(0xFF22014D) : const Color(0xFFF5EEF5);
     final cardBg = isDarkOption ? const Color(0xFFEDE0ED) : Colors.white;
     final textColor = isDarkOption ? Colors.white : const Color(0xFF22014D);
-    final label = isDarkOption ? 'Dark' : 'Light';
+    final label = isDarkOption ? loc.tr('dark') : loc.tr('light');
     final icon = isDarkOption ? Icons.dark_mode_rounded : Icons.light_mode_rounded;
 
     final unselectedLabelBg = screenIsDark
@@ -549,7 +551,7 @@ class _LanguageSection extends StatelessWidget {
             ),
             const SizedBox(width: 10),
             Text(
-              'Select Language',
+              loc.tr('select_language'),
               style: GoogleFonts.poppins(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
@@ -559,7 +561,7 @@ class _LanguageSection extends StatelessWidget {
         ),
         const SizedBox(height: 6),
         Text(
-          'Choose your preferred prayer language',
+          loc.tr('choose_prayer_language'),
           style: GoogleFonts.poppins(
               fontSize: 12, color: sectionSubColor, height: 1.4),
         ),
@@ -736,7 +738,7 @@ class _ProfilePreviewTutorialState extends State<_ProfilePreviewTutorial>
                 color: isDark ? _goldLight : _goldDark),
             const SizedBox(width: 6),
             Text(
-              'CHANGE ANYTIME IN PROFILE',
+              loc.tr('change_anytime_in_profile'),
               style: TextStyle(
                   fontSize: 9,
                   fontWeight: FontWeight.w800,

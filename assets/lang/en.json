@@ -44,5 +44,15 @@
   "region": "Region",
   "counting_history": "Counting History",
   "account_security": "Account Security",
-  "help_support": "Help & Support"
+  "help_support": "Help & Support",
+  "make_it_yours": "Make it yours",
+  "choose_appearance_language": "Choose how the app looks and the language for your prayers. You can always change this later from your profile.",
+  "appearance": "Appearance",
+  "language": "Language",
+  "dark": "Dark",
+  "light": "Light",
+  "continue": "CONTINUE",
+  "choose_prayer_language": "Choose your preferred prayer language",
+  "change_anytime_profile": "You can change appearance & language anytime from Profile → Settings.",
+  "change_anytime_in_profile": "CHANGE ANYTIME IN PROFILE"
 }
