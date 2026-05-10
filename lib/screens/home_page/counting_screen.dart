@@ -15,6 +15,10 @@ import '../../services/localization_service.dart';
 import '../../theme/theme_notifier.dart';
 import '../../widgets/global_count_panel.dart';
 
+import '../../providers/home_provider.dart';
+import '../../services/language_id_service.dart';
+import '../../models/home_model.dart';
+
 class CountingScreen extends StatefulWidget {
   final bool startWithChaplet;
   /// The prayer_type_id from the home API sections list.
@@ -96,8 +100,7 @@ class _CountingScreenState extends State<CountingScreen>
 
     // Fetch daily prayers for both Rosary (1) and Chaplet (2)
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<DailyPrayerProvider>().fetch(1); // Rosary
-      context.read<DailyPrayerProvider>().fetch(2); // Chaplet
+      _fetchAllPrayers();
     });
 
     _pulseController = AnimationController(
@@ -182,6 +185,33 @@ class _CountingScreenState extends State<CountingScreen>
     _leaderboardTimer?.cancel();
     _noteController.dispose();
     super.dispose();
+  }
+
+  int _getPrayerTypeId(bool forRosary) {
+    final route = forRosary ? '/rosary_prayer' : '/chaplet_prayer';
+    final fallback = forRosary ? 1 : 2;
+
+    if (!mounted) return fallback;
+
+    final homeProvider = context.read<HomeProvider>();
+    if (homeProvider.hasData) {
+      try {
+        return homeProvider.data!.sections
+            .firstWhere((s) => s.route == route)
+            .id;
+      } catch (_) {
+        return fallback;
+      }
+    }
+    return fallback;
+  }
+
+  void _fetchAllPrayers() {
+    final rId = _getPrayerTypeId(true);
+    final cId = _getPrayerTypeId(false);
+    // Force refresh because the ID might have changed
+    context.read<DailyPrayerProvider>().refresh(rId);
+    context.read<DailyPrayerProvider>().refresh(cId);
   }
 
   void _increment() {
@@ -589,8 +619,19 @@ class _CountingScreenState extends State<CountingScreen>
                         return GestureDetector(
                           onTap: () async {
                             await loc.load(lang['name']!);
+                            languageIdService.setLanguageByName(lang['name']!);
+                            if (!mounted) return;
                             setState(() => _selectedLanguage = lang['name']!);
                             Navigator.pop(ctx);
+
+                            // Refresh HomeProvider to get new IDs
+                            final homeProvider = context.read<HomeProvider>();
+                            await homeProvider.refreshTextOnly();
+
+                            // Re-fetch daily prayers with new IDs
+                            if (mounted) {
+                              _fetchAllPrayers();
+                            }
                           },
                           child: Container(
                             margin: const EdgeInsets.only(bottom: 8),
@@ -657,6 +698,21 @@ class _CountingScreenState extends State<CountingScreen>
         ? (_isRosary ? Colors.white.withOpacity(0.15) : Colors.black.withOpacity(0.35))
         : const Color(0xFF624294).withOpacity(0.10);
 
+    final homeProvider = context.read<HomeProvider>();
+    String rosaryTitle = 'Rosary';
+    String chapletTitle = 'Chaplet';
+
+    if (homeProvider.hasData) {
+      try {
+        rosaryTitle = homeProvider.data!.sections
+            .firstWhere((s) => s.route == '/rosary_prayer')
+            .title;
+        chapletTitle = homeProvider.data!.sections
+            .firstWhere((s) => s.route == '/chaplet_prayer')
+            .title;
+      } catch (_) {}
+    }
+
     return Container(
       height: 48,
       decoration: BoxDecoration(
@@ -666,8 +722,8 @@ class _CountingScreenState extends State<CountingScreen>
       ),
       child: Row(
         children: [
-          _toggleTab('Rosary', true),
-          _toggleTab('Chaplet', false),
+          _toggleTab(rosaryTitle, true),
+          _toggleTab(chapletTitle, false),
         ],
       ),
     );
@@ -686,7 +742,7 @@ class _CountingScreenState extends State<CountingScreen>
         onTap: () {
           setState(() => _isRosary = isRosary);
           // Fetch the prayer for the new mode
-          final newTypeId = isRosary ? 1 : 2; // Rosary = 1, Chaplet = 2
+          final newTypeId = _getPrayerTypeId(isRosary);
           context.read<DailyPrayerProvider>().fetch(newTypeId);
         },
         child: AnimatedContainer(
@@ -766,7 +822,7 @@ class _CountingScreenState extends State<CountingScreen>
 
   Widget _buildQuoteCard() {
     // Determine which prayer type to fetch based on current mode
-    final currentTypeId = _isRosary ? 1 : 2; // Rosary = 1, Chaplet = 2
+    final currentTypeId = _getPrayerTypeId(_isRosary);
     
     return Consumer<DailyPrayerProvider>(
       builder: (context, provider, _) {
