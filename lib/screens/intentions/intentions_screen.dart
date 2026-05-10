@@ -7,6 +7,7 @@ import '../../colors/colors.dart';
 import '../../theme/theme_notifier.dart';
 import '../../providers/intentions_provider.dart';
 import '../../models/intentions_model.dart';
+import '../../services/language_id_service.dart';
 import 'intention_success_screen.dart';
 
 class IntentionsScreen extends StatefulWidget {
@@ -28,6 +29,8 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
   late Animation<double> _quoteFadeAnim;
   Timer? _quoteTimer;
   int _currentQuoteIndex = 0;
+
+  int _lastLanguageId = 1;
 
   int _getTotalCount() {
     final data = context.read<IntentionsProvider>().data;
@@ -61,6 +64,9 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
     
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<IntentionsProvider>().fetch();
+      // Listen for language changes
+      languageIdService.addListener(_onLanguageChanged);
+      _lastLanguageId = languageIdService.languageId;
     });
   }
 
@@ -72,6 +78,7 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
     _rosaryCountFocus.dispose();
     _quoteTimer?.cancel();
     _quoteFadeController.dispose();
+    languageIdService.removeListener(_onLanguageChanged);
     super.dispose();
   }
 
@@ -85,6 +92,16 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
           _quoteFadeController.forward();
         });
       });
+    }
+  }
+
+  void _onLanguageChanged() {
+    if (!mounted) return;
+    final currentLanguageId = languageIdService.languageId;
+    if (currentLanguageId != _lastLanguageId) {
+      _lastLanguageId = currentLanguageId;
+      // Refresh intentions data with new language
+      context.read<IntentionsProvider>().fetch();
     }
   }
 
@@ -178,26 +195,31 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
                     });
                   }
 
-                  return SingleChildScrollView(
-                    physics: const BouncingScrollPhysics(),
-                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const SizedBox(height: 32),
-                        _buildHeader(isDark),
-                        const SizedBox(height: 32),
-                        _buildQuoteCard(isDark, data),
-                        const SizedBox(height: 24),
-                        _buildIntentionsGrid(data),
-                        const SizedBox(height: 16),
-                        _buildPrayerRequestsCard(data),
-                        const SizedBox(height: 32),
-                        _buildDivider(isDark),
-                        const SizedBox(height: 32),
-                        _buildRequestRosaryCard(isDark),
-                        const SizedBox(height: 48),
-                      ],
+                  return RefreshIndicator(
+                    onRefresh: () => provider.fetch(),
+                    color: AppColors.goldPrimary,
+                    child: SingleChildScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(
+                          parent: BouncingScrollPhysics()),
+                      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 32),
+                          _buildHeader(isDark),
+                          const SizedBox(height: 32),
+                          _buildQuoteCard(isDark, data),
+                          const SizedBox(height: 24),
+                          _buildIntentionsGrid(data),
+                          const SizedBox(height: 16),
+                          _buildPrayerRequestsCard(data),
+                          const SizedBox(height: 32),
+                          _buildDivider(isDark),
+                          const SizedBox(height: 32),
+                          _buildRequestRosaryCard(isDark),
+                          const SizedBox(height: 48),
+                        ],
+                      ),
                     ),
                   );
                 },
