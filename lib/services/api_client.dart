@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import '../config/app_config.dart';
 import 'session_service.dart';
+import 'language_id_service.dart';
 
 // ── Response wrapper ──────────────────────────────────────────────────────────
 
@@ -44,6 +45,7 @@ class ApiClient {
     return {
       HttpHeaders.contentTypeHeader: 'application/json',
       HttpHeaders.acceptHeader: 'application/json',
+      'X-Language-ID': languageIdService.languageId.toString(),
       if (token != null && token.isNotEmpty)
         HttpHeaders.authorizationHeader: 'Bearer $token',
     };

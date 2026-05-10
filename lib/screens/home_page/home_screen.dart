@@ -8,6 +8,7 @@ import '../../colors/colors.dart';
 import '../../models/home_model.dart';
 import '../../providers/home_provider.dart';
 import '../../services/localization_service.dart';
+import '../../services/language_id_service.dart';
 import '../../theme/theme_notifier.dart';
 import 'counting_screen.dart';
 import '../adopt_priest/adopt_priest_screen.dart';
@@ -165,10 +166,23 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   final isSelected = lang['name'] == _selectedLanguage;
                   return GestureDetector(
                     onTap: () async {
+                      // Only proceed if language is different
+                      if (lang['name'] == _selectedLanguage) {
+                        Navigator.pop(ctx);
+                        return;
+                      }
+
                       await loc.load(lang['name']!);
+                      // Sync language ID with the service
+                      languageIdService.setLanguageByName(lang['name']!);
                       if (!context.mounted) return;
                       setState(() => _selectedLanguage = lang['name']!);
                       Navigator.pop(ctx);
+                      
+                      // Refresh only text content (no images reload)
+                      if (mounted) {
+                        _homeProvider.refreshTextOnly();
+                      }
                     },
                     child: Container(
                       margin: const EdgeInsets.only(bottom: 10),
