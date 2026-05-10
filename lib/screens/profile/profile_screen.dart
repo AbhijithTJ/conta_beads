@@ -10,6 +10,7 @@ import '../../providers/auth_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../services/localization_service.dart';
 import '../../theme/theme_notifier.dart';
+import '../prayer_history/prayer_history_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -455,7 +456,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ),
         const SizedBox(height: 12),
-        _SettingRow(icon: Icons.history_rounded, title: 'My Prayer History'),
+        GestureDetector(
+          onTap: () {
+            HapticFeedback.lightImpact();
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const PrayerHistoryScreen()),
+            );
+          },
+          child: _SettingRow(icon: Icons.history_rounded, title: 'My Prayer History'),
+        ),
         const SizedBox(height: 12),
         _SettingRow(icon: Icons.security_rounded, title: 'Account Security'),
         const SizedBox(height: 12),
