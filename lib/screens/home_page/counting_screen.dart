@@ -10,6 +10,7 @@ import '../../colors/colors.dart';
 import '../../config/app_config.dart';
 import '../../models/rosary_entry_model.dart';
 import '../../providers/daily_prayer_provider.dart';
+import '../../providers/language_provider.dart';
 import '../../services/api_client.dart';
 import '../../services/localization_service.dart';
 import '../../theme/theme_notifier.dart';
@@ -560,8 +561,6 @@ class _CountingScreenState extends State<CountingScreen>
     );
   }
 
-  String _selectedLanguage = 'English';
-
   final List<Map<String, String>> _languages = [
     {'code': 'EN', 'name': 'English'},
     {'code': 'ML', 'name': 'Malayalam'},
@@ -569,6 +568,8 @@ class _CountingScreenState extends State<CountingScreen>
 
   void _showLanguagePicker() {
     HapticFeedback.lightImpact();
+    final languageProvider = context.read<LanguageProvider>();
+    
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -615,13 +616,12 @@ class _CountingScreenState extends State<CountingScreen>
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: _languages.map((lang) {
-                        final isSelected = lang['name'] == _selectedLanguage;
+                        final isSelected = lang['name'] == languageProvider.selectedLanguage;
                         return GestureDetector(
                           onTap: () async {
-                            await loc.load(lang['name']!);
+                            await languageProvider.setLanguage(lang['name']!);
                             languageIdService.setLanguageByName(lang['name']!);
                             if (!mounted) return;
-                            setState(() => _selectedLanguage = lang['name']!);
                             Navigator.pop(ctx);
 
                             // Refresh HomeProvider to get new IDs
@@ -810,7 +810,11 @@ class _CountingScreenState extends State<CountingScreen>
             child: Row(mainAxisSize: MainAxisSize.min, children: [
               Icon(Icons.language_rounded, color: langText, size: 16),
               const SizedBox(width: 6),
-              Text(_selectedLanguage, style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w700, color: langText, letterSpacing: 0.3)),
+              Consumer<LanguageProvider>(
+                builder: (_, languageProvider, __) {
+                  return Text(languageProvider.selectedLanguage, style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w700, color: langText, letterSpacing: 0.3));
+                },
+              ),
               const SizedBox(width: 4),
               Icon(Icons.keyboard_arrow_down_rounded, color: langText.withOpacity(0.7), size: 16),
             ]),

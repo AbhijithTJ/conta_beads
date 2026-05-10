@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
+import '../providers/language_provider.dart';
 import '../theme/theme_notifier.dart';
 import '../widgets/common_bottom_nav.dart';
 import 'home_page/home_screen.dart';
@@ -22,14 +24,20 @@ class _BottomNavWrapperState extends State<BottomNavWrapper> {
   int _selectedIndex = 0;
   DateTime? _lastBackPressTime;
 
-  static const List<Widget> _screens = [
-    HomeScreen(),
-    GlobalCountsScreen(),
-    IntentionsScreen(),
-    AdoptPriestScreen(),
-    EverydayPrayersScreen(),
-    ProfileScreen(),
-  ];
+  late final List<Widget> _screens;
+
+  @override
+  void initState() {
+    super.initState();
+    _screens = const [
+      HomeScreen(),
+      GlobalCountsScreen(),
+      IntentionsScreen(),
+      AdoptPriestScreen(),
+      EverydayPrayersScreen(),
+      ProfileScreen(),
+    ];
+  }
 
   void _onNavTap(int index) => setState(() => _selectedIndex = index);
 
@@ -70,24 +78,28 @@ class _BottomNavWrapperState extends State<BottomNavWrapper> {
       builder: (_, isDark, __) {
         final bgColor =
             isDark ? const Color(0xFF22014D) : const Color(0xFFEDE0ED);
-        return PopScope(
-          canPop: false,
-          onPopInvoked: (didPop) async {
-            if (didPop) return;
-            final shouldPop = await _onWillPop();
-            if (shouldPop && context.mounted) SystemNavigator.pop();
+        return Consumer<LanguageProvider>(
+          builder: (_, languageProvider, __) {
+            return PopScope(
+              canPop: false,
+              onPopInvoked: (didPop) async {
+                if (didPop) return;
+                final shouldPop = await _onWillPop();
+                if (shouldPop && context.mounted) SystemNavigator.pop();
+              },
+              child: Scaffold(
+                backgroundColor: bgColor,
+                body: IndexedStack(
+                  index: _selectedIndex,
+                  children: _screens,
+                ),
+                bottomNavigationBar: CommonBottomNav(
+                  selectedIndex: _selectedIndex,
+                  onTap: _onNavTap,
+                ),
+              ),
+            );
           },
-          child: Scaffold(
-            backgroundColor: bgColor,
-            body: IndexedStack(
-              index: _selectedIndex,
-              children: _screens,
-            ),
-            bottomNavigationBar: CommonBottomNav(
-              selectedIndex: _selectedIndex,
-              onTap: _onNavTap,
-            ),
-          ),
         );
       },
     );

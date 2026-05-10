@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import '../../colors/colors.dart';
 import '../../models/home_model.dart';
 import '../../providers/home_provider.dart';
+import '../../providers/language_provider.dart';
 import '../../services/localization_service.dart';
 import '../../services/language_id_service.dart';
 import '../../theme/theme_notifier.dart';
@@ -32,8 +33,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   double _dragOffset = 0;
   bool _dragging = false;
   static const double _dragThreshold = 80;
-
-  String _selectedLanguage = 'English';
 
   final List<Map<String, String>> _languages = [
     {'code': 'EN', 'name': 'English'},
@@ -115,6 +114,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   void _showLanguagePicker() {
     HapticFeedback.lightImpact();
+    final languageProvider = context.read<LanguageProvider>();
+    
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -163,20 +164,19 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               Column(
                 mainAxisSize: MainAxisSize.min,
                 children: _languages.map((lang) {
-                  final isSelected = lang['name'] == _selectedLanguage;
+                  final isSelected = lang['name'] == languageProvider.selectedLanguage;
                   return GestureDetector(
                     onTap: () async {
                       // Only proceed if language is different
-                      if (lang['name'] == _selectedLanguage) {
+                      if (lang['name'] == languageProvider.selectedLanguage) {
                         Navigator.pop(ctx);
                         return;
                       }
 
-                      await loc.load(lang['name']!);
+                      await languageProvider.setLanguage(lang['name']!);
                       // Sync language ID with the service
                       languageIdService.setLanguageByName(lang['name']!);
                       if (!context.mounted) return;
-                      setState(() => _selectedLanguage = lang['name']!);
                       Navigator.pop(ctx);
                       
                       // Refresh only text content (no images reload)
@@ -449,29 +449,33 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Image.asset(logoAsset, width: 52, height: 52),
-        GestureDetector(
-          onTap: _showLanguagePicker,
-          child: Container(
-            height: 40,
-            padding: const EdgeInsets.symmetric(horizontal: 14),
-            decoration: BoxDecoration(
-              color: langBg,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: borderColor, width: 1.5),
-            ),
-            child: Row(mainAxisSize: MainAxisSize.min, children: [
-              Icon(Icons.language_rounded, color: langText, size: 16),
-              const SizedBox(width: 6),
-              Text(_selectedLanguage,
-                  style: GoogleFonts.poppins(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: langText)),
-              const SizedBox(width: 4),
-              Icon(Icons.keyboard_arrow_down_rounded,
-                  color: langText.withOpacity(0.7), size: 16),
-            ]),
-          ),
+        Consumer<LanguageProvider>(
+          builder: (_, languageProvider, __) {
+            return GestureDetector(
+              onTap: _showLanguagePicker,
+              child: Container(
+                height: 40,
+                padding: const EdgeInsets.symmetric(horizontal: 14),
+                decoration: BoxDecoration(
+                  color: langBg,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: borderColor, width: 1.5),
+                ),
+                child: Row(mainAxisSize: MainAxisSize.min, children: [
+                  Icon(Icons.language_rounded, color: langText, size: 16),
+                  const SizedBox(width: 6),
+                  Text(languageProvider.selectedLanguage,
+                      style: GoogleFonts.poppins(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: langText)),
+                  const SizedBox(width: 4),
+                  Icon(Icons.keyboard_arrow_down_rounded,
+                      color: langText.withOpacity(0.7), size: 16),
+                ]),
+              ),
+            );
+          },
         ),
       ],
     );

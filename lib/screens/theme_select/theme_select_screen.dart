@@ -2,8 +2,12 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../colors/colors.dart';
+import '../../providers/language_provider.dart';
+import '../../providers/home_provider.dart';
+import '../../services/language_id_service.dart';
 import '../../theme/theme_notifier.dart';
 import '../../services/localization_service.dart';
 import '../splash/splash_screen.dart';
@@ -24,7 +28,6 @@ class ThemeSelectScreen extends StatefulWidget {
 class _ThemeSelectScreenState extends State<ThemeSelectScreen>
     with SingleTickerProviderStateMixin {
   bool? _selected = true; // dark selected by default
-  String _selectedLanguage = 'English';
   late AnimationController _fadeCtrl;
   late Animation<double> _fadeAnim;
 
@@ -55,8 +58,20 @@ class _ThemeSelectScreenState extends State<ThemeSelectScreen>
     themeNotifier.setDark(_selected!);
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('isDarkTheme', _selected!);
-    await prefs.setString('selectedLanguage', _selectedLanguage);
-    await loc.load(_selectedLanguage);
+    
+    // Get language from provider and ensure it's loaded
+    final languageProvider = context.read<LanguageProvider>();
+    await languageProvider.setLanguage(languageProvider.selectedLanguage);
+    
+    // Sync language ID with the service (this is the key!)
+    languageIdService.setLanguageByName(languageProvider.selectedLanguage);
+    
+    await prefs.setString('selectedLanguage', languageProvider.selectedLanguage);
+    
+    // Refresh home provider with new language (after language is loaded)
+    final homeProvider = context.read<HomeProvider>();
+    await homeProvider.refreshTextOnly();
+    
     if (!mounted) return;
     Navigator.of(context).pushReplacement(
       PageRouteBuilder(
@@ -224,13 +239,17 @@ class _ThemeSelectScreenState extends State<ThemeSelectScreen>
                   const SizedBox(height: 28),
 
                   // ── Language Section ───────────────────────────────────
-                  _LanguageSection(
-                    isDark: isDark,
-                    selectedLanguage: _selectedLanguage,
-                    languages: _languages,
-                    onSelect: (lang) {
-                      HapticFeedback.selectionClick();
-                      setState(() => _selectedLanguage = lang);
+                  Consumer<LanguageProvider>(
+                    builder: (_, languageProvider, __) {
+                      return _LanguageSection(
+                        isDark: isDark,
+                        selectedLanguage: languageProvider.selectedLanguage,
+                        languages: _languages,
+                        onSelect: (lang) {
+                          HapticFeedback.selectionClick();
+                          languageProvider.setLanguage(lang);
+                        },
+                      );
                     },
                   ),
 

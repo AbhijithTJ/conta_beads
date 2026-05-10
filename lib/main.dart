@@ -8,6 +8,7 @@ import 'providers/daily_prayer_provider.dart';
 import 'providers/adopt_priest_provider.dart';
 import 'providers/intentions_provider.dart';
 import 'providers/prayer_history_provider.dart';
+import 'providers/language_provider.dart';
 import 'screens/splash/splash_screen.dart';
 import 'screens/theme_select/theme_select_screen.dart';
 import 'services/localization_service.dart';
@@ -44,6 +45,7 @@ class AppRoot extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AdoptPriestProvider()),
         ChangeNotifierProvider(create: (_) => IntentionsProvider()),
         ChangeNotifierProvider(create: (_) => PrayerHistoryProvider()),
+        ChangeNotifierProvider(create: (_) => LanguageProvider()..initialize()),
       ],
       child: const _AppView(),
     );
