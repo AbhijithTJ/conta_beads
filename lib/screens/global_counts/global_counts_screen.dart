@@ -7,6 +7,7 @@ import '../../models/global_counts_model.dart';
 import '../../models/home_model.dart';
 import '../../providers/global_counts_provider.dart';
 import '../../providers/home_provider.dart';
+import '../../providers/reverb_provider.dart';
 import '../../theme/theme_notifier.dart';
 
 class GlobalCountsScreen extends StatefulWidget {
@@ -51,7 +52,17 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
     // Fetch both prayer types on first load
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<GlobalCountsProvider>().fetchAll();
+      
+      // Setup WebSocket listeners and subscribe to dashboard
+      _setupWebSocket();
     });
+  }
+
+  /// Setup WebSocket connection and subscriptions
+  void _setupWebSocket() {
+    // WebSocket is already initialized and subscribed in main.dart
+    // No need to do anything here
+    debugPrint('[GlobalCountsScreen] Reverb already initialized in main.dart');
   }
 
   @override
@@ -686,41 +697,49 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
   }
 
   Widget _buildLiveBadge() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: Colors.red.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.red.withOpacity(0.2)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          AnimatedBuilder(
-            animation: _blinkAnimation,
-            builder: (_, __) => Container(
-              width: 6,
-              height: 6,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.red.withOpacity(_blinkAnimation.value),
-                boxShadow: [
-                  if (_blinkAnimation.value > 0.5)
-                    BoxShadow(
-                        color: Colors.red.withOpacity(0.5), blurRadius: 4),
-                ],
-              ),
-            ),
+    return Consumer<ReverbProvider>(
+      builder: (_, reverbProvider, __) {
+        final isConnected = reverbProvider.isConnected;
+        final statusColor = isConnected ? Colors.green : Colors.red;
+        final statusText = isConnected ? 'LIVE' : 'OFFLINE';
+
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            color: statusColor.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: statusColor.withOpacity(0.2)),
           ),
-          const SizedBox(width: 6),
-          const Text('LIVE',
-              style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w900,
-                  color: Colors.red,
-                  letterSpacing: 1)),
-        ],
-      ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              AnimatedBuilder(
+                animation: _blinkAnimation,
+                builder: (_, __) => Container(
+                  width: 6,
+                  height: 6,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: statusColor.withOpacity(_blinkAnimation.value),
+                    boxShadow: [
+                      if (_blinkAnimation.value > 0.5)
+                        BoxShadow(
+                            color: statusColor.withOpacity(0.5), blurRadius: 4),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: 6),
+              Text(statusText,
+                  style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w900,
+                      color: statusColor,
+                      letterSpacing: 1)),
+            ],
+          ),
+        );
+      },
     );
   }
 

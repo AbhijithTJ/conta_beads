@@ -27,6 +27,24 @@ class LeaderboardEntry {
       isCurrentUser: json['is_current_user'] as bool,
     );
   }
+
+  LeaderboardEntry copyWith({
+    int? position,
+    int? userId,
+    String? name,
+    int? totalCount,
+    int? todayCount,
+    bool? isCurrentUser,
+  }) {
+    return LeaderboardEntry(
+      position: position ?? this.position,
+      userId: userId ?? this.userId,
+      name: name ?? this.name,
+      totalCount: totalCount ?? this.totalCount,
+      todayCount: todayCount ?? this.todayCount,
+      isCurrentUser: isCurrentUser ?? this.isCurrentUser,
+    );
+  }
 }
 
 class GlobalCountsData {
@@ -75,4 +93,27 @@ class GlobalCountsData {
     leaderboard: [],
     prayerTypeId: prayerTypeId,
   );
+
+  /// Create a copy with updated fields
+  GlobalCountsData copyWith({
+    int? yourTotal,
+    int? yourToday,
+    int? communityTotal,
+    int? communityTodayTotal,
+    int? yourPosition,
+    double? yourContributionPercent,
+    List<LeaderboardEntry>? leaderboard,
+    int? prayerTypeId,
+  }) {
+    return GlobalCountsData(
+      yourTotal: yourTotal ?? this.yourTotal,
+      yourToday: yourToday ?? this.yourToday,
+      communityTotal: communityTotal ?? this.communityTotal,
+      communityTodayTotal: communityTodayTotal ?? this.communityTodayTotal,
+      yourPosition: yourPosition ?? this.yourPosition,
+      yourContributionPercent: yourContributionPercent ?? this.yourContributionPercent,
+      leaderboard: leaderboard ?? this.leaderboard,
+      prayerTypeId: prayerTypeId ?? this.prayerTypeId,
+    );
+  }
 }

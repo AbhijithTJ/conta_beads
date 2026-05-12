@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'config/app_config.dart';
 import 'providers/auth_provider.dart';
 import 'providers/user_provider.dart';
 import 'providers/global_counts_provider.dart';
@@ -9,6 +10,7 @@ import 'providers/adopt_priest_provider.dart';
 import 'providers/intentions_provider.dart';
 import 'providers/prayer_history_provider.dart';
 import 'providers/language_provider.dart';
+import 'providers/reverb_provider.dart';
 import 'screens/splash/splash_screen.dart';
 import 'screens/theme_select/theme_select_screen.dart';
 import 'services/localization_service.dart';
@@ -46,14 +48,52 @@ class AppRoot extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => IntentionsProvider()),
         ChangeNotifierProvider(create: (_) => PrayerHistoryProvider()),
         ChangeNotifierProvider(create: (_) => LanguageProvider()..initialize()),
+        ChangeNotifierProvider(create: (_) => ReverbProvider()),
       ],
       child: const _AppView(),
     );
   }
 }
 
-class _AppView extends StatelessWidget {
+class _AppView extends StatefulWidget {
   const _AppView();
+
+  @override
+  State<_AppView> createState() => _AppViewState();
+}
+
+class _AppViewState extends State<_AppView> {
+  @override
+  void initState() {
+    super.initState();
+    // Initialize WebSocket after providers are ready
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initializeWebSocket();
+    });
+  }
+
+  /// Initialize Reverb WebSocket connection
+  Future<void> _initializeWebSocket() async {
+    try {
+      final reverbProvider = context.read<ReverbProvider>();
+      
+      // Initialize Reverb and wait for connection
+      await reverbProvider.initialize();
+      debugPrint('[App] Reverb connected');
+
+      // Subscribe to dashboard channel (will wait for connection if needed)
+      await reverbProvider.subscribe('dashboard');
+      debugPrint('[App] Subscribed to dashboard');
+
+      // Setup WebSocket listeners in GlobalCountsProvider
+      final globalCountsProvider = context.read<GlobalCountsProvider>();
+      globalCountsProvider.setupReverbListeners(reverbProvider.service);
+
+      debugPrint('[App] Reverb initialized and subscribed to dashboard');
+    } catch (e) {
+      debugPrint('[App] Reverb initialization error: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
