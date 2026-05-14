@@ -1,29 +1,30 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_html/flutter_html.dart';
 import '../../colors/colors.dart';
 import '../../theme/theme_notifier.dart';
+import '../../providers/prayer_documents_provider.dart';
+import '../../models/prayer_documents_model.dart';
 
-class EverydayPrayersScreen extends StatelessWidget {
+class EverydayPrayersScreen extends StatefulWidget {
   const EverydayPrayersScreen({super.key});
 
-  static const List<Map<String, dynamic>> _prayers = [
-    {'title': 'Divine Mercy Chaplet',           'image': 'assets/demo/Divine Mercy Chaplet.png'},
-    {'title': 'Divine Mercy Novena and Litany', 'image': 'assets/demo/Novena and Litany.png'},
-    {'title': 'Way of the Cross MCRC',          'image': 'assets/demo/Way of the cross.png'},
-    {'title': 'Prayer to be Merciful',          'image': 'assets/demo/Prayers to be Merciful.png'},
-    {'title': 'Prayer to the Holy Face',        'image': 'assets/demo/Prayer-to-the-Holy-Face.jpg.jpeg'},
-  ];
+  @override
+  State<EverydayPrayersScreen> createState() => _EverydayPrayersScreenState();
+}
 
-  static const List<String> _guides = [
-    'Confession Assistant',
-    'Living Divine Mercy A Daily Guide',
-  ];
-
-  static const List<String> _guideImages = [
-    'assets/demo/Confession Assistant.png',
-    'assets/demo/Divine Mercy Guide.png',
-  ];
+class _EverydayPrayersScreenState extends State<EverydayPrayersScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Fetch prayer documents when screen loads
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<PrayerDocumentsProvider>().fetch();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -177,57 +178,98 @@ class EverydayPrayersScreen extends StatelessWidget {
 
                 // ── Scrollable content ──────────────────────────────────
                 Expanded(
-                  child: SingleChildScrollView(
-                    physics: const BouncingScrollPhysics(),
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const SizedBox(height: 4),
-
-                        // Title
-                        Center(
-                          child: Text(
-                            'Everyday Prayers',
-                            style: GoogleFonts.poppins(
-                              fontSize: 24,
-                              fontWeight: FontWeight.w800,
-                              color: titleColor,
-                              letterSpacing: 0.5,
-                            ),
+                  child: Consumer<PrayerDocumentsProvider>(
+                    builder: (context, provider, _) {
+                      if (provider.isLoading) {
+                        return Center(
+                          child: CircularProgressIndicator(
+                            color: titleColor,
                           ),
-                        ),
-                        Center(
-                          child: Text(
-                            'Your daily path to grace',
-                            style: GoogleFonts.poppins(
-                              fontSize: 12,
-                              color: subColor,
-                              letterSpacing: 0.3,
-                            ),
+                        );
+                      }
+
+                      if (provider.status == PrayerDocumentsStatus.error) {
+                        return Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.error_outline, color: titleColor, size: 48),
+                              const SizedBox(height: 16),
+                              Text(
+                                provider.error ?? 'Failed to load prayers',
+                                style: GoogleFonts.poppins(
+                                  fontSize: 14,
+                                  color: titleColor,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 16),
+                              ElevatedButton(
+                                onPressed: () => provider.refresh(),
+                                child: const Text('Retry'),
+                              ),
+                            ],
                           ),
+                        );
+                      }
+
+                      final documents = provider.data?.documents ?? [];
+
+                      return SingleChildScrollView(
+                        physics: const BouncingScrollPhysics(),
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(height: 4),
+
+                            // Title
+                            Center(
+                              child: Text(
+                                'Everyday Prayers',
+                                style: GoogleFonts.poppins(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.w800,
+                                  color: titleColor,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                            ),
+                            Center(
+                              child: Text(
+                                'Your daily path to grace',
+                                style: GoogleFonts.poppins(
+                                  fontSize: 12,
+                                  color: subColor,
+                                  letterSpacing: 0.3,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 24),
+
+                            // ── Prayer grid ─────────────────────────────────
+                            if (documents.isNotEmpty) ...[
+                              _buildSectionLabel('Prayers', titleColor),
+                              const SizedBox(height: 12),
+                              _buildPrayerGrid(isDark, titleColor, documents),
+
+                              const SizedBox(height: 24),
+
+                              // ── Divider ──────────────────────────────────────
+                              Container(height: 1, color: dividerColor),
+                              const SizedBox(height: 20),
+                            ],
+
+                            // ── Guide cards ──────────────────────────────────
+                            _buildSectionLabel('Guides', titleColor),
+                            const SizedBox(height: 12),
+                            _buildGuideCards(isDark, documents),
+
+                            const SizedBox(height: 48),
+                          ],
                         ),
-                        const SizedBox(height: 24),
-
-                        // ── Prayer grid ─────────────────────────────────
-                        _buildSectionLabel('Prayers', titleColor),
-                        const SizedBox(height: 12),
-                        _buildPrayerGrid(isDark, titleColor),
-
-                        const SizedBox(height: 24),
-
-                        // ── Divider ──────────────────────────────────────
-                        Container(height: 1, color: dividerColor),
-                        const SizedBox(height: 20),
-
-                        // ── Guide cards ──────────────────────────────────
-                        _buildSectionLabel('Guides', titleColor),
-                        const SizedBox(height: 12),
-                        _buildGuideCards(isDark),
-
-                        const SizedBox(height: 48),
-                      ],
-                    ),
+                      );
+                    },
                   ),
                 ),
               ],
@@ -254,11 +296,14 @@ class EverydayPrayersScreen extends StatelessWidget {
   }
 
   // ── Prayer grid ─────────────────────────────────────────────────────────────
-  Widget _buildPrayerGrid(bool isDark, Color titleColor) {
+  Widget _buildPrayerGrid(bool isDark, Color titleColor, List<PrayerDocument> documents) {
+    // Filter only link-type documents for the prayer grid
+    final prayers = documents.where((doc) => doc.type == 'link').toList();
+    
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      itemCount: _prayers.length,
+      itemCount: prayers.length,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3,
         crossAxisSpacing: 12,
@@ -266,9 +311,9 @@ class EverydayPrayersScreen extends StatelessWidget {
         childAspectRatio: 0.72,
       ),
       itemBuilder: (context, i) {
-        final prayer = _prayers[i];
+        final prayer = prayers[i];
         return GestureDetector(
-          onTap: () {},
+          onTap: () => _openPrayerDocument(prayer),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -277,17 +322,26 @@ class EverydayPrayersScreen extends StatelessWidget {
                 height: 92,
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(14),
-                  child: Image.asset(
-                    prayer['image']!,
+                  child: Image.network(
+                    prayer.imagePath,
                     fit: BoxFit.cover,
                     width: double.infinity,
                     height: double.infinity,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        color: isDark ? Colors.grey[800] : Colors.grey[200],
+                        child: Icon(
+                          Icons.image_not_supported,
+                          color: isDark ? Colors.grey[400] : Colors.grey[600],
+                        ),
+                      );
+                    },
                   ),
                 ),
               ),
               const SizedBox(height: 6),
               Text(
-                prayer['title']!,
+                prayer.title,
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,
                 style: GoogleFonts.poppins(
@@ -305,18 +359,34 @@ class EverydayPrayersScreen extends StatelessWidget {
   }
 
   // ── Guide cards ─────────────────────────────────────────────────────────────
-  Widget _buildGuideCards(bool isDark) {
+  Widget _buildGuideCards(bool isDark, List<PrayerDocument> documents) {
+    // Filter text-type documents for guides
+    final guides = documents.where((doc) => doc.type == 'text').toList();
+    
+    if (guides.isEmpty) {
+      return Center(
+        child: Text(
+          'No guides available',
+          style: GoogleFonts.poppins(
+            fontSize: 12,
+            color: isDark ? Colors.white54 : Colors.grey,
+          ),
+        ),
+      );
+    }
+
     return IntrinsicHeight(
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: List.generate(_guides.length, (i) {
+        children: List.generate(guides.length, (i) {
+          final guide = guides[i];
           return Expanded(
             child: GestureDetector(
-              onTap: () {},
+              onTap: () => _showGuideContent(guide),
               child: Container(
                 margin: EdgeInsets.only(
                   right: i == 0 ? 8 : 0,
-                  left:  i == 1 ? 8 : 0,
+                  left:  i == guides.length - 1 ? 8 : 0,
                 ),
                 decoration: BoxDecoration(
                   color: Colors.white,
@@ -348,17 +418,24 @@ class EverydayPrayersScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Image.asset(
-                        _guideImages[i],
+                      Image.network(
+                        guide.imagePath,
                         height: 100,
                         width: double.infinity,
                         fit: BoxFit.cover,
                         alignment: Alignment.bottomCenter,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            height: 100,
+                            color: Colors.grey[300],
+                            child: const Icon(Icons.image_not_supported),
+                          );
+                        },
                       ),
                       Padding(
                         padding: const EdgeInsets.all(10),
                         child: Text(
-                          _guides[i],
+                          guide.title,
                           style: GoogleFonts.poppins(
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
@@ -438,6 +515,100 @@ class EverydayPrayersScreen extends StatelessWidget {
         ],
       ),
       child: child,
+    );
+  }
+
+  // ── Open prayer document (link type) ──────────────────────────────────────────
+  Future<void> _openPrayerDocument(PrayerDocument document) async {
+    if (document.type == 'link' && document.link != null) {
+      final uri = Uri.parse(document.link!);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Could not open ${document.title}')),
+          );
+        }
+      }
+    }
+  }
+
+  // ── Show guide content (text type) ────────────────────────────────────────────
+  void _showGuideContent(PrayerDocument guide) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return DraggableScrollableSheet(
+          expand: false,
+          builder: (context, scrollController) {
+            return Container(
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+              ),
+              child: Column(
+                children: [
+                  // ── Header ──────────────────────────────────────────
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            guide.title,
+                            style: GoogleFonts.poppins(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                              color: const Color(0xFF624294),
+                            ),
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () => Navigator.pop(context),
+                          child: const Icon(Icons.close, color: Color(0xFF624294)),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Divider(height: 1),
+                  // ── Content ─────────────────────────────────────────
+                  Expanded(
+                    child: SingleChildScrollView(
+                      controller: scrollController,
+                      padding: const EdgeInsets.all(16),
+                      child: guide.data != null
+                          ? Html(
+                              data: guide.data,
+                              style: {
+                                'body': Style(
+                                  fontSize: FontSize(14),
+                                  color: Colors.black87,
+                                  lineHeight: LineHeight(1.6),
+                                ),
+                                'p': Style(
+                                  margin: Margins.only(bottom: 12),
+                                ),
+                              },
+                            )
+                          : Text(
+                              'No content available',
+                              style: GoogleFonts.poppins(
+                                fontSize: 14,
+                                color: Colors.grey,
+                              ),
+                            ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }
