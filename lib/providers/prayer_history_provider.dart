@@ -58,7 +58,7 @@ class PrayerHistoryProvider extends ChangeNotifier {
       };
       
       final response = await ApiClient.instance.get(
-        '${AppConfig.rosariesPath}/history',
+        AppConfig.rosariesHistoryPath,
         query: query,
       );
       
