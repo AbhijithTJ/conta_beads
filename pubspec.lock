@@ -544,6 +544,15 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.2.0"
+  page_flip:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: HEAD
+      resolved-ref: "4b4391e31b135e06ceebc38943866f7d81e79fda"
+      url: "https://github.com/shivbo96/page_flip.git"
+    source: git
+    version: "0.2.5+1"
   path:
     dependency: transitive
     description:

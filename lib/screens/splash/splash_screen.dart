@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../login_and_register/login_screen.dart';
 import '../../screens/onboarding/onboarding_wrapper.dart';
+import '../../screens/theme_select/theme_select_screen.dart';
 import '../../services/session_service.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -28,10 +29,10 @@ class _SplashScreenState extends State<SplashScreen>
 
     _gifCtrl.addStatusListener((status) {
       if (status == AnimationStatus.completed && mounted) {
-        // Route to home if already logged in, otherwise show login.
+        // Route to home if already logged in, otherwise show theme selection.
         final destination = SessionService.instance.isLoggedIn
             ? const OnboardingWrapper()
-            : const LoginScreen();
+            : ThemeSelectScreen(onComplete: () {});
 
         Navigator.of(context).pushReplacement(
           PageRouteBuilder(

@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:flutter_html/flutter_html.dart';
 import '../../colors/colors.dart';
 import '../../theme/theme_notifier.dart';
 import '../../providers/prayer_documents_provider.dart';
 import '../../models/prayer_documents_model.dart';
+import 'prayer_detail_screen.dart';
 
 class EverydayPrayersScreen extends StatefulWidget {
   const EverydayPrayersScreen({super.key});
@@ -252,18 +252,7 @@ class _EverydayPrayersScreenState extends State<EverydayPrayersScreen> {
                               _buildSectionLabel('Prayers', titleColor),
                               const SizedBox(height: 12),
                               _buildPrayerGrid(isDark, titleColor, documents),
-
-                              const SizedBox(height: 24),
-
-                              // ── Divider ──────────────────────────────────────
-                              Container(height: 1, color: dividerColor),
-                              const SizedBox(height: 20),
                             ],
-
-                            // ── Guide cards ──────────────────────────────────
-                            _buildSectionLabel('Guides', titleColor),
-                            const SizedBox(height: 12),
-                            _buildGuideCards(isDark, documents),
 
                             const SizedBox(height: 48),
                           ],
@@ -297,13 +286,11 @@ class _EverydayPrayersScreenState extends State<EverydayPrayersScreen> {
 
   // ── Prayer grid ─────────────────────────────────────────────────────────────
   Widget _buildPrayerGrid(bool isDark, Color titleColor, List<PrayerDocument> documents) {
-    // Filter only link-type documents for the prayer grid
-    final prayers = documents.where((doc) => doc.type == 'link').toList();
-    
+    // Display all documents in the prayer grid
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      itemCount: prayers.length,
+      itemCount: documents.length,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3,
         crossAxisSpacing: 12,
@@ -311,9 +298,9 @@ class _EverydayPrayersScreenState extends State<EverydayPrayersScreen> {
         childAspectRatio: 0.72,
       ),
       itemBuilder: (context, i) {
-        final prayer = prayers[i];
+        final prayer = documents[i];
         return GestureDetector(
-          onTap: () => _openPrayerDocument(prayer),
+          onTap: () => _handlePrayerTap(prayer),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -358,101 +345,17 @@ class _EverydayPrayersScreenState extends State<EverydayPrayersScreen> {
     );
   }
 
-  // ── Guide cards ─────────────────────────────────────────────────────────────
-  Widget _buildGuideCards(bool isDark, List<PrayerDocument> documents) {
-    // Filter text-type documents for guides
-    final guides = documents.where((doc) => doc.type == 'text').toList();
-    
-    if (guides.isEmpty) {
-      return Center(
-        child: Text(
-          'No guides available',
-          style: GoogleFonts.poppins(
-            fontSize: 12,
-            color: isDark ? Colors.white54 : Colors.grey,
-          ),
+  // ── Handle prayer tap (text or link) ─────────────────────────────────────────
+  void _handlePrayerTap(PrayerDocument prayer) {
+    if (prayer.type == 'link') {
+      _openPrayerDocument(prayer);
+    } else if (prayer.type == 'text') {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => PrayerDetailScreen(prayer: prayer),
         ),
       );
     }
-
-    return IntrinsicHeight(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: List.generate(guides.length, (i) {
-          final guide = guides[i];
-          return Expanded(
-            child: GestureDetector(
-              onTap: () => _showGuideContent(guide),
-              child: Container(
-                margin: EdgeInsets.only(
-                  right: i == 0 ? 8 : 0,
-                  left:  i == guides.length - 1 ? 8 : 0,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: isDark
-                        ? Colors.white
-                        : const Color(0xFF624294).withOpacity(0.15),
-                    width: isDark ? 2.0 : 1.5,
-                  ),
-                  boxShadow: isDark
-                      ? [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 8, offset: const Offset(0, 3))]
-                      : [
-                          BoxShadow(
-                            color: const Color(0xFF624294).withOpacity(0.10),
-                            blurRadius: 16,
-                            spreadRadius: 1,
-                            offset: const Offset(0, 6),
-                          ),
-                          BoxShadow(
-                            color: Colors.white.withOpacity(0.80),
-                            blurRadius: 4,
-                            offset: const Offset(0, -2),
-                          ),
-                        ],
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(14),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Image.network(
-                        guide.imagePath,
-                        height: 100,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                        alignment: Alignment.bottomCenter,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Container(
-                            height: 100,
-                            color: Colors.grey[300],
-                            child: const Icon(Icons.image_not_supported),
-                          );
-                        },
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(10),
-                        child: Text(
-                          guide.title,
-                          style: GoogleFonts.poppins(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                            color: const Color(0xFF624294),
-                            height: 1.4,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          );
-        }),
-      ),
-    );
   }
 
   // ── Frosted glass card — mirrors login screen card style ────────────────────
@@ -532,83 +435,5 @@ class _EverydayPrayersScreenState extends State<EverydayPrayersScreen> {
         }
       }
     }
-  }
-
-  // ── Show guide content (text type) ────────────────────────────────────────────
-  void _showGuideContent(PrayerDocument guide) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) {
-        return DraggableScrollableSheet(
-          expand: false,
-          builder: (context, scrollController) {
-            return Container(
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-              ),
-              child: Column(
-                children: [
-                  // ── Header ──────────────────────────────────────────
-                  Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            guide.title,
-                            style: GoogleFonts.poppins(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w700,
-                              color: const Color(0xFF624294),
-                            ),
-                          ),
-                        ),
-                        GestureDetector(
-                          onTap: () => Navigator.pop(context),
-                          child: const Icon(Icons.close, color: Color(0xFF624294)),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const Divider(height: 1),
-                  // ── Content ─────────────────────────────────────────
-                  Expanded(
-                    child: SingleChildScrollView(
-                      controller: scrollController,
-                      padding: const EdgeInsets.all(16),
-                      child: guide.data != null
-                          ? Html(
-                              data: guide.data,
-                              style: {
-                                'body': Style(
-                                  fontSize: FontSize(14),
-                                  color: Colors.black87,
-                                  lineHeight: LineHeight(1.6),
-                                ),
-                                'p': Style(
-                                  margin: Margins.only(bottom: 12),
-                                ),
-                              },
-                            )
-                          : Text(
-                              'No content available',
-                              style: GoogleFonts.poppins(
-                                fontSize: 14,
-                                color: Colors.grey,
-                              ),
-                            ),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
   }
 }

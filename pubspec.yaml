@@ -48,6 +48,9 @@ dependencies:
   url_launcher: ^6.2.4
   pusher_channels_flutter: ^2.2.0
   web_socket_channel: ^2.4.0
+  page_flip:
+    git:
+      url: https://github.com/shivbo96/page_flip.git
 
 dev_dependencies:
   flutter_test:

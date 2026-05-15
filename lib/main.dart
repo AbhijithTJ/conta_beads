@@ -126,9 +126,7 @@ class _AppViewState extends State<_AppView> {
             ),
             useMaterial3: true,
           ),
-          home: ThemeSelectScreen(
-            onComplete: () {}, // handled inside the screen via Navigator
-          ),
+          home: const SplashScreen(),
         );
       },
     );
