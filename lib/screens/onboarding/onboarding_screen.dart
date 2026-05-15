@@ -1,7 +1,6 @@
 import 'dart:math';
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../../colors/colors.dart';
 
 class OnboardingPage {
@@ -107,13 +106,13 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     _orb3 = Tween<double>(begin: 0, end: 1).animate(CurvedAnimation(parent: _orb3Ctrl, curve: Curves.easeInOut));
     _orb4 = Tween<double>(begin: 0, end: 1).animate(CurvedAnimation(parent: _orb4Ctrl, curve: Curves.easeInOut));
 
-    _contentCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 500));
+    _contentCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 600));
     _contentFade = Tween<double>(begin: 0, end: 1).animate(CurvedAnimation(parent: _contentCtrl, curve: Curves.easeOut));
-    _contentScale = Tween<double>(begin: 0.88, end: 1.0).animate(CurvedAnimation(parent: _contentCtrl, curve: Curves.easeOutBack));
+    _contentScale = Tween<double>(begin: 0.85, end: 1.0).animate(CurvedAnimation(parent: _contentCtrl, curve: Curves.easeOutBack));
     _contentCtrl.forward();
 
-    _iconCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 1600))..repeat(reverse: true);
-    _iconBounce = Tween<double>(begin: -6, end: 6).animate(CurvedAnimation(parent: _iconCtrl, curve: Curves.easeInOut));
+    _iconCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 1800))..repeat(reverse: true);
+    _iconBounce = Tween<double>(begin: -8, end: 8).animate(CurvedAnimation(parent: _iconCtrl, curve: Curves.easeInOut));
 
     _shimmerCtrl = AnimationController(vsync: this, duration: const Duration(seconds: 20))..repeat();
     _shimmerCtrl.addListener(() {
@@ -124,7 +123,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final s = MediaQuery.of(context).size;
-      for (int i = 0; i < 30; i++) {
+      for (int i = 0; i < 40; i++) {
         _particles.add(_Particle(s.width, s.height, _rng));
       }
     });
@@ -147,10 +146,8 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     super.dispose();
   }
 
-  Future<void> _complete() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('hasSeenOnboarding', true);
-    if (mounted) widget.onComplete?.call();
+  void _complete() {
+    widget.onComplete?.call();
   }
 
   @override
@@ -243,7 +240,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: Colors.white, letterSpacing: 0.5)),
             ),
           ]),
-          // Skip
+          // Skip button
           if (_currentPage < _pages.length - 1)
             GestureDetector(
               onTap: _complete,
@@ -289,67 +286,67 @@ class _OnboardingScreenState extends State<OnboardingScreen>
               builder: (_, __) => Transform.translate(
                 offset: Offset(0, _iconBounce.value),
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(36),
+                  borderRadius: BorderRadius.circular(40),
                   child: BackdropFilter(
                     filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
                     child: Container(
-                      width: 130, height: 130,
+                      width: 140, height: 140,
                       decoration: BoxDecoration(
                         color: Colors.white.withOpacity(0.08),
-                        borderRadius: BorderRadius.circular(36),
+                        borderRadius: BorderRadius.circular(40),
                         border: Border.all(color: Colors.white.withOpacity(0.18), width: 1.5),
                         boxShadow: [
-                          BoxShadow(color: page.accentColor.withOpacity(0.45), blurRadius: 32, spreadRadius: 4),
+                          BoxShadow(color: page.accentColor.withOpacity(0.50), blurRadius: 40, spreadRadius: 6),
                         ],
                       ),
-                      child: Center(child: Text(page.icon, style: const TextStyle(fontSize: 64))),
+                      child: Center(child: Text(page.icon, style: const TextStyle(fontSize: 72))),
                     ),
                   ),
                 ),
               ),
             ),
-            const SizedBox(height: 40),
+            const SizedBox(height: 48),
 
             // Glass content card
             ClipRRect(
-              borderRadius: BorderRadius.circular(28),
+              borderRadius: BorderRadius.circular(32),
               child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+                filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
                 child: Container(
-                  padding: const EdgeInsets.fromLTRB(28, 28, 28, 28),
+                  padding: const EdgeInsets.fromLTRB(32, 32, 32, 32),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.08),
-                    borderRadius: BorderRadius.circular(28),
-                    border: Border.all(color: Colors.white.withOpacity(0.15), width: 1.5),
+                    color: Colors.white.withOpacity(0.09),
+                    borderRadius: BorderRadius.circular(32),
+                    border: Border.all(color: Colors.white.withOpacity(0.16), width: 1.5),
                     boxShadow: [
-                      BoxShadow(color: const Color(0xFF22014D).withOpacity(0.40), blurRadius: 40, offset: const Offset(0, 12)),
+                      BoxShadow(color: const Color(0xFF22014D).withOpacity(0.45), blurRadius: 48, offset: const Offset(0, 16)),
                     ],
                   ),
                   child: Column(children: [
                     // Accent line
                     Container(
-                      width: 40, height: 3,
+                      width: 48, height: 4,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(2),
-                        gradient: LinearGradient(colors: [page.accentColor, page.accentColor.withOpacity(0.3)]),
+                        gradient: LinearGradient(colors: [page.accentColor, page.accentColor.withOpacity(0.2)]),
                       ),
                     ),
-                    const SizedBox(height: 18),
+                    const SizedBox(height: 22),
                     Text(
                       page.title,
                       textAlign: TextAlign.center,
                       style: const TextStyle(
-                        fontSize: 26, fontWeight: FontWeight.w800,
-                        color: Colors.white, height: 1.3, letterSpacing: 0.2,
+                        fontSize: 28, fontWeight: FontWeight.w800,
+                        color: Colors.white, height: 1.3, letterSpacing: 0.3,
                       ),
                     ),
-                    const SizedBox(height: 14),
+                    const SizedBox(height: 16),
                     Text(
                       page.description,
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: 15, fontWeight: FontWeight.w500,
-                        color: Colors.white.withOpacity(0.72), height: 1.65,
+                        fontSize: 15.5, fontWeight: FontWeight.w500,
+                        color: Colors.white.withOpacity(0.75), height: 1.7,
                       ),
                     ),
                   ]),
@@ -364,7 +361,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
 
   Widget _buildBottomSection() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
+      padding: const EdgeInsets.fromLTRB(24, 0, 24, 40),
       child: Column(children: [
         // Dot indicators
         Row(
@@ -374,45 +371,45 @@ class _OnboardingScreenState extends State<OnboardingScreen>
             return GestureDetector(
               onTap: () => _animateToPage(i),
               child: AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                width: active ? 28 : 8, height: 8,
-                margin: const EdgeInsets.symmetric(horizontal: 4),
+                duration: const Duration(milliseconds: 350),
+                width: active ? 32 : 10, height: 10,
+                margin: const EdgeInsets.symmetric(horizontal: 5),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(4),
-                  color: active ? AppColors.goldPrimary : AppColors.goldPrimary.withOpacity(0.28),
-                  boxShadow: active ? [BoxShadow(color: AppColors.goldPrimary.withOpacity(0.5), blurRadius: 6)] : [],
+                  borderRadius: BorderRadius.circular(5),
+                  color: active ? AppColors.goldPrimary : AppColors.goldPrimary.withOpacity(0.25),
+                  boxShadow: active ? [BoxShadow(color: AppColors.goldPrimary.withOpacity(0.6), blurRadius: 8)] : [],
                 ),
               ),
             );
           }),
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 32),
 
         // Buttons row
         Row(children: [
           if (_currentPage > 0) ...[
             Expanded(
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(18),
                 child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+                  filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                   child: GestureDetector(
                     onTap: () => _animateToPage(_currentPage - 1),
                     child: Container(
-                      height: 54,
+                      height: 58,
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.10),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: AppColors.goldPrimary.withOpacity(0.45), width: 1.5),
+                        color: Colors.white.withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border.all(color: AppColors.goldPrimary.withOpacity(0.50), width: 1.8),
                       ),
                       child: const Center(child: Text('Back',
-                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.goldDark))),
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.goldDark))),
                     ),
                   ),
                 ),
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 14),
           ],
           Expanded(
             child: GestureDetector(
@@ -424,19 +421,19 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                 }
               },
               child: Container(
-                height: 54,
+                height: 58,
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
                     colors: [AppColors.goldAccent, AppColors.goldAccentDark],
                     begin: Alignment.topLeft, end: Alignment.bottomRight,
                   ),
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [BoxShadow(color: AppColors.goldAccent.withOpacity(0.45), blurRadius: 16, offset: const Offset(0, 6))],
-                  border: Border.all(color: Colors.white.withOpacity(0.35), width: 1.5),
+                  borderRadius: BorderRadius.circular(18),
+                  boxShadow: [BoxShadow(color: AppColors.goldAccent.withOpacity(0.50), blurRadius: 20, offset: const Offset(0, 8))],
+                  border: Border.all(color: Colors.white.withOpacity(0.40), width: 1.5),
                 ),
                 child: Center(child: Text(
                   _currentPage == _pages.length - 1 ? 'Get Started' : 'Next',
-                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: Colors.white, letterSpacing: 0.5),
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: Colors.white, letterSpacing: 0.6),
                 )),
               ),
             ),
@@ -481,15 +478,15 @@ class _Particle {
   _Particle(this.maxW, this.maxH, this.rng)
       : x = rng.nextDouble() * maxW,
         y = rng.nextDouble() * maxH,
-        size = rng.nextDouble() * 3 + 1,
-        speed = rng.nextDouble() * 0.6 + 0.2,
-        opacity = rng.nextDouble() * 0.35 + 0.1,
+        size = rng.nextDouble() * 3.5 + 0.8,
+        speed = rng.nextDouble() * 0.8 + 0.15,
+        opacity = rng.nextDouble() * 0.40 + 0.08,
         angle = rng.nextDouble() * 2 * pi;
 
   void update() {
     y -= speed;
-    x += sin(angle) * 0.5;
-    angle += 0.01;
+    x += sin(angle) * 0.6;
+    angle += 0.012;
     if (y < -10) { y = maxH + 10; x = rng.nextDouble() * maxW; }
   }
 }

@@ -24,6 +24,7 @@ class _LoginScreenState extends State<LoginScreen> {
   late TextEditingController _passwordController;
   bool _obscurePassword = true;
   bool _biometricAvailable = false;
+  bool _hasCredentialsSaved = false;
 
   @override
   void initState() {
@@ -44,14 +45,19 @@ class _LoginScreenState extends State<LoginScreen> {
     final canCheck = await _localAuth.canCheckBiometrics;
     final isSupported = await _localAuth.isDeviceSupported();
     final session = SessionService.instance;
+    
+    // Check if credentials are actually saved
+    final savedCreds = await session.getBiometricCredentials();
+    final hasCredentials = savedCreds != null;
 
     setState(() {
       _biometricAvailable = canCheck && isSupported;
+      _hasCredentialsSaved = hasCredentials;
       final saved = session.contact ?? '';
       if (saved.isNotEmpty) _contactController.text = saved;
     });
 
-    if (_biometricAvailable && session.biometricEnabled) {
+    if (_biometricAvailable && session.biometricEnabled && hasCredentials) {
       await Future.delayed(const Duration(milliseconds: 400));
       _authenticateWithBiometric();
     }
@@ -308,6 +314,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final subTextColor = const Color(0xFF624294).withOpacity(0.60);
 
     final biometricEnabled = SessionService.instance.biometricEnabled;
+    final hasCredentials = _hasCredentialsSaved;
 
     final cardContent = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -355,13 +362,13 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
         const SizedBox(height: 28),
         _buildLoginButton(isLoading),
-        // Show biometric button whenever it's enabled — works after logout too.
-        if (_biometricAvailable && biometricEnabled) ...[
+        // Show biometric button only when credentials are saved AND biometric is enabled
+        if (_biometricAvailable && biometricEnabled && hasCredentials) ...[
           const SizedBox(height: 14),
           _buildBiometricButton(),
         ],
-        // Show setup link only when biometric not yet enabled.
-        if (_biometricAvailable && !biometricEnabled) ...[
+        // Show setup link only when biometric not yet enabled AND no credentials saved
+        if (_biometricAvailable && !biometricEnabled && !hasCredentials) ...[
           const SizedBox(height: 14),
           Center(
             child: GestureDetector(

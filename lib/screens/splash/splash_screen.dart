@@ -29,7 +29,9 @@ class _SplashScreenState extends State<SplashScreen>
 
     _gifCtrl.addStatusListener((status) {
       if (status == AnimationStatus.completed && mounted) {
-        // Route to home if already logged in, otherwise show theme selection.
+        // Route logic:
+        // 1. If logged in → go to OnboardingWrapper (which checks onboarding flag)
+        // 2. If not logged in → show theme selection first
         final destination = SessionService.instance.isLoggedIn
             ? const OnboardingWrapper()
             : ThemeSelectScreen(onComplete: () {});
