@@ -8,6 +8,7 @@ import '../../models/home_model.dart';
 import '../../providers/global_counts_provider.dart';
 import '../../providers/home_provider.dart';
 import '../../providers/reverb_provider.dart';
+import '../../providers/user_provider.dart';
 import '../../theme/theme_notifier.dart';
 
 class GlobalCountsScreen extends StatefulWidget {
@@ -142,9 +143,10 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
                   )
                 : BoxDecoration(color: bgColor),
             child: SafeArea(
-              child: Consumer<GlobalCountsProvider>(
-                builder: (_, provider, __) {
+              child: Consumer2<GlobalCountsProvider, UserProvider>(
+                builder: (_, provider, userProvider, __) {
                   final homeQuotes = context.read<HomeProvider>().data?.quotes ?? [];
+                  final currentUserId = userProvider.userId;
                   return RefreshIndicator(
                     onRefresh: () => provider.fetchAll(),
                     color: AppColors.goldPrimary,
@@ -163,7 +165,7 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
                           const SizedBox(height: 16),
                           _buildCinematicSection(3, _buildStatsRow(provider)),
                           const SizedBox(height: 16),
-                          _buildCinematicSection(4, _buildTopOfferingsCard(provider)),
+                          _buildCinematicSection(4, _buildTopOfferingsCard(provider, currentUserId)),
                           const SizedBox(height: 40),
                         ],
                       ),
@@ -538,7 +540,7 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
 
   // ── Top offerings / leaderboard ─────────────────────────────────────────────
 
-  Widget _buildTopOfferingsCard(GlobalCountsProvider provider) {
+  Widget _buildTopOfferingsCard(GlobalCountsProvider provider, int currentUserId) {
     final data        = provider.dataFor(_isRosaryMode ? PrayerType.rosary : PrayerType.divineMercy);
     final leaderboard = data.leaderboard;
     final prayerLabel = _isRosaryMode ? 'Rosaries offered' : 'Chaplets offered';
@@ -574,14 +576,14 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
                       color: AppColors.authBgMid.withOpacity(0.5))),
             )
           else
-            _buildLeaderboardList(leaderboard, prayerLabel),
+            _buildLeaderboardList(leaderboard, prayerLabel, currentUserId),
         ],
       ),
     );
   }
 
   Widget _buildLeaderboardList(
-      List<LeaderboardEntry> entries, String prayerLabel) {
+      List<LeaderboardEntry> entries, String prayerLabel, int currentUserId) {
     const double itemHeight = 80.0;
     final totalHeight = entries.length * itemHeight;
 
@@ -599,15 +601,15 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
             left: 0,
             right: 0,
             height: itemHeight,
-            child: _buildOfferingItem(entry, prayerLabel),
+            child: _buildOfferingItem(entry, prayerLabel, currentUserId),
           );
         }).toList(),
       ),
     );
   }
 
-  Widget _buildOfferingItem(LeaderboardEntry entry, String prayerLabel) {
-    final isYou = entry.isCurrentUser;
+  Widget _buildOfferingItem(LeaderboardEntry entry, String prayerLabel, int currentUserId) {
+    final isYou = entry.userId == currentUserId;
     return Container(
       padding: isYou
           ? const EdgeInsets.symmetric(horizontal: 14, vertical: 12)

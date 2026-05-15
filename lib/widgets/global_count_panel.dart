@@ -6,6 +6,7 @@ import '../colors/colors.dart';
 import '../models/global_counts_model.dart';
 import '../providers/global_counts_provider.dart';
 import '../providers/reverb_provider.dart';
+import '../providers/user_provider.dart';
 import '../theme/theme_notifier.dart';
 
 /// Frosted-glass "Top Offerings" panel shown as an overlay on the counting screen.
@@ -76,11 +77,12 @@ class _GlobalCountPanelState extends State<GlobalCountPanel> with TickerProvider
   @override
   Widget build(BuildContext context) {
     final isDark = themeNotifier.isDark;
-    return Consumer<GlobalCountsProvider>(
-      builder: (context, provider, _) {
+    return Consumer2<GlobalCountsProvider, UserProvider>(
+      builder: (context, provider, userProvider, _) {
         final data = provider.dataFor(widget.isRosary ? PrayerType.rosary : PrayerType.divineMercy);
         final leaderboard = data.leaderboard;
-        return isDark ? _buildDarkPanel(leaderboard) : _buildLightPanel(leaderboard);
+        final currentUserId = userProvider.userId;
+        return isDark ? _buildDarkPanel(leaderboard, currentUserId) : _buildLightPanel(leaderboard, currentUserId);
       },
     );
   }
@@ -104,7 +106,7 @@ class _GlobalCountPanelState extends State<GlobalCountPanel> with TickerProvider
     );
   }
 
-  Widget _buildDarkPanel(List<LeaderboardEntry> leaderboard) {
+  Widget _buildDarkPanel(List<LeaderboardEntry> leaderboard, int currentUserId) {
     return SizedBox(
       width: 280,
       height: 380,
@@ -126,14 +128,14 @@ class _GlobalCountPanelState extends State<GlobalCountPanel> with TickerProvider
                 ),
               ],
             ),
-            child: _buildContent(isDark: true, leaderboard: leaderboard),
+            child: _buildContent(isDark: true, leaderboard: leaderboard, currentUserId: currentUserId),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildLightPanel(List<LeaderboardEntry> leaderboard) {
+  Widget _buildLightPanel(List<LeaderboardEntry> leaderboard, int currentUserId) {
     return SizedBox(
       width: 280,
       height: 380,
@@ -156,12 +158,12 @@ class _GlobalCountPanelState extends State<GlobalCountPanel> with TickerProvider
             ),
           ],
         ),
-        child: _buildContent(isDark: false, leaderboard: leaderboard),
+        child: _buildContent(isDark: false, leaderboard: leaderboard, currentUserId: currentUserId),
       ),
     );
   }
 
-  Widget _buildContent({required bool isDark, required List<LeaderboardEntry> leaderboard}) {
+  Widget _buildContent({required bool isDark, required List<LeaderboardEntry> leaderboard, required int currentUserId}) {
     return Column(
       children: [
         // ── Header ──
@@ -218,7 +220,12 @@ class _GlobalCountPanelState extends State<GlobalCountPanel> with TickerProvider
                 : SingleChildScrollView(
                     physics: const BouncingScrollPhysics(),
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    child: _AnimatedLeaderboard(items: leaderboard, itemHeight: GlobalCountPanel._itemHeight, isDark: isDark),
+                    child: _AnimatedLeaderboard(
+                      items: leaderboard, 
+                      itemHeight: GlobalCountPanel._itemHeight, 
+                      isDark: isDark,
+                      currentUserId: currentUserId,
+                    ),
                   ),
           ),
         ),
@@ -232,8 +239,14 @@ class _AnimatedLeaderboard extends StatefulWidget {
   final List<LeaderboardEntry> items;
   final double itemHeight;
   final bool isDark;
+  final int currentUserId;
 
-  const _AnimatedLeaderboard({required this.items, required this.itemHeight, required this.isDark});
+  const _AnimatedLeaderboard({
+    required this.items, 
+    required this.itemHeight, 
+    required this.isDark,
+    required this.currentUserId,
+  });
 
   @override
   State<_AnimatedLeaderboard> createState() => _AnimatedLeaderboardState();
@@ -284,7 +297,7 @@ class _AnimatedLeaderboardState extends State<_AnimatedLeaderboard> {
               rank: item.position,
               name: item.name,
               count: item.totalCount,
-              isYou: item.isCurrentUser,
+              isYou: item.userId == widget.currentUserId,
               isDark: widget.isDark,
             ),
           );
