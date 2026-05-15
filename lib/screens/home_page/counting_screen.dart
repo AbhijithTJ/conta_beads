@@ -11,6 +11,7 @@ import '../../config/app_config.dart';
 import '../../models/rosary_entry_model.dart';
 import '../../providers/daily_prayer_provider.dart';
 import '../../providers/language_provider.dart';
+import '../../providers/global_counts_provider.dart';
 import '../../services/api_client.dart';
 import '../../services/localization_service.dart';
 import '../../theme/theme_notifier.dart';
@@ -81,8 +82,6 @@ class _CountingScreenState extends State<CountingScreen>
   // ── Floating global-count button state ──
   Offset _fabPosition = const Offset(20, 200);
   bool _showGlobalPanel = false;
-  late List<Map<String, dynamic>> _leaderboardData;
-  Timer? _leaderboardTimer;
   late AnimationController _blinkController;
   late Animation<double> _blinkAnimation;
   final _random = Random();
@@ -153,23 +152,9 @@ class _CountingScreenState extends State<CountingScreen>
       CurvedAnimation(parent: _blinkController, curve: Curves.easeInOut),
     );
 
-    _leaderboardData = [
-      {'name': 'Emma',    'count': 56, 'isYou': false},
-      {'name': 'Rachel',  'count': 42, 'isYou': false},
-      {'name': 'James T.','count': 38, 'isYou': false},
-      {'name': 'You',     'count': 245,'isYou': true},
-    ];
-
-    _leaderboardTimer = Timer.periodic(const Duration(seconds: 3), (_) {
-      if (!mounted) return;
-      setState(() {
-        final nonYou = _leaderboardData.where((e) => !(e['isYou'] as bool)).toList();
-        if (nonYou.isNotEmpty) {
-          final pick = nonYou[_random.nextInt(nonYou.length)];
-          pick['count'] = (pick['count'] as int) + _random.nextInt(3) + 1;
-        }
-        _leaderboardData.sort((a, b) => (b['count'] as int).compareTo(a['count'] as int));
-      });
+    // Fetch global counts on first load
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<GlobalCountsProvider>().fetchAll();
     });
 
   }
@@ -183,7 +168,6 @@ class _CountingScreenState extends State<CountingScreen>
     _ripple2Controller.dispose();
     _ripple3Controller.dispose();
     _blinkController.dispose();
-    _leaderboardTimer?.cancel();
     _noteController.dispose();
     super.dispose();
   }
@@ -495,7 +479,7 @@ class _CountingScreenState extends State<CountingScreen>
                 right: 16,
                 bottom: 90,
                 child: GlobalCountPanel(
-                  leaderboardData: _leaderboardData,
+                  leaderboardData: [],
                   blinkAnimation: _blinkAnimation,
                   onClose: () => setState(() => _showGlobalPanel = false),
                 ),
