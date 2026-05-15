@@ -10,7 +10,7 @@ import '../theme/theme_notifier.dart';
 
 /// Frosted-glass "Top Offerings" panel shown as an overlay on the counting screen.
 class GlobalCountPanel extends StatefulWidget {
-  final List<Map<String, dynamic>> leaderboardData;
+  final bool isRosary;
   final Animation<double> blinkAnimation;
   final VoidCallback onClose;
 
@@ -19,7 +19,7 @@ class GlobalCountPanel extends StatefulWidget {
 
   const GlobalCountPanel({
     super.key,
-    required this.leaderboardData,
+    required this.isRosary,
     required this.blinkAnimation,
     required this.onClose,
   });
@@ -78,7 +78,7 @@ class _GlobalCountPanelState extends State<GlobalCountPanel> with TickerProvider
     final isDark = themeNotifier.isDark;
     return Consumer<GlobalCountsProvider>(
       builder: (context, provider, _) {
-        final data = provider.dataFor(PrayerType.rosary);
+        final data = provider.dataFor(widget.isRosary ? PrayerType.rosary : PrayerType.divineMercy);
         final leaderboard = data.leaderboard;
         return isDark ? _buildDarkPanel(leaderboard) : _buildLightPanel(leaderboard);
       },

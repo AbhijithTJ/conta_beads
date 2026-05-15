@@ -479,7 +479,7 @@ class _CountingScreenState extends State<CountingScreen>
                 right: 16,
                 bottom: 90,
                 child: GlobalCountPanel(
-                  leaderboardData: [],
+                  isRosary: _isRosary,
                   blinkAnimation: _blinkAnimation,
                   onClose: () => setState(() => _showGlobalPanel = false),
                 ),
