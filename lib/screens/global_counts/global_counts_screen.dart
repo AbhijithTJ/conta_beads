@@ -23,6 +23,10 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
   late Animation<double> _blinkAnimation;
   late AnimationController _quoteFadeController;
   late Animation<double> _quoteFadeAnim;
+  
+  // Cinematic Entry Animations
+  late AnimationController _entryController;
+  final List<Animation<double>> _staggeredAnims = [];
 
   int _currentQuotePage = 0;
   bool _isRosaryMode = true;
@@ -49,10 +53,27 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
     );
     _quoteFadeController.forward();
 
+    // Cinematic Stagger Setup (5 sections)
+    _entryController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1400),
+    );
+
+    for (int i = 0; i < 5; i++) {
+      final start = i * 0.12;
+      final end = (start + 0.45).clamp(0.0, 1.0);
+      _staggeredAnims.add(
+        CurvedAnimation(
+          parent: _entryController,
+          curve: Interval(start, end, curve: Curves.easeOutCubic),
+        ),
+      );
+    }
+
     // Fetch both prayer types on first load
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<GlobalCountsProvider>().fetchAll();
-      
+      _entryController.forward();
       // Setup WebSocket listeners and subscribe to dashboard
       _setupWebSocket();
     });
@@ -69,6 +90,7 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
   void dispose() {
     _blinkController.dispose();
     _quoteFadeController.dispose();
+    _entryController.dispose();
     super.dispose();
   }
 
@@ -133,15 +155,15 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
                       child: Column(
                         children: [
                           const SizedBox(height: 24),
-                          _buildHeader(isDark),
+                          _buildCinematicSection(0, _buildHeader(isDark)),
                           const SizedBox(height: 16),
-                          _buildQuoteCard(isDark, homeQuotes),
+                          _buildCinematicSection(1, _buildQuoteCard(isDark, homeQuotes)),
                           const SizedBox(height: 16),
-                          _buildGlobalCountCard(provider, isDark),
+                          _buildCinematicSection(2, _buildGlobalCountCard(provider, isDark)),
                           const SizedBox(height: 16),
-                          _buildStatsRow(provider),
+                          _buildCinematicSection(3, _buildStatsRow(provider)),
                           const SizedBox(height: 16),
-                          _buildTopOfferingsCard(provider),
+                          _buildCinematicSection(4, _buildTopOfferingsCard(provider)),
                           const SizedBox(height: 40),
                         ],
                       ),
@@ -153,6 +175,25 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
           ),
         );
       },
+    );
+  }
+
+  // ── Cinematic Helper ────────────────────────────────────────────────────────
+
+  Widget _buildCinematicSection(int index, Widget child) {
+    return AnimatedBuilder(
+      animation: _staggeredAnims[index],
+      builder: (context, child) {
+        final value = _staggeredAnims[index].value;
+        return Opacity(
+          opacity: value,
+          child: Transform.translate(
+            offset: Offset(0, 30 * (1.0 - value)),
+            child: child,
+          ),
+        );
+      },
+      child: child,
     );
   }
 

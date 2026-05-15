@@ -32,6 +32,10 @@ class _GlobalCountPanelState extends State<GlobalCountPanel> with TickerProvider
   late AnimationController _blinkController;
   late Animation<double> _blinkAnimation;
 
+  // Cinematic Entry Animations
+  late AnimationController _entryController;
+  final List<Animation<double>> _staggeredAnims = [];
+
   @override
   void initState() {
     super.initState();
@@ -42,33 +46,61 @@ class _GlobalCountPanelState extends State<GlobalCountPanel> with TickerProvider
     _blinkAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _blinkController, curve: Curves.easeInOut),
     );
+
+    // Cinematic Stagger Setup
+    _entryController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1000),
+    );
+
+    for (int i = 0; i < 3; i++) {
+      final start = i * 0.15;
+      final end = (start + 0.6).clamp(0.0, 1.0);
+      _staggeredAnims.add(
+        CurvedAnimation(
+          parent: _entryController,
+          curve: Interval(start, end, curve: Curves.easeOutCubic),
+        ),
+      );
+    }
+    _entryController.forward();
   }
 
   @override
   void dispose() {
     _blinkController.dispose();
+    _entryController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final isDark = themeNotifier.isDark;
-    return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0.0, end: 1.0),
-      duration: const Duration(milliseconds: 280),
-      curve: Curves.easeOutBack,
-      builder: (context, v, child) => Transform.scale(
-        scale: v,
-        alignment: Alignment.bottomCenter,
-        child: Opacity(opacity: v.clamp(0.0, 1.0), child: child),
-      ),
-      child: Consumer<GlobalCountsProvider>(
-        builder: (context, provider, _) {
-          final data = provider.dataFor(PrayerType.rosary);
-          final leaderboard = data.leaderboard;
-          return isDark ? _buildDarkPanel(leaderboard) : _buildLightPanel(leaderboard);
-        },
-      ),
+    return Consumer<GlobalCountsProvider>(
+      builder: (context, provider, _) {
+        final data = provider.dataFor(PrayerType.rosary);
+        final leaderboard = data.leaderboard;
+        return isDark ? _buildDarkPanel(leaderboard) : _buildLightPanel(leaderboard);
+      },
+    );
+  }
+
+  // ── Cinematic Helper ────────────────────────────────────────────────────────
+
+  Widget _buildCinematicSection(int index, Widget child) {
+    return AnimatedBuilder(
+      animation: _staggeredAnims[index],
+      builder: (context, child) {
+        final value = _staggeredAnims[index].value;
+        return Opacity(
+          opacity: value,
+          child: Transform.translate(
+            offset: Offset(0, 20 * (1.0 - value)),
+            child: child,
+          ),
+        );
+      },
+      child: child,
     );
   }
 
@@ -133,53 +165,62 @@ class _GlobalCountPanelState extends State<GlobalCountPanel> with TickerProvider
     return Column(
       children: [
         // ── Header ──
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 16, 12, 12),
-          child: Row(
-            children: [
-              Icon(Icons.public_rounded, color: AppColors.authBgBottom, size: 18),
-              const SizedBox(width: 8),
-              Text(
-                'Top Offerings',
-                style: GoogleFonts.poppins(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w900,
-                  color: AppColors.authBgBottom,
+        _buildCinematicSection(
+          0,
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 12, 12),
+            child: Row(
+              children: [
+                Icon(Icons.public_rounded, color: AppColors.authBgBottom, size: 18),
+                const SizedBox(width: 8),
+                Text(
+                  'Top Offerings',
+                  style: GoogleFonts.poppins(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w900,
+                    color: AppColors.authBgBottom,
+                  ),
                 ),
-              ),
-              const Spacer(),
-              _buildLiveBadge(),
-              const SizedBox(width: 8),
-              GestureDetector(
-                onTap: widget.onClose,
-                child: Icon(Icons.close_rounded, color: AppColors.authBgMid.withOpacity(0.5), size: 20),
-              ),
-            ],
+                const Spacer(),
+                const _buildLiveBadge(),
+                const SizedBox(width: 8),
+                GestureDetector(
+                  onTap: widget.onClose,
+                  child: Icon(Icons.close_rounded, color: AppColors.authBgMid.withOpacity(0.5), size: 20),
+                ),
+              ],
+            ),
           ),
         ),
-        Divider(
-          color: AppColors.authBgMid.withOpacity(0.1),
-          height: 1,
-          indent: 20,
-          endIndent: 20,
+        _buildCinematicSection(
+          1,
+          Divider(
+            color: AppColors.authBgMid.withOpacity(0.1),
+            height: 1,
+            indent: 20,
+            endIndent: 20,
+          ),
         ),
         // ── Scrollable Leaderboard ──
         Expanded(
-          child: leaderboard.isEmpty
-              ? Center(
-                  child: Text(
-                    'Loading...',
-                    style: GoogleFonts.poppins(
-                      fontSize: 14,
-                      color: AppColors.authBgMid.withOpacity(0.5),
+          child: _buildCinematicSection(
+            2,
+            leaderboard.isEmpty
+                ? Center(
+                    child: Text(
+                      'Loading...',
+                      style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        color: AppColors.authBgMid.withOpacity(0.5),
+                      ),
                     ),
+                  )
+                : SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    child: _AnimatedLeaderboard(items: leaderboard, itemHeight: GlobalCountPanel._itemHeight, isDark: isDark),
                   ),
-                )
-              : SingleChildScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  child: _AnimatedLeaderboard(items: leaderboard, itemHeight: GlobalCountPanel._itemHeight, isDark: isDark),
-                ),
+          ),
         ),
       ],
     );
