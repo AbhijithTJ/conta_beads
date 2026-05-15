@@ -115,5 +115,7 @@
   "passwords_not_match": "പാസ്‌വേഡുകൾ പൊരുത്തപ്പെടുന്നില്ല",
   "registration_failed": "രജിസ്ട്രേഷൻ പരാജയപ്പെട്ടു",
   "account_created": "അക്കൗണ്ട് സൃഷ്ടിച്ചു! ദയവായി ലോഗ് ഇൻ ചെയ്യുക.",
-  "use_biometrics_to_signin": "Rosary Bank-ലേക്ക് സൈൻ ഇൻ ചെയ്യാൻ ബയോമെട്രിക്സ് ഉപയോഗിക്കുക"
+  "use_biometrics_to_signin": "Rosary Bank-ലേക്ക് സൈൻ ഇൻ ചെയ്യാൻ ബയോമെട്രിക്സ് ഉപയോഗിക്കുക",
+  "my_profile": "എന്റെ പ്രാർത്ഥന ജീവിതം",
+  "member_since": "പ്രാർത്ഥനയുടെ ശിഷ്യൻ മുതൽ"
 }

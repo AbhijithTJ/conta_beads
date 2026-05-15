@@ -208,46 +208,46 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<bool>(
-      valueListenable: themeNotifier,
-      builder: (_, isDark, __) {
-        final headerColor = isDark ? Colors.white : AppColors.authBgBottom;
-        final subColor = isDark ? Colors.white.withOpacity(0.50) : AppColors.authBgMid.withOpacity(0.6);
-        final sectionLabelColor = isDark ? AppColors.goldLight.withOpacity(0.9) : AppColors.goldDark;
+    return Consumer<LanguageProvider>(
+      builder: (context, languageProvider, _) {
+        return ValueListenableBuilder<bool>(
+          valueListenable: themeNotifier,
+          builder: (_, isDark, __) {
+            final headerColor = isDark ? Colors.white : AppColors.authBgBottom;
+            final subColor = isDark ? Colors.white.withOpacity(0.50) : AppColors.authBgMid.withOpacity(0.6);
+            final sectionLabelColor = isDark ? AppColors.goldLight.withOpacity(0.9) : AppColors.goldDark;
 
-        return Scaffold(
-          body: Container(
-            width: double.infinity,
-            height: double.infinity,
-            decoration: isDark
-                ? const BoxDecoration(
-                    gradient: RadialGradient(
-                      center: Alignment(0.0, -0.2),
-                      radius: 1.2,
-                      colors: [
-                        Color(0xFF4A4080),
-                        Color(0xFF2A1F5E),
-                        Color(0xFF100828),
-                      ],
-                      stops: [0.0, 0.50, 1.0],
-                    ),
-                  )
-                : const BoxDecoration(color: Color(0xFFF5EEF5)),
-            child: SafeArea(
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    const SizedBox(height: 12),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            return Scaffold(
+              body: Container(
+                width: double.infinity,
+                height: double.infinity,
+                decoration: isDark
+                    ? const BoxDecoration(
+                        gradient: RadialGradient(
+                          center: Alignment(0.0, -0.2),
+                          radius: 1.2,
+                          colors: [
+                            Color(0xFF4A4080),
+                            Color(0xFF2A1F5E),
+                            Color(0xFF100828),
+                          ],
+                          stops: [0.0, 0.50, 1.0],
+                        ),
+                      )
+                    : const BoxDecoration(color: Color(0xFFF5EEF5)),
+                child: SafeArea(
+                  child: SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Text('My Prayer Life', style: GoogleFonts.poppins(fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 3.5, color: subColor)),
-                        Consumer<LanguageProvider>(
-                          builder: (_, languageProvider, __) {
-                            return GestureDetector(
+                        const SizedBox(height: 12),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(loc.tr('my_profile'), style: GoogleFonts.poppins(fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 3.5, color: subColor)),
+                            GestureDetector(
                               onTap: _showLanguagePicker,
                               child: Container(
                                 height: 40,
@@ -268,57 +268,57 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   Icon(Icons.keyboard_arrow_down_rounded, color: (isDark ? Colors.white : const Color(0xFF624294)).withOpacity(0.7), size: 16),
                                 ]),
                               ),
-                            );
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 28),
+                        _buildAvatar(),
+                        const SizedBox(height: 16),
+                        Consumer<UserProvider>(
+                          builder: (_, userProvider, __) {
+                            if (userProvider.isLoading && userProvider.user == null) {
+                              return Column(children: [
+                                const SizedBox(height: 8),
+                                SizedBox(
+                                  width: 20, height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: isDark ? Colors.white54 : const Color(0xFF624294),
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                              ]);
+                            }
+                            final name = userProvider.displayName;
+                            final createdAt = userProvider.user?.createdAt;
+                            final since = _formatSince(createdAt);
+                            return Column(children: [
+                              Text(name, style: GoogleFonts.poppins(fontSize: 28, fontWeight: FontWeight.w800, color: headerColor, letterSpacing: 0.5)),
+                              const SizedBox(height: 6),
+                              Text('${loc.tr('member_since')} $since', style: GoogleFonts.poppins(fontSize: 10, fontWeight: FontWeight.w600, letterSpacing: 2.0, color: subColor)),
+                            ]);
                           },
                         ),
+                        const SizedBox(height: 32),
+                        _buildStatsRow(),
+                        const SizedBox(height: 36),
+                        _buildSectionLabel(loc.tr('account_details'), sectionLabelColor),
+                        const SizedBox(height: 12),
+                        _buildDetailsCard(),
+                        const SizedBox(height: 28),
+                        _buildSectionLabel(loc.tr('settings'), sectionLabelColor),
+                        const SizedBox(height: 12),
+                        _buildSettingsList(),
+                        const SizedBox(height: 40),
+                        _buildLogoutButton(context),
+                        const SizedBox(height: 40),
                       ],
                     ),
-                    const SizedBox(height: 28),
-                    _buildAvatar(),
-                    const SizedBox(height: 16),
-                    Consumer<UserProvider>(
-                      builder: (_, userProvider, __) {
-                        if (userProvider.isLoading && userProvider.user == null) {
-                          return Column(children: [
-                            const SizedBox(height: 8),
-                            SizedBox(
-                              width: 20, height: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: isDark ? Colors.white54 : const Color(0xFF624294),
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                          ]);
-                        }
-                        final name = userProvider.displayName;
-                        final createdAt = userProvider.user?.createdAt;
-                        final since = _formatSince(createdAt);
-                        return Column(children: [
-                          Text(name, style: GoogleFonts.poppins(fontSize: 28, fontWeight: FontWeight.w800, color: headerColor, letterSpacing: 0.5)),
-                          const SizedBox(height: 6),
-                          Text('Disciple of prayer since $since', style: GoogleFonts.poppins(fontSize: 10, fontWeight: FontWeight.w600, letterSpacing: 2.0, color: subColor)),
-                        ]);
-                      },
-                    ),
-                    const SizedBox(height: 32),
-                    _buildStatsRow(),
-                    const SizedBox(height: 36),
-                    _buildSectionLabel('Account Details', sectionLabelColor),
-                    const SizedBox(height: 12),
-                    _buildDetailsCard(),
-                    const SizedBox(height: 28),
-                    _buildSectionLabel('Settings', sectionLabelColor),
-                    const SizedBox(height: 12),
-                    _buildSettingsList(),
-                    const SizedBox(height: 40),
-                    _buildLogoutButton(context),
-                    const SizedBox(height: 40),
-                  ],
+                  ),
                 ),
               ),
-            ),
-          ),
+            );
+          },
         );
       },
     );
@@ -429,11 +429,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return _WhiteCard(
       child: Column(
         children: [
-          _InfoRow(icon: Icons.email_outlined,    label: 'Email Address', value: user.email.isNotEmpty ? user.email : '—'),
+          _InfoRow(icon: Icons.email_outlined,    label: loc.tr('email_address'), value: user.email.isNotEmpty ? user.email : '—'),
           _divider(),
-          _InfoRow(icon: Icons.phone_outlined,    label: 'Phone Number',  value: phone.isNotEmpty ? phone : '—'),
+          _InfoRow(icon: Icons.phone_outlined,    label: loc.tr('phone_number'),  value: phone.isNotEmpty ? phone : '—'),
           _divider(),
-          _InfoRow(icon: Icons.schedule_outlined, label: 'Timezone',      value: user.timezone.isNotEmpty ? user.timezone : '—'),
+          _InfoRow(icon: Icons.schedule_outlined, label: loc.tr('region'),      value: user.timezone.isNotEmpty ? user.timezone : '—'),
         ],
       ),
     );
@@ -459,7 +459,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   child: Icon(Icons.dark_mode_rounded, color: const Color(0xFF624294), size: 18),
                 ),
                 const SizedBox(width: 16),
-                Expanded(child: Text('Dark Mode', style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.authBgBottom))),
+                Expanded(child: Text(loc.tr('appearance'), style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.authBgBottom))),
                 Transform.scale(
                   scale: 0.8,
                   child: Switch.adaptive(
@@ -486,12 +486,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
               MaterialPageRoute(builder: (_) => const PrayerHistoryScreen()),
             );
           },
-          child: _SettingRow(icon: Icons.history_rounded, title: 'My Prayer History'),
+          child: _SettingRow(icon: Icons.history_rounded, title: loc.tr('counting_history')),
         ),
         const SizedBox(height: 12),
-        _SettingRow(icon: Icons.security_rounded, title: 'Account Security'),
+        _SettingRow(icon: Icons.security_rounded, title: loc.tr('account_security')),
         const SizedBox(height: 12),
-        _SettingRow(icon: Icons.help_outline_rounded, title: 'Help & Support'),
+        _SettingRow(icon: Icons.help_outline_rounded, title: loc.tr('help_support')),
       ],
     );
   }
@@ -507,7 +507,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           gradient: LinearGradient(colors: [Colors.redAccent.shade400, Colors.red.shade800], begin: Alignment.topCenter, end: Alignment.bottomCenter),
           boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.25), blurRadius: 15, offset: const Offset(0, 8))],
         ),
-        child: const Center(child: Text('SIGN OUT', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, letterSpacing: 1.5, color: Colors.white))),
+        child: Center(child: Text(loc.tr('sign_out'), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, letterSpacing: 1.5, color: Colors.white))),
       ),
     );
   }

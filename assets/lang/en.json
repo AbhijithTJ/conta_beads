@@ -115,5 +115,7 @@
   "passwords_not_match": "Passwords do not match",
   "registration_failed": "Registration failed",
   "account_created": "Account created! Please log in.",
-  "use_biometrics_to_signin": "Use biometrics to sign in to Rosary Bank"
+  "use_biometrics_to_signin": "Use biometrics to sign in to Rosary Bank",
+  "my_profile": "MY PRAYER LIFE",
+  "member_since": "Disciple of prayer since"
 }
