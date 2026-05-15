@@ -99,19 +99,21 @@ class PrayerStats {
 class RosaryEntryResponse {
   final RosaryEntry entry;
   final UserStats userStats;
-  final PrayerStats prayerStats;
+  final PrayerStats? prayerStats;
 
   const RosaryEntryResponse({
     required this.entry,
     required this.userStats,
-    required this.prayerStats,
+    this.prayerStats,
   });
 
   factory RosaryEntryResponse.fromJson(Map<String, dynamic> json) {
     return RosaryEntryResponse(
       entry:       RosaryEntry.fromJson(json['entry'] as Map<String, dynamic>),
       userStats:   UserStats.fromJson(json['user_stats'] as Map<String, dynamic>),
-      prayerStats: PrayerStats.fromJson(json['prayer_stats'] as Map<String, dynamic>),
+      prayerStats: json['prayer_stats'] != null 
+          ? PrayerStats.fromJson(json['prayer_stats'] as Map<String, dynamic>)
+          : null,
     );
   }
 }

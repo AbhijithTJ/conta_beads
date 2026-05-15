@@ -285,6 +285,12 @@ class _CountingScreenState extends State<CountingScreen>
     final noteText = _noteController.text.trim();
     final prayerTypeId = _isRosary ? 1 : 2;
 
+    final requestBody = {
+      'count': _activeCount,
+      'intention_text': noteText,
+      'prayer_type_id': prayerTypeId,
+    };
+
     try {
       // Show loading indicator
       ScaffoldMessenger.of(context).showSnackBar(
@@ -311,11 +317,7 @@ class _CountingScreenState extends State<CountingScreen>
       // Call API
       final response = await ApiClient.instance.post(
         AppConfig.rosariesPath,
-        body: {
-          'count': _activeCount,
-          'intention_text': noteText,
-          'prayer_type_id': prayerTypeId,
-        },
+        body: requestBody,
       );
 
       if (!mounted) return;
@@ -367,7 +369,7 @@ class _CountingScreenState extends State<CountingScreen>
               const Icon(Icons.error_outline, color: Colors.white, size: 20),
               const SizedBox(width: 10),
               Expanded(
-                child: Text(e.message, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 14)),
+                child: Text('API Error: ${e.message}', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 14)),
               ),
             ],
           ),
@@ -375,20 +377,20 @@ class _CountingScreenState extends State<CountingScreen>
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
           margin: const EdgeInsets.all(16),
-          duration: const Duration(seconds: 3),
+          duration: const Duration(seconds: 5),
         ),
       );
-    } catch (e) {
+    } catch (e, stack) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).clearSnackBars();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Row(
+          content: Row(
             children: [
-              Icon(Icons.error_outline, color: Colors.white, size: 20),
-              SizedBox(width: 10),
+              const Icon(Icons.error_outline, color: Colors.white, size: 20),
+              const SizedBox(width: 10),
               Expanded(
-                child: Text('Failed to save. Please try again.', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 14)),
+                child: Text('Error: $e', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 14)),
               ),
             ],
           ),
@@ -396,7 +398,7 @@ class _CountingScreenState extends State<CountingScreen>
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
           margin: const EdgeInsets.all(16),
-          duration: const Duration(seconds: 3),
+          duration: const Duration(seconds: 5),
         ),
       );
     }

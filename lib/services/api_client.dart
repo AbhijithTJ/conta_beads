@@ -19,10 +19,11 @@ class ApiResponse<T> {
 class ApiException implements Exception {
   final String message;
   final int? statusCode;
-  const ApiException({required this.message, this.statusCode});
+  final Map<String, dynamic>? responseBody;
+  const ApiException({required this.message, this.statusCode, this.responseBody});
 
   @override
-  String toString() => 'ApiException($statusCode): $message';
+  String toString() => 'ApiException($statusCode): $message (Body: $responseBody)';
 }
 
 // ── Client ────────────────────────────────────────────────────────────────────
@@ -144,6 +145,7 @@ class ApiClient {
     throw ApiException(
       message: _extractErrorMessage(body, response.statusCode),
       statusCode: response.statusCode,
+      responseBody: body,
     );
   }
 
