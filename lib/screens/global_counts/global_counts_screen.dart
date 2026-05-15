@@ -424,6 +424,12 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
                             color: AppColors.authBgMid.withOpacity(0.5))),
                   ],
                 ),
+          const SizedBox(height: 4),
+          Text('Today: ${data.yourToday}',
+              style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.goldDark)),
           if (data.yourPosition > 0) ...[
             const SizedBox(height: 6),
             Text('Rank #${data.yourPosition}',

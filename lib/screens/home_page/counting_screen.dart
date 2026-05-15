@@ -962,6 +962,21 @@ class _CountingScreenState extends State<CountingScreen>
                       letterSpacing: 1.5,
                     ),
                   ),
+                  const SizedBox(height: 4),
+                  Consumer<GlobalCountsProvider>(
+                    builder: (context, provider, _) {
+                      final data = provider.dataFor(_isRosary ? PrayerType.rosary : PrayerType.divineMercy);
+                      return Text(
+                        'TODAY: ${data.yourToday}',
+                        style: GoogleFonts.poppins(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w800,
+                          color: isDark ? AppColors.goldLight : AppColors.goldDark,
+                          letterSpacing: 1.0,
+                        ),
+                      );
+                    },
+                  ),
                 ],
               ),
             ),

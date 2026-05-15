@@ -297,6 +297,7 @@ class _AnimatedLeaderboardState extends State<_AnimatedLeaderboard> {
               rank: item.position,
               name: item.name,
               count: item.totalCount,
+              todayCount: item.todayCount,
               isYou: item.userId == widget.currentUserId,
               isDark: widget.isDark,
             ),
@@ -405,6 +406,7 @@ class LeaderRow extends StatelessWidget {
   final int rank;
   final String name;
   final int count;
+  final int todayCount;
   final bool isYou;
   final bool isDark;
 
@@ -413,6 +415,7 @@ class LeaderRow extends StatelessWidget {
     required this.rank,
     required this.name,
     required this.count,
+    required this.todayCount,
     required this.isYou,
     this.isDark = true,
   });
@@ -490,13 +493,30 @@ class LeaderRow extends StatelessWidget {
             ),
           ),
           // count
-          Text(
-            '$count',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w900,
-              color: isYou ? AppColors.goldDark : AppColors.authBgBottom,
-            ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                '$count',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w900,
+                  color: isYou ? AppColors.goldDark : AppColors.authBgBottom,
+                  height: 1.0,
+                ),
+              ),
+              Text(
+                'today: $todayCount',
+                style: GoogleFonts.poppins(
+                  fontSize: 9,
+                  fontWeight: FontWeight.w600,
+                  color: isYou
+                      ? AppColors.goldDark.withOpacity(0.6)
+                      : AppColors.authBgMid.withOpacity(0.4),
+                ),
+              ),
+            ],
           ),
         ],
       ),
