@@ -2,63 +2,67 @@ import 'dart:math';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../../colors/colors.dart';
+import '../../services/localization_service.dart';
 
 class OnboardingPage {
   final String icon;
-  final String title;
-  final String description;
+  final String titleKey;
+  final String descriptionKey;
   final Color accentColor;
 
   const OnboardingPage({
     required this.icon,
-    required this.title,
-    required this.description,
+    required this.titleKey,
+    required this.descriptionKey,
     required this.accentColor,
   });
+  
+  String getTitle() => loc.tr(titleKey);
+  String getDescription() => loc.tr(descriptionKey);
 }
 
-const _pages = [
+final _pages = [
   OnboardingPage(
     icon: '📿',
-    title: 'Welcome to Upper Room',
-    description: 'A sacred space to count your rosaries and join a global community united in prayer.',
-    accentColor: Color(0xFFD4A843),
+    titleKey: 'onboarding_welcome_title',
+    descriptionKey: 'onboarding_welcome_desc',
+    accentColor: const Color(0xFFD4A843),
   ),
   OnboardingPage(
     icon: '⛪',
-    title: 'Count Your Rosary',
-    description: 'Use the Home screen to count each rosary bead with the Rosary or Divine Mercy Chaplet. Tap to count, save when done.',
-    accentColor: Color(0xFF9B6B8A),
+    titleKey: 'onboarding_count_title',
+    descriptionKey: 'onboarding_count_desc',
+    accentColor: const Color(0xFF9B6B8A),
   ),
   OnboardingPage(
     icon: '🌍',
-    title: 'Global Community',
-    description: 'See how many rosaries our community has offered together worldwide. Your prayers contribute to our collective goal.',
-    accentColor: Color(0xFF7B3F6E),
+    titleKey: 'onboarding_community_title',
+    descriptionKey: 'onboarding_community_desc',
+    accentColor: const Color(0xFF7B3F6E),
   ),
   OnboardingPage(
     icon: '🙏',
-    title: 'Share Your Intentions',
-    description: 'Submit your personal prayer requests and share your spiritual intentions with the community.',
-    accentColor: Color(0xFFD4A0A0),
+    titleKey: 'onboarding_intentions_title',
+    descriptionKey: 'onboarding_intentions_desc',
+    accentColor: const Color(0xFFD4A0A0),
   ),
   OnboardingPage(
     icon: '✝️',
-    title: 'Adopt a Priest',
-    description: 'Spiritually support a priest through prayer. Select up to three priests for a personal spiritual partnership.',
-    accentColor: Color(0xFFB89AC8),
+    titleKey: 'onboarding_priest_title',
+    descriptionKey: 'onboarding_priest_desc',
+    accentColor: const Color(0xFFB89AC8),
   ),
   OnboardingPage(
     icon: '📖',
-    title: 'Everyday Prayers',
-    description: 'Access the Divine Mercy Chaplet, Way of the Cross, Novenas, and daily guides — all in one place.',
-    accentColor: Color(0xFFD4A843),
+    titleKey: 'onboarding_prayers_title',
+    descriptionKey: 'onboarding_prayers_desc',
+    accentColor: const Color(0xFFD4A843),
   ),
   OnboardingPage(
     icon: '👤',
-    title: 'Your Profile',
-    description: 'Track your personal prayer statistics, manage your account, and customise your experience.',
-    accentColor: Color(0xFF9B6B8A),
+    titleKey: 'onboarding_profile_title',
+    descriptionKey: 'onboarding_profile_desc',
+    accentColor: const Color(0xFF9B6B8A),
   ),
 ];
 
@@ -255,7 +259,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(color: Colors.white.withOpacity(0.4)),
                     ),
-                    child: Text('Skip', style: TextStyle(
+                    child: Text(loc.tr('onboarding_skip'), style: TextStyle(
                       fontSize: 13, fontWeight: FontWeight.w600,
                       color: Colors.white.withOpacity(0.70),
                     )),
@@ -333,7 +337,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                     ),
                     const SizedBox(height: 22),
                     Text(
-                      page.title,
+                      page.getTitle(),
                       textAlign: TextAlign.center,
                       style: const TextStyle(
                         fontSize: 28, fontWeight: FontWeight.w800,
@@ -342,7 +346,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      page.description,
+                      page.getDescription(),
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 15.5, fontWeight: FontWeight.w500,
@@ -402,8 +406,8 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                         borderRadius: BorderRadius.circular(18),
                         border: Border.all(color: AppColors.goldPrimary.withOpacity(0.50), width: 1.8),
                       ),
-                      child: const Center(child: Text('Back',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.goldDark))),
+                      child: Center(child: Text(loc.tr('onboarding_back'),
+                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.goldDark))),
                     ),
                   ),
                 ),
@@ -432,7 +436,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                   border: Border.all(color: Colors.white.withOpacity(0.40), width: 1.5),
                 ),
                 child: Center(child: Text(
-                  _currentPage == _pages.length - 1 ? 'Get Started' : 'Next',
+                  _currentPage == _pages.length - 1 ? loc.tr('onboarding_get_started') : loc.tr('onboarding_next'),
                   style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: Colors.white, letterSpacing: 0.6),
                 )),
               ),
