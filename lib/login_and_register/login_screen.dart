@@ -1,13 +1,17 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:provider/provider.dart';
 import '../colors/colors.dart';
 import '../providers/auth_provider.dart';
 import '../providers/user_provider.dart';
+import '../providers/language_provider.dart';
 import '../screens/onboarding/onboarding_wrapper.dart';
 import '../services/session_service.dart';
+import '../services/language_id_service.dart';
+import '../services/localization_service.dart';
 import '../theme/theme_notifier.dart';
 import 'register_screen.dart';
 
@@ -25,6 +29,11 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _obscurePassword = true;
   bool _biometricAvailable = false;
   bool _hasCredentialsSaved = false;
+
+  final List<Map<String, String>> _languages = [
+    {'code': 'EN', 'name': 'English'},
+    {'code': 'ML', 'name': 'Malayalam'},
+  ];
 
   @override
   void initState() {
@@ -206,6 +215,129 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
+  void _showLanguagePicker() {
+    HapticFeedback.lightImpact();
+    final languageProvider = context.read<LanguageProvider>();
+    
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (ctx) => Padding(
+        padding:
+            EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
+        child: Container(
+          decoration: const BoxDecoration(
+            gradient: RadialGradient(
+              center: Alignment(0.0, -0.2),
+              radius: 1.2,
+              colors: [
+                Color(0xFF4A4080),
+                Color(0xFF2A1F5E),
+                Color(0xFF100828),
+              ],
+              stops: [0.0, 0.50, 1.0],
+            ),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+          ),
+          padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Row(children: [
+                const Icon(Icons.language_rounded,
+                    color: Colors.white, size: 22),
+                const SizedBox(width: 10),
+                Text('Select Language',
+                    style: GoogleFonts.poppins(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white)),
+              ]),
+              const SizedBox(height: 16),
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: _languages.map((lang) {
+                  final isSelected = lang['name'] == languageProvider.selectedLanguage;
+                  return GestureDetector(
+                    onTap: () async {
+                      // Only proceed if language is different
+                      if (lang['name'] == languageProvider.selectedLanguage) {
+                        Navigator.pop(ctx);
+                        return;
+                      }
+
+                      await languageProvider.setLanguage(lang['name']!);
+                      // Sync language ID with the service
+                      languageIdService.setLanguageByName(lang['name']!);
+                      if (!context.mounted) return;
+                      Navigator.pop(ctx);
+                    },
+                    child: Container(
+                      margin: const EdgeInsets.only(bottom: 10),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 14),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? Colors.white.withOpacity(0.18)
+                            : Colors.white.withOpacity(0.08),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: isSelected
+                              ? Colors.white.withOpacity(0.55)
+                              : Colors.white.withOpacity(0.12),
+                          width: 1.5,
+                        ),
+                      ),
+                      child: Row(children: [
+                        Container(
+                          width: 38,
+                          height: 28,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Center(
+                            child: Text(lang['code']!,
+                                style: GoogleFonts.poppins(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w800,
+                                    color: Colors.white,
+                                    letterSpacing: 0.5)),
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Text(lang['name']!,
+                              style: GoogleFonts.poppins(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white)),
+                        ),
+                        if (isSelected)
+                          const Icon(Icons.check_rounded,
+                              color: Colors.white, size: 20),
+                      ]),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // Read provider state here — inside build() — before any nested builders.
@@ -254,7 +386,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 24),
                   child: Column(
                     children: [
-                      const SizedBox(height: 60),
+                      const SizedBox(height: 20),
+                      _buildLanguageButton(isDark),
+                      const SizedBox(height: 40),
                       _buildHeader(logoAsset, subColor),
                       const SizedBox(height: 48),
                       _buildGlassCard(isDark, isLoading),
@@ -309,6 +443,59 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
+  Widget _buildLanguageButton(bool isDark) {
+    return Consumer<LanguageProvider>(
+      builder: (context, languageProvider, _) {
+        return Align(
+          alignment: Alignment.topRight,
+          child: GestureDetector(
+            onTap: _showLanguagePicker,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: isDark
+                    ? Colors.white.withOpacity(0.12)
+                    : const Color(0xFF624294).withOpacity(0.10),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: isDark
+                      ? Colors.white.withOpacity(0.25)
+                      : const Color(0xFF624294).withOpacity(0.20),
+                  width: 1.0,
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.language_rounded,
+                    color: isDark ? Colors.white : const Color(0xFF624294),
+                    size: 18,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    languageProvider.selectedLanguage,
+                    style: GoogleFonts.poppins(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: isDark ? Colors.white : const Color(0xFF624294),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Icon(
+                    Icons.expand_more_rounded,
+                    color: isDark ? Colors.white : const Color(0xFF624294),
+                    size: 16,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   Widget _buildGlassCard(bool isDark, bool isLoading) {
     final signInColor = const Color(0xFF624294);
     final subTextColor = const Color(0xFF624294).withOpacity(0.60);
@@ -319,21 +506,21 @@ class _LoginScreenState extends State<LoginScreen> {
     final cardContent = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Log In',
+        Text(loc.tr('log_in'),
             style: GoogleFonts.poppins(
                 fontSize: 22,
                 fontWeight: FontWeight.w800,
                 letterSpacing: 3,
                 color: signInColor)),
         const SizedBox(height: 4),
-        Text('Return to prayer',
+        Text(loc.tr('return_to_prayer'),
             style: GoogleFonts.poppins(
                 fontSize: 12, color: subTextColor, letterSpacing: 0.3)),
         const SizedBox(height: 28),
         _buildGlassField(
           controller: _contactController,
-          label: 'Phone Number',
-          hint: 'Enter your phone number',
+          label: loc.tr('phone_number_label'),
+          hint: loc.tr('enter_phone_number'),
           icon: Icons.phone_outlined,
           keyboardType: TextInputType.phone,
           isDark: isDark,
@@ -341,8 +528,8 @@ class _LoginScreenState extends State<LoginScreen> {
         const SizedBox(height: 18),
         _buildGlassField(
           controller: _passwordController,
-          label: 'Password',
-          hint: 'Enter your password',
+          label: loc.tr('password_label'),
+          hint: loc.tr('enter_password'),
           icon: Icons.lock_outline_rounded,
           isPassword: true,
           obscure: _obscurePassword,
@@ -353,7 +540,7 @@ class _LoginScreenState extends State<LoginScreen> {
         const SizedBox(height: 10),
         Align(
           alignment: Alignment.centerRight,
-          child: Text('Forgot password?',
+          child: Text(loc.tr('forgot_password'),
               style: GoogleFonts.poppins(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
@@ -376,13 +563,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 final contact = _contactController.text.trim();
                 final password = _passwordController.text;
                 if (contact.isEmpty || password.isEmpty) {
-                  _showError(
-                      'Sign in with your password first to enable biometrics');
+                  _showError(loc.tr('enter_phone_and_password'));
                   return;
                 }
                 await _offerBiometricSetup(contact, password);
               },
-              child: Text('Set up biometric login',
+              child: Text(loc.tr('set_up_biometric'),
                   style: TextStyle(
                       color: AppColors.authPurple,
                       fontWeight: FontWeight.w600,
@@ -595,7 +781,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: Icon(Icons.language_rounded,
                         color: Colors.white, size: 26),
                   ),
-                  Text('Continue',
+                  Text(loc.tr('continue_btn'),
                       style: GoogleFonts.poppins(
                         color: Colors.white,
                         fontSize: 16,
@@ -622,15 +808,20 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
             const Icon(Icons.fingerprint, color: Color(0xFF624294), size: 22),
             const SizedBox(width: 8),
-            Text('Use Face ID / Fingerprint',
-                style: GoogleFonts.poppins(
-                  color: const Color(0xFF624294),
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                )),
+            Flexible(
+              child: Text(loc.tr('use_biometric'),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.poppins(
+                    color: const Color(0xFF624294),
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  )),
+            ),
           ],
         ),
       ),
@@ -638,16 +829,16 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Widget _buildRegisterLink(Color textColor, Color linkColor) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+    return Wrap(
+      alignment: WrapAlignment.center,
       children: [
-        Text('New here? ',
+        Text(loc.tr('new_here'),
             style: GoogleFonts.poppins(color: textColor, fontSize: 13)),
         GestureDetector(
           onTap: () => Navigator.of(context).pushReplacement(
             MaterialPageRoute(builder: (_) => const RegisterScreen()),
           ),
-          child: Text('Create an account',
+          child: Text(loc.tr('create_account'),
               style: GoogleFonts.poppins(
                   color: linkColor,
                   fontWeight: FontWeight.w700,

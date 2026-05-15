@@ -9,6 +9,7 @@ import '../colors/colors.dart';
 import '../providers/auth_provider.dart';
 import '../providers/user_provider.dart';
 import '../services/session_service.dart';
+import '../services/localization_service.dart';
 import '../theme/theme_notifier.dart';
 import 'login_screen.dart';
 
@@ -296,21 +297,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final cardContent = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('CREATE ACCOUNT',
+        Text(loc.tr('create_account'),
             style: GoogleFonts.poppins(fontSize: 22, fontWeight: FontWeight.w800, letterSpacing: 3, color: titleColor)),
         const SizedBox(height: 4),
-        Text('Become a disciple of prayer',
+        Text(loc.tr('become_disciple'),
             style: GoogleFonts.poppins(fontSize: 12, color: subColor, letterSpacing: 0.3)),
         const SizedBox(height: 28),
-        _buildGlassField(controller: _nameController, label: 'Full Name', hint: 'Enter your name', icon: Icons.person_outline_rounded, isDark: isDark),
+        _buildGlassField(controller: _nameController, label: loc.tr('full_name'), hint: loc.tr('enter_name'), icon: Icons.person_outline_rounded, isDark: isDark),
         const SizedBox(height: 18),
-        _buildGlassField(controller: _emailController, label: 'Email address', hint: 'Enter your email', icon: Icons.email_outlined, isDark: isDark),
+        _buildGlassField(controller: _emailController, label: loc.tr('email_address_label'), hint: loc.tr('enter_email'), icon: Icons.email_outlined, isDark: isDark),
         const SizedBox(height: 18),
         _buildPhoneField(isDark),
         const SizedBox(height: 18),
-        _buildGlassField(controller: _passwordController, label: 'Password', hint: 'Create a password', icon: Icons.lock_outline_rounded, isPassword: true, obscure: _obscurePassword, onToggle: () => setState(() => _obscurePassword = !_obscurePassword), isDark: isDark),
+        _buildGlassField(controller: _passwordController, label: loc.tr('password'), hint: loc.tr('create_password'), icon: Icons.lock_outline_rounded, isPassword: true, obscure: _obscurePassword, onToggle: () => setState(() => _obscurePassword = !_obscurePassword), isDark: isDark),
         const SizedBox(height: 18),
-        _buildGlassField(controller: _confirmPasswordController, label: 'Confirm Password', hint: 'Repeat your password', icon: Icons.lock_reset_rounded, isPassword: true, obscure: _obscureConfirmPassword, onToggle: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword), isDark: isDark),
+        _buildGlassField(controller: _confirmPasswordController, label: loc.tr('confirm_password'), hint: loc.tr('repeat_password'), icon: Icons.lock_reset_rounded, isPassword: true, obscure: _obscureConfirmPassword, onToggle: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword), isDark: isDark),
         const SizedBox(height: 28),
         _buildRegisterButton(isLoading),
       ],
@@ -441,7 +442,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Phone number',
+          loc.tr('phone_number_reg'),
           style: GoogleFonts.poppins(
             fontSize: 12,
             fontWeight: FontWeight.w600,
@@ -498,7 +499,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
               languageCode: 'en',
               decoration: InputDecoration(
-                hintText: 'Enter phone number',
+                hintText: loc.tr('enter_phone'),
                 hintStyle: GoogleFonts.poppins(color: const Color(0xFF624294).withOpacity(0.40), fontSize: 14),
                 filled: true,
                 fillColor: isDark
@@ -561,7 +562,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     left: 16,
                     child: Icon(Icons.person_add_rounded, color: Colors.white, size: 24),
                   ),
-                  Text('Create account',
+                  Text(loc.tr('create_account_btn'),
                       style: GoogleFonts.poppins(
                         color: Colors.white,
                         fontSize: 16,
@@ -576,13 +577,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   // ── Login link ───────────────────────────────────────────────────────────────
   Widget _buildLoginLink(Color textColor, Color linkColor) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+    return Wrap(
+      alignment: WrapAlignment.center,
       children: [
-        Text('Already have an account? ', style: GoogleFonts.poppins(color: textColor, fontSize: 13)),
+        Text(loc.tr('already_have_account'), style: GoogleFonts.poppins(color: textColor, fontSize: 13)),
         GestureDetector(
           onTap: () => Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const LoginScreen())),
-          child: Text('Log In', style: GoogleFonts.poppins(color: linkColor, fontWeight: FontWeight.w800, fontSize: 13)),
+          child: Text(loc.tr('log_in_link'), style: GoogleFonts.poppins(color: linkColor, fontWeight: FontWeight.w800, fontSize: 13)),
         ),
       ],
     );
