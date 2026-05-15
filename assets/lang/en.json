@@ -117,5 +117,14 @@
   "account_created": "Account created! Please log in.",
   "use_biometrics_to_signin": "Use biometrics to sign in to Rosary Bank",
   "my_profile": "MY PRAYER LIFE",
-  "member_since": "Disciple of prayer since"
+  "member_since": "Disciple of prayer since",
+  "choose_priest": "Choose your Priest",
+  "select_up_to_three": "You may select up to 3 priests",
+  "suggest_priest": "Suggest a Priest",
+  "pray_for_me": "Pray for me",
+  "choose_priest_modal": "Choose a Priest",
+  "select_to_add": "Select one to add to your prayer list",
+  "add_priest": "Add Priest",
+  "selected_badge": "SELECTED",
+  "saved_badge": "SAVED"
 }
