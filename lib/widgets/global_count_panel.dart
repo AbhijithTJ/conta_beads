@@ -225,6 +225,7 @@ class _GlobalCountPanelState extends State<GlobalCountPanel> with TickerProvider
                       itemHeight: GlobalCountPanel._itemHeight, 
                       isDark: isDark,
                       currentUserId: currentUserId,
+                      prayerLabel: widget.isRosary ? 'Rosaries offered' : 'Chaplets offered',
                     ),
                   ),
           ),
@@ -240,12 +241,14 @@ class _AnimatedLeaderboard extends StatefulWidget {
   final double itemHeight;
   final bool isDark;
   final int currentUserId;
+  final String prayerLabel;
 
   const _AnimatedLeaderboard({
     required this.items, 
     required this.itemHeight, 
     required this.isDark,
     required this.currentUserId,
+    required this.prayerLabel,
   });
 
   @override
@@ -300,6 +303,7 @@ class _AnimatedLeaderboardState extends State<_AnimatedLeaderboard> {
               todayCount: item.todayCount,
               isYou: item.userId == widget.currentUserId,
               isDark: widget.isDark,
+              label: widget.prayerLabel,
             ),
           );
         }).toList(),
@@ -409,6 +413,7 @@ class LeaderRow extends StatelessWidget {
   final int todayCount;
   final bool isYou;
   final bool isDark;
+  final String label;
 
   const LeaderRow({
     super.key,
@@ -417,6 +422,7 @@ class LeaderRow extends StatelessWidget {
     required this.count,
     required this.todayCount,
     required this.isYou,
+    required this.label,
     this.isDark = true,
   });
 
@@ -429,7 +435,7 @@ class LeaderRow extends StatelessWidget {
       curve: Curves.easeInOut,
       margin: const EdgeInsets.only(bottom: 8),
       padding: isYou
-          ? const EdgeInsets.symmetric(horizontal: 14, vertical: 12)
+          ? const EdgeInsets.symmetric(horizontal: 14, vertical: 8)
           : const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
       decoration: isYou
           ? BoxDecoration(
@@ -472,6 +478,7 @@ class LeaderRow extends StatelessWidget {
                         style: GoogleFonts.poppins(
                           fontSize: 15,
                           fontWeight: FontWeight.w800,
+                          height: 1.2,
                           color: isYou ? AppColors.goldDark : AppColors.authBgBottom,
                         ),
                       ),
@@ -488,6 +495,17 @@ class LeaderRow extends StatelessWidget {
                       ),
                     ],
                   ],
+                ),
+                Text(
+                  label,
+                  style: GoogleFonts.poppins(
+                    fontSize: 9,
+                    fontWeight: FontWeight.w600,
+                    height: 1.2,
+                    color: isYou
+                        ? AppColors.goldDark.withOpacity(0.6)
+                        : AppColors.authBgMid.withOpacity(0.4),
+                  ),
                 ),
               ],
             ),
@@ -511,6 +529,7 @@ class LeaderRow extends StatelessWidget {
                 style: GoogleFonts.poppins(
                   fontSize: 9,
                   fontWeight: FontWeight.w600,
+                  height: 1.2,
                   color: isYou
                       ? AppColors.goldDark.withOpacity(0.6)
                       : AppColors.authBgMid.withOpacity(0.4),
