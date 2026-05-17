@@ -274,10 +274,18 @@ class GlobalCountsProvider extends ChangeNotifier {
       query: {'prayer_type_id': prayerTypeId.toString()},
     );
     
+    // DEBUG: Log raw API response
+    debugPrint('[GlobalCountsProvider] 🔍 RAW API RESPONSE: ${response.data}');
+    
     // The API returns nested structure: { rosary: {...}, chaplet: {...} }
     // Extract the appropriate prayer type data
     final prayerTypeKey = prayerTypeId == PrayerType.rosary ? 'rosary' : 'chaplet';
     final prayerData = response.data[prayerTypeKey] as Map<String, dynamic>;
+    
+    // DEBUG: Log extracted prayer data
+    debugPrint('[GlobalCountsProvider] 🔍 PRAYER DATA ($prayerTypeKey): $prayerData');
+    debugPrint('[GlobalCountsProvider] 🔍 community_total VALUE: ${prayerData['community_total']}');
+    debugPrint('[GlobalCountsProvider] 🔍 community_total TYPE: ${prayerData['community_total'].runtimeType}');
     
     return GlobalCountsData.fromJson(prayerData);
   }

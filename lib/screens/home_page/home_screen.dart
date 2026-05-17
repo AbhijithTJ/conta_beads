@@ -516,7 +516,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         opacity: _quoteFadeAnim,
         child: Container(
           width: double.infinity,
-          height: 160,
+          height: 200,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           decoration: BoxDecoration(
             color: Colors.white,
@@ -543,7 +543,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               Text(
                 quote.quotation,
                 textAlign: TextAlign.center,
-                maxLines: 2,
+                maxLines: 4,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                     fontSize: 14.5,
@@ -594,7 +594,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       bool isDark, Color shadowColor, Color borderColor) {
     return Container(
       width: double.infinity,
-      height: 160,
+      height: 200,
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       decoration: BoxDecoration(
         color: Colors.white,
