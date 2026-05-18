@@ -478,29 +478,61 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
                   children: [
                     Text('Community Prayers',
                         style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w900, color: const Color(0xFF624294), letterSpacing: -0.5)),
-                    const SizedBox(height: 4),
-                    Text('Active prayer requests',
-                        style: GoogleFonts.poppins(fontSize: 11, fontWeight: FontWeight.w500, color: const Color(0xFF624294).withOpacity(0.6))),
                   ],
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 20),
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 14,
-              mainAxisSpacing: 14,
-              childAspectRatio: 0.9,
+          const SizedBox(height: 24),
+          // Total community prayers count
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: const Color(0xFFB57BEA).withOpacity(0.12),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: const Color(0xFFB57BEA).withOpacity(0.25), width: 1.5),
             ),
-            itemCount: data.communityPrayers.length,
-            itemBuilder: (context, index) {
-              final prayer = data.communityPrayers[index];
-              return _buildPrayerCard(prayer);
-            },
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Active Requests',
+                      style: GoogleFonts.poppins(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xFFB57BEA).withOpacity(0.7),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      data.communityPrayersTotal.toString(),
+                      style: const TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.w900,
+                        color: Color(0xFFB57BEA),
+                      ),
+                    ),
+                  ],
+                ),
+                Container(
+                  width: 50,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFB57BEA).withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.people_alt_rounded,
+                    color: Color(0xFFB57BEA),
+                    size: 28,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),

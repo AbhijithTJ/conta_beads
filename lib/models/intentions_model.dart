@@ -125,12 +125,14 @@ class IntentionsData {
   final List<IntentionQuote> quotes;
   final List<AdminIntention> adminIntentions;
   final List<PrayerCount> communityPrayers;
+  final int communityPrayersTotal;
   final List<PersonalPrayer> personalPrayers;
 
   const IntentionsData({
     required this.quotes,
     required this.adminIntentions,
     required this.communityPrayers,
+    required this.communityPrayersTotal,
     required this.personalPrayers,
   });
 
@@ -152,6 +154,7 @@ class IntentionsData {
       communityPrayers: rawCommunityPrayers
           .map((e) => PrayerCount.fromJson(e as Map<String, dynamic>))
           .toList(),
+      communityPrayersTotal: data['community_prayers_total'] as int? ?? 0,
       personalPrayers: rawPersonalPrayers
           .map((e) => PersonalPrayer.fromJson(e as Map<String, dynamic>))
           .toList(),
