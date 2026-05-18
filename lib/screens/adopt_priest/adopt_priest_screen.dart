@@ -175,81 +175,89 @@ class _AdoptPriestScreenState extends State<AdoptPriestScreen> {
                 ),
               ),
               const SizedBox(height: 20),
-              ...candidates.map((priest) {
-                return GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _slots[slotIndex] = priest;
-                    });
-                    Navigator.of(context).pop();
-                  },
-                  child: Container(
-                    margin: const EdgeInsets.only(bottom: 10),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                    decoration: BoxDecoration(
-                      color: isDark
-                          ? Colors.white.withOpacity(0.07)
-                          : const Color(0xFFF0EBF0),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: isDark
-                            ? Colors.white.withOpacity(0.12)
-                            : const Color(0xFF624294).withOpacity(0.15),
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 44, height: 44,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: const Color(0xFFEDE0ED),
-                            border: Border.all(
-                              color: const Color(0xFF624294).withOpacity(0.2),
-                              width: 1.5,
+              // Scrollable list of priests
+              Flexible(
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: candidates.length,
+                  itemBuilder: (context, index) {
+                    final priest = candidates[index];
+                    return GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _slots[slotIndex] = priest;
+                        });
+                        Navigator.of(context).pop();
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.only(bottom: 10),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                        decoration: BoxDecoration(
+                          color: isDark
+                              ? Colors.white.withOpacity(0.07)
+                              : const Color(0xFFF0EBF0),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: isDark
+                                ? Colors.white.withOpacity(0.12)
+                                : const Color(0xFF624294).withOpacity(0.15),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 44, height: 44,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: const Color(0xFFEDE0ED),
+                                border: Border.all(
+                                  color: const Color(0xFF624294).withOpacity(0.2),
+                                  width: 1.5,
+                                ),
+                              ),
+                              child: const Icon(
+                                Icons.person_rounded,
+                                size: 24,
+                                color: Color(0xFF624294),
+                              ),
                             ),
-                          ),
-                          child: const Icon(
-                            Icons.person_rounded,
-                            size: 24,
-                            color: Color(0xFF624294),
-                          ),
-                        ),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                priest.displayName,
-                                style: GoogleFonts.poppins(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w700,
-                                  color: isDark ? Colors.white : const Color(0xFF624294),
-                                ),
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    priest.displayName,
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w700,
+                                      color: isDark ? Colors.white : const Color(0xFF624294),
+                                    ),
+                                  ),
+                                  Text(
+                                    'Pray for me',
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 11,
+                                      color: isDark
+                                          ? Colors.white.withOpacity(0.5)
+                                          : const Color(0xFF624294).withOpacity(0.5),
+                                    ),
+                                  ),
+                                ],
                               ),
-                              Text(
-                                'Pray for me',
-                                style: GoogleFonts.poppins(
-                                  fontSize: 11,
-                                  color: isDark
-                                      ? Colors.white.withOpacity(0.5)
-                                      : const Color(0xFF624294).withOpacity(0.5),
-                                ),
-                              ),
-                            ],
-                          ),
+                            ),
+                            Icon(
+                              Icons.add_circle_rounded,
+                              color: const Color(0xFF624294).withOpacity(0.7),
+                              size: 22,
+                            ),
+                          ],
                         ),
-                        Icon(
-                          Icons.add_circle_rounded,
-                          color: const Color(0xFF624294).withOpacity(0.7),
-                          size: 22,
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              }),
+                      ),
+                    );
+                  },
+                ),
+              ),
             ],
           ),
         );
