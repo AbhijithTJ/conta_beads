@@ -534,74 +534,74 @@ class _AdoptPriestScreenState extends State<AdoptPriestScreen> {
                         Consumer<AdoptPriestProvider>(
                           builder: (context, provider, _) {
                             return Row(
-                              children: List.generate(_maxSlots, (i) {
-                                // Check if this slot has a saved priest
-                                final hasSavedPriest = i < provider.savedPriests.length;
-                                final savedPriest = hasSavedPriest 
-                                    ? provider.savedPriests[i] 
-                                    : null;
+                                children: List.generate(_maxSlots, (i) {
+                                  // Check if this slot has a saved priest
+                                  final hasSavedPriest = i < provider.savedPriests.length;
+                                  final savedPriest = hasSavedPriest 
+                                      ? provider.savedPriests[i] 
+                                      : null;
 
-                                // If there's a saved priest, show it
-                                if (savedPriest != null) {
+                                  // If there's a saved priest, show it
+                                  if (savedPriest != null) {
+                                    return Expanded(
+                                      child: Padding(
+                                        padding: EdgeInsets.only(
+                                          left: i == 0 ? 0 : 6,
+                                          right: i == _maxSlots - 1 ? 0 : 6,
+                                        ),
+                                        child: _SavedSlotCard(
+                                          priest: savedPriest,
+                                          slotNumber: i + 1,
+                                          isDark: isDark,
+                                          onUnadopt: () async {
+                                            final success = await provider.unadoptPriest(savedPriest.id);
+                                            if (success && mounted) {
+                                              ScaffoldMessenger.of(context).showSnackBar(
+                                                SnackBar(
+                                                  content: Text(
+                                                    'Priest unadopted',
+                                                    style: GoogleFonts.poppins(
+                                                        color: Colors.white),
+                                                  ),
+                                                  backgroundColor: Colors.green,
+                                                  behavior: SnackBarBehavior.floating,
+                                                  shape: RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(14)),
+                                                  margin: const EdgeInsets.all(16),
+                                                ),
+                                              );
+                                            }
+                                          },
+                                        ),
+                                      ),
+                                    );
+                                  }
+
+                                  // Otherwise, show empty slot or newly selected priest
+                                  final newSlotIndex = i - provider.savedPriests.length;
                                   return Expanded(
                                     child: Padding(
                                       padding: EdgeInsets.only(
                                         left: i == 0 ? 0 : 6,
                                         right: i == _maxSlots - 1 ? 0 : 6,
                                       ),
-                                      child: _SavedSlotCard(
-                                        priest: savedPriest,
-                                        slotNumber: i + 1,
-                                        isDark: isDark,
-                                        onUnadopt: () async {
-                                          final success = await provider.unadoptPriest(savedPriest.id);
-                                          if (success && mounted) {
-                                            ScaffoldMessenger.of(context).showSnackBar(
-                                              SnackBar(
-                                                content: Text(
-                                                  'Priest unadopted',
-                                                  style: GoogleFonts.poppins(
-                                                      color: Colors.white),
-                                                ),
-                                                backgroundColor: Colors.green,
-                                                behavior: SnackBarBehavior.floating,
-                                                shape: RoundedRectangleBorder(
-                                                    borderRadius:
-                                                        BorderRadius.circular(14)),
-                                                margin: const EdgeInsets.all(16),
-                                              ),
-                                            );
-                                          }
-                                        },
-                                      ),
+                                      child: _slots[newSlotIndex] == null
+                                          ? _EmptySlot(
+                                              slotNumber: i + 1,
+                                              isDark: isDark,
+                                              isLoading: _isLoadingPriests,
+                                              onAdd: () => _openPickerForSlot(newSlotIndex),
+                                            )
+                                          : _FilledCard(
+                                              priest: _slots[newSlotIndex]!,
+                                              slotLabel: '${i + 1}/$_maxSlots',
+                                              isDark: isDark,
+                                              onRemove: () => _removeSlot(newSlotIndex),
+                                            ),
                                     ),
                                   );
-                                }
-
-                                // Otherwise, show empty slot or newly selected priest
-                                final newSlotIndex = i - provider.savedPriests.length;
-                                return Expanded(
-                                  child: Padding(
-                                    padding: EdgeInsets.only(
-                                      left: i == 0 ? 0 : 6,
-                                      right: i == _maxSlots - 1 ? 0 : 6,
-                                    ),
-                                    child: _slots[newSlotIndex] == null
-                                        ? _EmptySlot(
-                                            slotNumber: i + 1,
-                                            isDark: isDark,
-                                            isLoading: _isLoadingPriests,
-                                            onAdd: () => _openPickerForSlot(newSlotIndex),
-                                          )
-                                        : _FilledCard(
-                                            priest: _slots[newSlotIndex]!,
-                                            slotLabel: '${i + 1}/$_maxSlots',
-                                            isDark: isDark,
-                                            onRemove: () => _removeSlot(newSlotIndex),
-                                          ),
-                                  ),
-                                );
-                              }),
+                                }),
                             );
                           },
                         ),
@@ -937,6 +937,7 @@ class _FilledCard extends StatelessWidget {
       ),
       padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           // Avatar with remove button overlay
           Stack(
@@ -981,11 +982,14 @@ class _FilledCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 8),
+          // Priest name with auto-shrinking text
           Text(
             priest.displayName,
             textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
             style: GoogleFonts.poppins(
-              fontSize: 11,
+              fontSize: 12,
               fontWeight: FontWeight.w800,
               color: const Color(0xFF624294),
             ),
@@ -1084,6 +1088,7 @@ class _SavedSlotCard extends StatelessWidget {
       ),
       padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           // Avatar with remove button overlay
           Stack(
@@ -1128,11 +1133,14 @@ class _SavedSlotCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 8),
+          // Priest name with auto-shrinking text
           Text(
             priest.displayName,
             textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
             style: GoogleFonts.poppins(
-              fontSize: 11,
+              fontSize: 12,
               fontWeight: FontWeight.w800,
               color: const Color(0xFF624294),
             ),
