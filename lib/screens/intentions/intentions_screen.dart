@@ -310,12 +310,16 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
             children: [
               Text('\u275D', style: TextStyle(fontSize: 20, color: const Color(0xFF624294).withOpacity(0.45), height: 1.0)),
               const SizedBox(height: 6),
-              Text(
-                q.quotation,
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(fontSize: 14.5, fontWeight: isDark ? FontWeight.w500 : FontWeight.w700, color: quoteTextColor, fontStyle: FontStyle.italic, height: 1.5, letterSpacing: 0.2),
+              Expanded(
+                child: Center(
+                  child: Text(
+                    q.quotation,
+                    textAlign: TextAlign.center,
+                    maxLines: 4,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(fontSize: 13, fontWeight: isDark ? FontWeight.w500 : FontWeight.w700, color: quoteTextColor, fontStyle: FontStyle.italic, height: 1.4, letterSpacing: 0.2),
+                  ),
+                ),
               ),
               const SizedBox(height: 8),
               if (q.reference.isNotEmpty)

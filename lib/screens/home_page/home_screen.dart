@@ -516,7 +516,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         opacity: _quoteFadeAnim,
         child: Container(
           width: double.infinity,
-          height: 200,
+          height: 160,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           decoration: BoxDecoration(
             color: Colors.white,
@@ -540,19 +540,23 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       color: const Color(0xFF624294).withOpacity(0.45),
                       height: 1.0)),
               const SizedBox(height: 6),
-              Text(
-                quote.quotation,
-                textAlign: TextAlign.center,
-                maxLines: 4,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                    fontSize: 14.5,
-                    fontWeight:
-                        isDark ? FontWeight.w500 : FontWeight.w700,
-                    color: const Color(0xFF624294),
-                    fontStyle: FontStyle.italic,
-                    height: 1.5,
-                    letterSpacing: 0.2),
+              Expanded(
+                child: Center(
+                  child: Text(
+                    quote.quotation,
+                    textAlign: TextAlign.center,
+                    maxLines: 5,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                        fontSize: 13,
+                        fontWeight:
+                            isDark ? FontWeight.w500 : FontWeight.w700,
+                        color: const Color(0xFF624294),
+                        fontStyle: FontStyle.italic,
+                        height: 1.4,
+                        letterSpacing: 0.2),
+                  ),
+                ),
               ),
               const SizedBox(height: 8),
               if (quote.reference.isNotEmpty)
@@ -594,7 +598,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       bool isDark, Color shadowColor, Color borderColor) {
     return Container(
       width: double.infinity,
-      height: 200,
+      height: 160,
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       decoration: BoxDecoration(
         color: Colors.white,
