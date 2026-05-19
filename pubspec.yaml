@@ -16,6 +16,21 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
+#
+# VERSION CHANGE GUIDE FOR PLAY STORE RELEASES:
+# Format: versionName+versionCode
+# - versionName: User-visible version (e.g., 1.0.0, 1.0.1, 1.1.0)
+# - versionCode: Internal version number (must always increase)
+#
+# Examples:
+# - First release: 1.0.0+1
+# - Bug fix: 1.0.1+2
+# - Minor feature: 1.1.0+3
+# - Major update: 2.0.0+4
+#
+# IMPORTANT: versionCode MUST be higher than previous release
+# Play Store will reject if versionCode is same or lower
+#
 version: 1.0.0+1
 
 environment:
