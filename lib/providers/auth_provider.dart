@@ -50,6 +50,10 @@ class AuthProvider extends ChangeNotifier {
       _user = response.user;
       _status = AuthStatus.authenticated;
       _errorMessage = null;
+      
+      // Mark onboarding as complete for returning users (they already saw it on first install)
+      SessionService.instance.setOnboardingComplete();
+      
       notifyListeners();
       return true;
     } on ApiException catch (e) {
@@ -87,6 +91,10 @@ class AuthProvider extends ChangeNotifier {
       _user = response.user;
       _status = AuthStatus.authenticated;
       _errorMessage = null;
+      
+      // Mark onboarding as complete after registration (user already saw it before registering)
+      SessionService.instance.setOnboardingComplete();
+      
       notifyListeners();
       return true;
     } on ApiException catch (e) {
