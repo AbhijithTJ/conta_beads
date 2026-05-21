@@ -161,7 +161,9 @@ class ReverbWebSocketService {
       final event = data['event'] as String?;
 
       debugPrint('[Reverb] 📨 Event: $event');
-      debugPrint('[Reverb] 📄 Data: $data');
+      debugPrint('[Reverb] 📄 Full Raw Message: $message');
+      debugPrint('[Reverb] 📄 Parsed Data: $data');
+      debugPrint('[Reverb] 📄 Data Keys: ${data.keys.toList()}');
 
       switch (event) {
         case 'pusher:connection_established':
@@ -184,6 +186,7 @@ class ReverbWebSocketService {
             final eventData = data['data'];
             debugPrint('[Reverb] 📊 Raw event data type: ${eventData.runtimeType}');
             debugPrint('[Reverb] 📊 Raw event data: $eventData');
+            debugPrint('[Reverb] 📊 Event data length: ${eventData.toString().length} chars');
             
             // Handle both string and map formats
             Map<String, dynamic>? parsedData;
@@ -191,31 +194,47 @@ class ReverbWebSocketService {
             if (eventData is String) {
               // If data is a JSON string, parse it
               debugPrint('[Reverb] 📝 Data is String, parsing JSON...');
+              debugPrint('[Reverb] 📝 String length: ${eventData.length} chars');
               parsedData = jsonDecode(eventData) as Map<String, dynamic>;
+              debugPrint('[Reverb] 📝 Parsed successfully. Keys: ${parsedData.keys.toList()}');
             } else if (eventData is Map<String, dynamic>) {
               // If data is already a map, use it directly
               debugPrint('[Reverb] 📦 Data is already Map');
+              debugPrint('[Reverb] 📦 Map keys: ${eventData.keys.toList()}');
               parsedData = eventData;
             }
             
             if (parsedData != null) {
-              // Backend sends nested structure: { data: { rosary: {...}, chaplet: {...} } }
-              // Or sometimes: { rosary: {...}, chaplet: {...} }
+              debugPrint('[Reverb] 🔍 Full parsed data: $parsedData');
+              
+              // Backend sends nested structure: { rosary: {...}, chaplet: {...}, triggering_user_id: X }
+              // Or sometimes: { data: { rosary: {...}, chaplet: {...}, triggering_user_id: X } }
               
               // Check if data is wrapped in another 'data' key
               final innerData = parsedData['data'] is Map<String, dynamic>
                   ? parsedData['data'] as Map<String, dynamic>
                   : parsedData;
               
+              debugPrint('[Reverb] 🔍 Inner data keys: ${innerData.keys.toList()}');
+              
+              // Extract triggering_user_id if present
+              final triggeringUserId = innerData['triggering_user_id'] as int?;
+              debugPrint('[Reverb] 🔍 Triggering user ID: $triggeringUserId');
+              
               final rosaryData = innerData['rosary'] as Map<String, dynamic>?;
               final chapletData = innerData['chaplet'] as Map<String, dynamic>?;
               
+              debugPrint('[Reverb] 🔍 Rosary data found: ${rosaryData != null}');
+              debugPrint('[Reverb] 🔍 Chaplet data found: ${chapletData != null}');
+              
               if (rosaryData != null) {
                 debugPrint('[Reverb] 🔔 Count updated (Rosary): $rosaryData');
+                debugPrint('[Reverb] 🔔 Rosary keys: ${rosaryData.keys.toList()}');
                 _eventController.add(ReverbEvent(
                   type: ReverbEventType.countUpdated,
                   data: {
                     'prayer_type_id': 1,
+                    'triggering_user_id': triggeringUserId,
                     ...rosaryData,
                   },
                 ));
@@ -223,10 +242,12 @@ class ReverbWebSocketService {
               
               if (chapletData != null) {
                 debugPrint('[Reverb] 🔔 Count updated (Chaplet): $chapletData');
+                debugPrint('[Reverb] 🔔 Chaplet keys: ${chapletData.keys.toList()}');
                 _eventController.add(ReverbEvent(
                   type: ReverbEventType.countUpdated,
                   data: {
                     'prayer_type_id': 2,
+                    'triggering_user_id': triggeringUserId,
                     ...chapletData,
                   },
                 ));
@@ -242,10 +263,14 @@ class ReverbWebSocketService {
           final eventData = data['data'] as Map<String, dynamic>?;
           if (eventData != null) {
             debugPrint('[Reverb] 🔔 Leaderboard updated: $eventData');
+            debugPrint('[Reverb] 🔔 Leaderboard data keys: ${eventData.keys.toList()}');
+            debugPrint('[Reverb] 🔔 Full leaderboard: $eventData');
             _eventController.add(ReverbEvent(
               type: ReverbEventType.leaderboardUpdated,
               data: eventData,
             ));
+          } else {
+            debugPrint('[Reverb] ⚠️ Leaderboard event data is null');
           }
           break;
 

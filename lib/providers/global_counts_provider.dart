@@ -3,6 +3,7 @@ import '../config/app_config.dart';
 import '../models/global_counts_model.dart';
 import '../services/api_client.dart';
 import '../services/reverb_websocket_service.dart';
+import 'user_provider.dart';
 
 /// Prayer type IDs used by the backend.
 class PrayerType {
@@ -17,6 +18,8 @@ enum GlobalCountsStatus { initial, loading, loaded, error }
 ///
 /// Call [fetchAll] on initial load, then WebSocket will push updates automatically.
 class GlobalCountsProvider extends ChangeNotifier {
+  final UserProvider _userProvider;
+  
   GlobalCountsStatus _status = GlobalCountsStatus.initial;
   String? _errorMessage;
 
@@ -26,6 +29,9 @@ class GlobalCountsProvider extends ChangeNotifier {
 
   // WebSocket subscription tracking
   final Set<int> _subscribedPrayerTypes = {};
+
+  GlobalCountsProvider({UserProvider? userProvider})
+      : _userProvider = userProvider ?? UserProvider();
 
   GlobalCountsStatus get status       => _status;
   String?            get errorMessage => _errorMessage;
@@ -81,12 +87,35 @@ class GlobalCountsProvider extends ChangeNotifier {
   /// Handle real-time count update from WebSocket
   void _handleCountUpdated(dynamic data) {
     try {
-      debugPrint('[GlobalCountsProvider] Processing count update: $data');
+      debugPrint('[GlobalCountsProvider] 🔍 ===== COUNT UPDATE RECEIVED =====');
+      debugPrint('[GlobalCountsProvider] 🔍 Data type: ${data.runtimeType}');
+      debugPrint('[GlobalCountsProvider] 🔍 Data keys: ${(data as Map).keys.toList()}');
       
       final prayerTypeId = data['prayer_type_id'] as int?;
       if (prayerTypeId == null) {
         debugPrint('[GlobalCountsProvider] ❌ Missing prayer_type_id');
         return;
+      }
+
+      final triggeringUserId = data['triggering_user_id'] as int?;
+      debugPrint('[GlobalCountsProvider] 🔍 Triggering user ID: $triggeringUserId');
+      
+      // Get current user ID from UserProvider
+      final currentUserId = _userProvider.userId;
+      debugPrint('[GlobalCountsProvider] 🔍 Current user ID: $currentUserId');
+      
+      // IMPORTANT: 
+      // - Leaderboard and community totals ALWAYS update (for all users)
+      // - Personal data (your_total, your_today, your_position) only updates if triggering_user_id matches current user
+      // - If triggering_user_id is null, treat it as current user (for backward compatibility)
+      final isCurrentUserTriggered = triggeringUserId == null || triggeringUserId == currentUserId;
+      debugPrint('[GlobalCountsProvider] 🔍 Is current user triggered: $isCurrentUserTriggered');
+      debugPrint('[GlobalCountsProvider] 🔍 Comparison: $triggeringUserId == $currentUserId ? ${triggeringUserId == currentUserId}');
+      
+      if (!isCurrentUserTriggered) {
+        debugPrint('[GlobalCountsProvider] ℹ️ Another user prayed - updating leaderboard & community totals only');
+      } else {
+        debugPrint('[GlobalCountsProvider] ✅ Current user prayed - updating all data');
       }
 
       final communityTotal = data['community_total'] as int? ?? 0;
@@ -95,43 +124,59 @@ class GlobalCountsProvider extends ChangeNotifier {
       final communityTodayTotal = data['community_today_total'] as int? ?? 0;
       final yourPosition = data['your_position'] as int? ?? 0;
       final yourContributionPercent = (data['your_contribution_percent'] as num?)?.toDouble() ?? 0.0;
+      final prayerTypeName = data['prayer_type_name'] as String? ?? 'Unknown';
+
+      debugPrint('[GlobalCountsProvider] 🔍 Extracted values:');
+      debugPrint('[GlobalCountsProvider]   - prayer_type_id: $prayerTypeId ($prayerTypeName)');
+      debugPrint('[GlobalCountsProvider]   - triggering_user_id: $triggeringUserId');
+      debugPrint('[GlobalCountsProvider]   - community_total: $communityTotal');
+      debugPrint('[GlobalCountsProvider]   - your_total: $yourTotal');
+      debugPrint('[GlobalCountsProvider]   - your_today: $yourToday');
+      debugPrint('[GlobalCountsProvider]   - community_today_total: $communityTodayTotal');
+      debugPrint('[GlobalCountsProvider]   - your_position: $yourPosition');
+      debugPrint('[GlobalCountsProvider]   - your_contribution_percent: $yourContributionPercent');
 
       // Parse leaderboard if present
       List<LeaderboardEntry> leaderboard = [];
       final leaderboardData = data['leaderboard'] as List<dynamic>?;
-      if (leaderboardData != null) {
-        leaderboard = leaderboardData
-            .map((entry) {
-              try {
-                final entryMap = entry as Map<String, dynamic>;
-                return LeaderboardEntry(
-                  position: entryMap['position'] as int? ?? 0,
-                  userId: entryMap['user_id'] as int? ?? 0,
-                  name: entryMap['name'] as String? ?? '',
-                  totalCount: entryMap['total_count'] as int? ?? 0,
-                  todayCount: entryMap['today_count'] as int? ?? 0,
-                  isCurrentUser: entryMap['is_current_user'] as bool? ?? false,
-                );
-              } catch (e) {
-                debugPrint('[GlobalCountsProvider] ❌ Error parsing leaderboard entry: $e');
-                return null;
-              }
-            })
-            .whereType<LeaderboardEntry>()
-            .toList();
+      debugPrint('[GlobalCountsProvider] 🔍 Leaderboard data present: ${leaderboardData != null}');
+      debugPrint('[GlobalCountsProvider] 🔍 Leaderboard length: ${leaderboardData?.length ?? 0}');
+      
+      if (leaderboardData != null && leaderboardData.isNotEmpty) {
+        debugPrint('[GlobalCountsProvider] 🔍 Leaderboard entries:');
+        for (int i = 0; i < leaderboardData.length; i++) {
+          try {
+            final entryMap = leaderboardData[i] as Map<String, dynamic>;
+            final entry = LeaderboardEntry(
+              position: entryMap['position'] as int? ?? 0,
+              userId: entryMap['user_id'] as int? ?? 0,
+              name: entryMap['name'] as String? ?? '',
+              totalCount: entryMap['total_count'] as int? ?? 0,
+              todayCount: entryMap['today_count'] as int? ?? 0,
+              isCurrentUser: entryMap['is_current_user'] as bool? ?? false,
+            );
+            leaderboard.add(entry);
+            debugPrint('[GlobalCountsProvider]   [$i] Pos: ${entry.position}, User: ${entry.name}, Total: ${entry.totalCount}, Today: ${entry.todayCount}, Current: ${entry.isCurrentUser}');
+          } catch (e) {
+            debugPrint('[GlobalCountsProvider] ❌ Error parsing leaderboard entry $i: $e');
+          }
+        }
       }
 
-      debugPrint('[GlobalCountsProvider] Prayer Type: $prayerTypeId, Community Total: $communityTotal');
+      debugPrint('[GlobalCountsProvider] 🔍 Total leaderboard entries parsed: ${leaderboard.length}');
+      debugPrint('[GlobalCountsProvider] Prayer Type: $prayerTypeId ($prayerTypeName), Community Total: $communityTotal, Triggered by User: $triggeringUserId');
 
       if (prayerTypeId == PrayerType.rosary) {
         _rosaryData = _rosaryData?.copyWith(
+          // ALWAYS update these (community-wide metrics)
           communityTotal: communityTotal,
-          yourTotal: yourTotal,
-          yourToday: yourToday,
           communityTodayTotal: communityTodayTotal,
-          yourPosition: yourPosition,
-          yourContributionPercent: yourContributionPercent,
+          yourContributionPercent: yourContributionPercent,  // ALWAYS update
           leaderboard: leaderboard.isNotEmpty ? leaderboard : _rosaryData?.leaderboard,
+          // Only update personal data if current user prayed
+          yourTotal: isCurrentUserTriggered ? yourTotal : _rosaryData?.yourTotal,
+          yourToday: isCurrentUserTriggered ? yourToday : _rosaryData?.yourToday,
+          yourPosition: isCurrentUserTriggered ? yourPosition : _rosaryData?.yourPosition,
         ) ?? GlobalCountsData(
           yourTotal: yourTotal,
           yourToday: yourToday,
@@ -141,17 +186,21 @@ class GlobalCountsProvider extends ChangeNotifier {
           yourContributionPercent: yourContributionPercent,
           leaderboard: leaderboard,
           prayerTypeId: prayerTypeId,
+          prayerTypeName: prayerTypeName,
         );
         debugPrint('[GlobalCountsProvider] ✅ Updated Rosary data');
+        debugPrint('[GlobalCountsProvider] 🔍 Rosary - Community: $communityTotal, Your: ${isCurrentUserTriggered ? yourTotal : "NOT UPDATED"}, Contribution: $yourContributionPercent%, Position: ${isCurrentUserTriggered ? yourPosition : "NOT UPDATED"}, Leaderboard: ${_rosaryData?.leaderboard.length ?? 0} entries');
       } else if (prayerTypeId == PrayerType.divineMercy) {
         _divineMercyData = _divineMercyData?.copyWith(
+          // ALWAYS update these (community-wide metrics)
           communityTotal: communityTotal,
-          yourTotal: yourTotal,
-          yourToday: yourToday,
           communityTodayTotal: communityTodayTotal,
-          yourPosition: yourPosition,
-          yourContributionPercent: yourContributionPercent,
+          yourContributionPercent: yourContributionPercent,  // ALWAYS update
           leaderboard: leaderboard.isNotEmpty ? leaderboard : _divineMercyData?.leaderboard,
+          // Only update personal data if current user prayed
+          yourTotal: isCurrentUserTriggered ? yourTotal : _divineMercyData?.yourTotal,
+          yourToday: isCurrentUserTriggered ? yourToday : _divineMercyData?.yourToday,
+          yourPosition: isCurrentUserTriggered ? yourPosition : _divineMercyData?.yourPosition,
         ) ?? GlobalCountsData(
           yourTotal: yourTotal,
           yourToday: yourToday,
@@ -161,14 +210,17 @@ class GlobalCountsProvider extends ChangeNotifier {
           yourContributionPercent: yourContributionPercent,
           leaderboard: leaderboard,
           prayerTypeId: prayerTypeId,
+          prayerTypeName: prayerTypeName,
         );
         debugPrint('[GlobalCountsProvider] ✅ Updated Divine Mercy data');
+        debugPrint('[GlobalCountsProvider] 🔍 Divine Mercy - Community: $communityTotal, Your: ${isCurrentUserTriggered ? yourTotal : "NOT UPDATED"}, Contribution: $yourContributionPercent%, Position: ${isCurrentUserTriggered ? yourPosition : "NOT UPDATED"}, Leaderboard: ${_divineMercyData?.leaderboard.length ?? 0} entries');
       }
 
       _errorMessage = null;
       debugPrint('[GlobalCountsProvider] 🔔 Calling notifyListeners()');
       notifyListeners();
       debugPrint('[GlobalCountsProvider] ✅ UI should update now');
+      debugPrint('[GlobalCountsProvider] 🔍 ===== COUNT UPDATE COMPLETE =====');
     } catch (e) {
       debugPrint('[GlobalCountsProvider] ❌ Error handling count update: $e');
       debugPrint('[GlobalCountsProvider] ❌ Stack trace: ${StackTrace.current}');

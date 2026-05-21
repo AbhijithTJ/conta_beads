@@ -56,6 +56,7 @@ class GlobalCountsData {
   final double yourContributionPercent;
   final List<LeaderboardEntry> leaderboard;
   final int prayerTypeId;
+  final String? prayerTypeName;
 
   const GlobalCountsData({
     required this.yourTotal,
@@ -66,6 +67,7 @@ class GlobalCountsData {
     required this.yourContributionPercent,
     required this.leaderboard,
     required this.prayerTypeId,
+    this.prayerTypeName,
   });
 
   factory GlobalCountsData.fromJson(Map<String, dynamic> json) {
@@ -79,6 +81,7 @@ class GlobalCountsData {
       yourContributionPercent: (json['your_contribution_percent'] as num).toDouble(),
       leaderboard:             rawList.map((e) => LeaderboardEntry.fromJson(e as Map<String, dynamic>)).toList(),
       prayerTypeId:            int.parse(json['prayer_type_id'].toString()),
+      prayerTypeName:          json['prayer_type_name'] as String?,
     );
   }
 
@@ -92,6 +95,7 @@ class GlobalCountsData {
     yourContributionPercent: 0,
     leaderboard: [],
     prayerTypeId: prayerTypeId,
+    prayerTypeName: null,
   );
 
   /// Create a copy with updated fields
@@ -104,6 +108,7 @@ class GlobalCountsData {
     double? yourContributionPercent,
     List<LeaderboardEntry>? leaderboard,
     int? prayerTypeId,
+    String? prayerTypeName,
   }) {
     return GlobalCountsData(
       yourTotal: yourTotal ?? this.yourTotal,
@@ -114,6 +119,7 @@ class GlobalCountsData {
       yourContributionPercent: yourContributionPercent ?? this.yourContributionPercent,
       leaderboard: leaderboard ?? this.leaderboard,
       prayerTypeId: prayerTypeId ?? this.prayerTypeId,
+      prayerTypeName: prayerTypeName ?? this.prayerTypeName,
     );
   }
 }

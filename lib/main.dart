@@ -42,7 +42,9 @@ class AppRoot extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()..restoreSession()),
         ChangeNotifierProvider(create: (_) => UserProvider()..restoreFromSession()),
-        ChangeNotifierProvider(create: (_) => GlobalCountsProvider()),
+        ChangeNotifierProvider(create: (context) => GlobalCountsProvider(
+          userProvider: context.read<UserProvider>(),
+        )),
         ChangeNotifierProvider(create: (_) => HomeProvider()),
         ChangeNotifierProvider(create: (_) => DailyPrayerProvider()),
         ChangeNotifierProvider(create: (_) => PrayerDocumentsProvider()),
