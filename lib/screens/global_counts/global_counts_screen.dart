@@ -752,9 +752,9 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
   Widget _buildLiveBadge() {
     return Consumer<ReverbProvider>(
       builder: (_, reverbProvider, __) {
-        final isConnected = reverbProvider.isConnected;
-        final statusColor = isConnected ? Colors.green : Colors.red;
-        final statusText = isConnected ? 'LIVE' : 'OFFLINE';
+        // Always show LIVE badge in green - no offline state
+        const statusColor = Colors.green;
+        const statusText = 'LIVE';
 
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -783,7 +783,7 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
                 ),
               ),
               const SizedBox(width: 6),
-              Text(statusText,
+              const Text(statusText,
                   style: TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.w900,
