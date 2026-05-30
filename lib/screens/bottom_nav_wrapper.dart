@@ -1,7 +1,10 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../providers/language_provider.dart';
+import '../providers/user_provider.dart';
+import '../services/notification_service.dart';
 import '../theme/theme_notifier.dart';
 import '../widgets/common_bottom_nav.dart';
 import 'home_page/home_screen.dart';
@@ -37,6 +40,28 @@ class _BottomNavWrapperState extends State<BottomNavWrapper> {
       EverydayPrayersScreen(),
       ProfileScreen(),
     ];
+    
+    // Sync FCM Token with backend silently at startup
+    WidgetsBinding.instance.addPostFrameCallback((_) => _syncFcmToken());
+  }
+
+  Future<void> _syncFcmToken() async {
+    try {
+      final fcmToken = await NotificationService.instance.getToken();
+      if (fcmToken == null || fcmToken.isEmpty) return;
+
+      if (!mounted) return;
+      final userProvider = context.read<UserProvider>();
+      
+      // Stable device identifier logic
+      final deviceId = '${Platform.operatingSystem}_stable_id';
+
+      // Silently update FCM token on the backend
+      await userProvider.updateFcmToken(fcmToken, deviceId);
+      debugPrint("FCM Token synced with backend.");
+    } catch (e) {
+      debugPrint("Failed to sync FCM token: $e");
+    }
   }
 
   void _onNavTap(int index) => setState(() => _selectedIndex = index);

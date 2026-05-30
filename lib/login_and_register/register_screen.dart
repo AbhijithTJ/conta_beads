@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'dart:io';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -105,6 +106,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final deviceId =
         '${Platform.operatingSystem}_${now.millisecondsSinceEpoch}';
 
+    // Get FCM Token
+    String fcmToken = '';
+    try {
+      fcmToken = await FirebaseMessaging.instance.getToken() ?? '';
+    } catch (e) {
+      debugPrint('Error getting FCM token: $e');
+    }
+
     final success = await auth.register(
       name: name,
       email: email,
@@ -113,6 +122,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       password: password,
       timezone: timezone,
       deviceId: deviceId,
+      fcmToken: fcmToken,
     );
 
     if (!mounted) return;

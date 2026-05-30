@@ -40,12 +40,17 @@ class AuthProvider extends ChangeNotifier {
   }
 
   // ── Login ─────────────────────────────────────────────────────────────────────
-  Future<bool> login({required String contact, required String password}) async {
+  Future<bool> login({
+    required String contact,
+    required String password,
+    String fcmToken = '',
+  }) async {
     _setLoading();
     try {
       final response = await AuthService.instance.login(
         contact: contact,
         password: password,
+        fcmToken: fcmToken,
       );
       _user = response.user;
       _status = AuthStatus.authenticated;

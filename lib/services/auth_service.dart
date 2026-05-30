@@ -13,10 +13,15 @@ class AuthService {
   Future<LoginResponse> login({
     required String contact,
     required String password,
+    String fcmToken = '',
   }) async {
     final res = await ApiClient.instance.post(
       AppConfig.loginPath,
-      body: LoginRequest(contact: contact, password: password).toJson(),
+      body: LoginRequest(
+        contact: contact,
+        password: password,
+        fcmToken: fcmToken,
+      ).toJson(),
       auth: false, // no token needed for login
     );
     final loginResponse = LoginResponse.fromJson(res.data);

@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -91,9 +92,18 @@ class _LoginScreenState extends State<LoginScreen> {
       final auth = context.read<AuthProvider>();
       final userProvider = context.read<UserProvider>();
 
+      // Get FCM Token
+      String fcmToken = '';
+      try {
+        fcmToken = await FirebaseMessaging.instance.getToken() ?? '';
+      } catch (e) {
+        debugPrint('Error getting FCM token: $e');
+      }
+
       final success = await auth.login(
         contact: creds.contact,
         password: creds.password,
+        fcmToken: fcmToken,
       );
 
       if (!mounted) return;
@@ -120,7 +130,19 @@ class _LoginScreenState extends State<LoginScreen> {
     final auth = context.read<AuthProvider>();
     final userProvider = context.read<UserProvider>();
 
-    final success = await auth.login(contact: contact, password: password);
+    // Get FCM Token
+    String fcmToken = '';
+    try {
+      fcmToken = await FirebaseMessaging.instance.getToken() ?? '';
+    } catch (e) {
+      debugPrint('Error getting FCM token: $e');
+    }
+
+    final success = await auth.login(
+      contact: contact,
+      password: password,
+      fcmToken: fcmToken,
+    );
 
     if (!mounted) return;
 

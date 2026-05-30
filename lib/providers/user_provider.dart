@@ -150,6 +150,15 @@ class UserProvider extends ChangeNotifier {
     }
   }
 
+  /// Specifically update only the FCM token and Device ID
+  /// (Commonly used at app startup or when token refreshes)
+  Future<bool> updateFcmToken(String fcmToken, String deviceId) async {
+    return await updateProfile(
+      fcmToken: fcmToken,
+      deviceId: deviceId,
+    );
+  }
+
   void clear() {
     _user = null;
     _errorMessage = null;

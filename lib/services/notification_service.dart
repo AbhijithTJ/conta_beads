@@ -1,11 +1,19 @@
 import 'dart:async';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter/foundation.dart';
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
   debugPrint("Handling a background message: ${message.messageId}");
+  
+  // If it's a data-only message and you want to show a notification manually in the background:
+  if (message.notification == null && message.data.isNotEmpty) {
+     // You could initialize flutter_local_notifications here and show it,
+     // but usually, it's better to send 'notification' payload from the server.
+  }
 }
 
 class NotificationService {
@@ -97,6 +105,15 @@ class NotificationService {
     RemoteMessage? initialMessage = await _messaging.getInitialMessage();
     if (initialMessage != null) {
       debugPrint('App opened from terminated state via notification');
+    }
+  }
+
+  Future<String?> getToken() async {
+    try {
+      return await _messaging.getToken();
+    } catch (e) {
+      debugPrint("Error fetching FCM token: $e");
+      return null;
     }
   }
 }

@@ -2,12 +2,18 @@
 class LoginRequest {
   final String contact;
   final String password;
+  final String fcmToken;
 
-  const LoginRequest({required this.contact, required this.password});
+  const LoginRequest({
+    required this.contact,
+    required this.password,
+    this.fcmToken = '',
+  });
 
   Map<String, dynamic> toJson() => {
         'contact': contact,
         'password': password,
+        'fcm_token': fcmToken,
       };
 }
 
