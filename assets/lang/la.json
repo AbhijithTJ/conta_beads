@@ -157,8 +157,5 @@
   "password_required": "Tessera necessaria est",
   "account_deleted_successfully": "Ratio cum successu deleta est",
   "failed_to_delete_account": "Rationem delere defecit",
-  "delete": "Dele",
-  "enable_notifications": "Notificationes Permitte",
-  "notification_permission_description": "De petitionibus precationis, renovationibus communitatis, et monitione importanti notificatus esto ut vita precationis tuae activa maneat.",
-  "allow": "Permitte"
+  "delete": "Dele"
 }
