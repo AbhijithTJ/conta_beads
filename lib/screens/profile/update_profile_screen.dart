@@ -134,7 +134,7 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
               children: [
                 // Header
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     GestureDetector(
                       onTap: () => Navigator.pop(context),
