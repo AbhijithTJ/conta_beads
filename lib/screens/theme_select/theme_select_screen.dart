@@ -10,6 +10,8 @@ import '../../providers/home_provider.dart';
 import '../../services/language_id_service.dart';
 import '../../theme/theme_notifier.dart';
 import '../../services/localization_service.dart';
+import '../../services/notification_service.dart';
+import '../../services/session_service.dart';
 import '../../login_and_register/login_screen.dart';
 import '../onboarding/onboarding_screen.dart';
 
@@ -45,6 +47,138 @@ class _ThemeSelectScreenState extends State<ThemeSelectScreen>
     _fadeAnim =
         CurvedAnimation(parent: _fadeCtrl, curve: Curves.easeOut);
     _fadeCtrl.forward();
+
+    // Show notification permission dialog after a short delay
+    Future.delayed(const Duration(milliseconds: 500), _showNotificationPermissionDialog);
+  }
+
+  /// Show notification permission dialog if not already requested
+  Future<void> _showNotificationPermissionDialog() async {
+    if (!mounted) return;
+
+    // Check if we've already asked for notification permission
+    if (SessionService.instance.hasRequestedNotificationPermission) {
+      return;
+    }
+
+    // Show the dialog
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext dialogContext) {
+        return Dialog(
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(28),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Bell icon
+                Container(
+                  width: 60,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: const Color(0xFF7B55A8).withOpacity(0.1),
+                  ),
+                  child: const Icon(
+                    Icons.notifications_active_rounded,
+                    size: 32,
+                    color: Color(0xFF7B55A8),
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                // Title
+                Text(
+                  loc.tr('enable_notifications'),
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.poppins(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF1A1A1A),
+                  ),
+                ),
+                const SizedBox(height: 8),
+
+                // Description
+                Text(
+                  loc.tr('notification_permission_description'),
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.poppins(
+                    fontSize: 13,
+                    height: 1.6,
+                    color: const Color(0xFF666666),
+                  ),
+                ),
+                const SizedBox(height: 28),
+
+                // Allow button
+                SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      // User allowed
+                      await NotificationService.instance.requestNotificationPermission();
+                      await SessionService.instance.setNotificationPermissionRequested();
+                      if (mounted) Navigator.of(dialogContext).pop();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFB3D9FF),
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Text(
+                      loc.tr('allow'),
+                      style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xFF1A1A1A),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+
+                // Don't allow button
+                SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      // User declined
+                      await SessionService.instance.setNotificationPermissionRequested();
+                      if (mounted) Navigator.of(dialogContext).pop();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFE8F0FF),
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Text(
+                      loc.tr('not_now'),
+                      style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xFF666666),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   @override

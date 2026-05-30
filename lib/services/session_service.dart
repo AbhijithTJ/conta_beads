@@ -27,6 +27,7 @@ class SessionService {
   static const _kBiometric  = 'biometric_enabled';
   static const _kDarkTheme  = 'isDarkTheme';
   static const _kOnboarded  = 'onboarding_complete';
+  static const _kNotificationPermissionRequested = 'notification_permission_requested';
 
   // Secure storage keys (Keystore / Keychain)
   static const _ksContact  = 'secure_contact';
@@ -48,6 +49,7 @@ class SessionService {
   bool    _biometricEnabled   = false;
   bool    _isDarkTheme        = true;
   bool    _onboardingComplete = false;
+  bool    _notificationPermissionRequested = false;
 
   // ── Getters (synchronous — no await needed) ─────────────────────────────────
   String? get token              => _token;
@@ -60,6 +62,7 @@ class SessionService {
   bool    get biometricEnabled   => _biometricEnabled;
   bool    get isDarkTheme        => _isDarkTheme;
   bool    get onboardingComplete => _onboardingComplete;
+  bool    get hasRequestedNotificationPermission => _notificationPermissionRequested;
   bool    get isLoggedIn         => _token != null && _token!.isNotEmpty;
 
   // ── Initialise once at app startup ──────────────────────────────────────────
@@ -75,6 +78,7 @@ class SessionService {
     _biometricEnabled   = _prefs.getBool(_kBiometric) ?? false;
     _isDarkTheme        = _prefs.getBool(_kDarkTheme) ?? true;
     _onboardingComplete = _prefs.getBool(_kOnboarded) ?? false;
+    _notificationPermissionRequested = _prefs.getBool(_kNotificationPermissionRequested) ?? false;
   }
 
   // ── Write helpers ────────────────────────────────────────────────────────────
@@ -186,5 +190,10 @@ class SessionService {
   Future<void> saveContact(String contact) async {
     _contact = contact;
     await _prefs.setString(_kContact, contact);
+  }
+
+  Future<void> setNotificationPermissionRequested() async {
+    _notificationPermissionRequested = true;
+    await _prefs.setBool(_kNotificationPermissionRequested, true);
   }
 }

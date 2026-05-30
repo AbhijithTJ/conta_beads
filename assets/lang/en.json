@@ -158,5 +158,8 @@
   "account_deleted_successfully": "Account deleted successfully",
   "failed_to_delete_account": "Failed to delete account",
   "delete": "Delete",
-  "confirm_password": "Confirm Password"
+  "confirm_password": "Confirm Password",
+  "enable_notifications": "Enable Notifications",
+  "notification_permission_description": "Get notified about prayer requests, community updates, and important reminders to keep your prayer life active.",
+  "allow": "Allow"
 }

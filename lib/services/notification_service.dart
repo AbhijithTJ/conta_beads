@@ -29,12 +29,15 @@ class NotificationService {
       alert: true,
       badge: true,
       sound: true,
+      provisional: false, // Don't use provisional authorization
     );
 
     if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-      debugPrint('User granted permission');
+      debugPrint('User granted notification permission');
+    } else if (settings.authorizationStatus == AuthorizationStatus.provisional) {
+      debugPrint('User granted provisional notification permission');
     } else {
-      debugPrint('User declined or has not accepted permission');
+      debugPrint('User declined or has not accepted notification permission');
     }
 
     // Get FCM Token
@@ -92,6 +95,24 @@ class NotificationService {
     } catch (e) {
       debugPrint("Error fetching FCM token: $e");
       return null;
+    }
+  }
+
+  /// Request notification permission explicitly
+  Future<void> requestNotificationPermission() async {
+    NotificationSettings settings = await _messaging.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+      provisional: false,
+    );
+
+    if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+      debugPrint('User granted notification permission');
+    } else if (settings.authorizationStatus == AuthorizationStatus.provisional) {
+      debugPrint('User granted provisional notification permission');
+    } else {
+      debugPrint('User declined notification permission');
     }
   }
 }
