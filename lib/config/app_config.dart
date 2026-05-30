@@ -61,6 +61,7 @@ class AppConfig {
   static const String registerPath       = '/api/register';
   static const String userPath           = '/api/user';
   static const String updateProfilePath  = '/api/user/update-proile';
+  static const String changePasswordPath = '/api/user/change-password';
   static const String logoutPath         = '/api/logout';
   static const String globalCountsPath   = '/api/community/global-counts/redis';
   static const String homePath           = '/api/home';

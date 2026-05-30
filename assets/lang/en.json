@@ -146,5 +146,12 @@
   "password_changed_successfully": "Password changed successfully!",
   "failed_to_change_password": "Failed to change password",
   "keep_account_secure": "Keep Your Account Secure",
-  "change_password_regularly": "Change your password regularly to protect your account"
+  "change_password_regularly": "Change your password regularly to protect your account",
+  "security_options": "Security Options",
+  "update_your_password": "Update your password to keep your account safe",
+  "delete_account": "Delete Account",
+  "permanently_delete_account": "Permanently delete your account and all data",
+  "delete_account_warning": "Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently removed.",
+  "delete": "Delete",
+  "confirm_password": "Confirm Password"
 }

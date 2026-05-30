@@ -97,6 +97,25 @@ class UpdateProfileRequest {
   }
 }
 
+/// Request payload for POST /api/user/change-password
+class ChangePasswordRequest {
+  final String currentPassword;
+  final String newPassword;
+  final String passwordConfirmation;
+
+  const ChangePasswordRequest({
+    required this.currentPassword,
+    required this.newPassword,
+    required this.passwordConfirmation,
+  });
+
+  Map<String, dynamic> toJson() => {
+        'current_password': currentPassword,
+        'new_password': newPassword,
+        'password_confirmation': passwordConfirmation,
+      };
+}
+
 class UserData {
   final int? id;
   final String? name;

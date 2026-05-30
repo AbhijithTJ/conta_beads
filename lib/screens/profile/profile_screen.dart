@@ -476,6 +476,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget _buildSettingsList() {
     return Column(
       children: [
+        GestureDetector(
+          onTap: () {
+            HapticFeedback.lightImpact();
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const AccountSecurityScreen()),
+            );
+          },
+          child: _SettingRow(icon: Icons.security_rounded, title: loc.tr('account_security')),
+        ),
+        const SizedBox(height: 12),
         _WhiteCard(
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 8),
@@ -519,16 +529,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
             );
           },
           child: _SettingRow(icon: Icons.history_rounded, title: loc.tr('counting_history')),
-        ),
-        const SizedBox(height: 12),
-        GestureDetector(
-          onTap: () {
-            HapticFeedback.lightImpact();
-            Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const AccountSecurityScreen()),
-            );
-          },
-          child: _SettingRow(icon: Icons.security_rounded, title: loc.tr('account_security')),
         ),
         const SizedBox(height: 12),
         _SettingRow(icon: Icons.help_outline_rounded, title: loc.tr('help_support')),

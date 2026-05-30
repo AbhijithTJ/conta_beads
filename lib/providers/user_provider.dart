@@ -155,4 +155,42 @@ class UserProvider extends ChangeNotifier {
     _errorMessage = null;
     notifyListeners();
   }
+
+  /// Change user password via POST /api/user/change-password
+  Future<bool> changePassword({
+    required String currentPassword,
+    required String newPassword,
+    required String passwordConfirmation,
+  }) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final request = ChangePasswordRequest(
+        currentPassword: currentPassword,
+        newPassword: newPassword,
+        passwordConfirmation: passwordConfirmation,
+      );
+
+      final res = await ApiClient.instance.post(
+        AppConfig.changePasswordPath,
+        body: request.toJson(),
+      );
+
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } on ApiException catch (e) {
+      _errorMessage = e.message;
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    } catch (e) {
+      _errorMessage = 'Failed to change password.';
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
 }

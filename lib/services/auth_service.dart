@@ -67,4 +67,27 @@ class AuthService {
       await SessionService.instance.clearSession();
     }
   }
+
+  // ── Change Password ──────────────────────────────────────────────────────────
+  /// Calls POST /api/user/change-password to change the user's password.
+  /// Returns true on success, false on failure.
+  Future<bool> changePassword({
+    required String currentPassword,
+    required String newPassword,
+    required String passwordConfirmation,
+  }) async {
+    try {
+      final res = await ApiClient.instance.post(
+        AppConfig.changePasswordPath,
+        body: ChangePasswordRequest(
+          currentPassword: currentPassword,
+          newPassword: newPassword,
+          passwordConfirmation: passwordConfirmation,
+        ).toJson(),
+      );
+      return res.statusCode == 200;
+    } catch (_) {
+      return false;
+    }
+  }
 }
