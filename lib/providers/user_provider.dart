@@ -178,6 +178,10 @@ class UserProvider extends ChangeNotifier {
         body: request.toJson(),
       );
 
+      // Clear user data and session on successful password change
+      _user = null;
+      await SessionService.instance.clearSession();
+
       _isLoading = false;
       notifyListeners();
       return true;
@@ -188,6 +192,38 @@ class UserProvider extends ChangeNotifier {
       return false;
     } catch (e) {
       _errorMessage = 'Failed to change password.';
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  /// Delete user account via POST /api/user/delete-account
+  Future<bool> deleteAccount({required String password}) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final res = await ApiClient.instance.post(
+        AppConfig.deleteAccountPath,
+        query: {'password': password},
+      );
+
+      // Clear user data on successful deletion
+      _user = null;
+      await SessionService.instance.clearSession();
+
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } on ApiException catch (e) {
+      _errorMessage = e.message;
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    } catch (e) {
+      _errorMessage = 'Failed to delete account.';
       _isLoading = false;
       notifyListeners();
       return false;

@@ -116,6 +116,17 @@ class ChangePasswordRequest {
       };
 }
 
+/// Request payload for DELETE /api/user/delete-account
+class DeleteAccountRequest {
+  final String password;
+
+  const DeleteAccountRequest({required this.password});
+
+  Map<String, dynamic> toJson() => {
+        'password': password,
+      };
+}
+
 class UserData {
   final int? id;
   final String? name;

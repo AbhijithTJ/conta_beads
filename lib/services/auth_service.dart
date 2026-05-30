@@ -90,4 +90,19 @@ class AuthService {
       return false;
     }
   }
+
+  // ── Delete Account ───────────────────────────────────────────────────────────
+  /// Calls POST /api/user/delete-account to permanently delete the user account.
+  /// Returns true on success, false on failure.
+  Future<bool> deleteAccount({required String password}) async {
+    try {
+      final res = await ApiClient.instance.post(
+        AppConfig.deleteAccountPath,
+        query: {'password': password},
+      );
+      return res.statusCode == 200;
+    } catch (_) {
+      return false;
+    }
+  }
 }

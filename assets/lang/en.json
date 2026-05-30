@@ -152,6 +152,11 @@
   "delete_account": "Delete Account",
   "permanently_delete_account": "Permanently delete your account and all data",
   "delete_account_warning": "Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently removed.",
+  "confirm_deletion": "Confirm Deletion",
+  "enter_password_to_delete": "Enter your password to confirm account deletion",
+  "password_required": "Password is required",
+  "account_deleted_successfully": "Account deleted successfully",
+  "failed_to_delete_account": "Failed to delete account",
   "delete": "Delete",
   "confirm_password": "Confirm Password"
 }

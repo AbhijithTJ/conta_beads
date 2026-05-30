@@ -61,11 +61,12 @@ class ApiClient {
   Future<ApiResponse<Map<String, dynamic>>> post(
     String path, {
     Map<String, dynamic>? body,
+    Map<String, String>? query,
     bool auth = true,
   }) async {
     return _execute(() => _client
         .post(
-          _uri(path),
+          _uri(path, query),
           headers: _headers(auth: auth),
           body: body != null ? jsonEncode(body) : null,
         )

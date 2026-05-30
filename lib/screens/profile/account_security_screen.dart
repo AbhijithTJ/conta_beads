@@ -7,6 +7,7 @@ import '../../colors/colors.dart';
 import '../../providers/user_provider.dart';
 import '../../theme/theme_notifier.dart';
 import '../../services/localization_service.dart';
+import '../../login_and_register/login_screen.dart';
 
 class AccountSecurityScreen extends StatefulWidget {
   const AccountSecurityScreen({super.key});
@@ -272,7 +273,7 @@ class _AccountSecurityScreenState extends State<AccountSecurityScreen> {
           TextButton(
             onPressed: () {
               Navigator.pop(ctx);
-              // TODO: Implement delete account functionality
+              _showDeletePasswordDialog(context, isDark);
             },
             child: Text(
               loc.tr('delete'),
@@ -282,6 +283,150 @@ class _AccountSecurityScreenState extends State<AccountSecurityScreen> {
         ],
       ),
     );
+  }
+
+  void _showDeletePasswordDialog(BuildContext context, bool isDark) {
+    final passwordController = TextEditingController();
+    bool showPassword = false;
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          backgroundColor: isDark ? const Color(0xFF2A1F5E) : Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: Text(
+            loc.tr('confirm_deletion'),
+            style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w800, color: isDark ? Colors.white : AppColors.authBgBottom),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                loc.tr('enter_password_to_delete'),
+                style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500, color: isDark ? Colors.white70 : AppColors.authBgMid),
+              ),
+              const SizedBox(height: 16),
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  color: isDark ? Colors.white.withOpacity(0.08) : Colors.white,
+                  border: Border.all(
+                    color: isDark ? Colors.white.withOpacity(0.15) : const Color(0xFF624294).withOpacity(0.15),
+                    width: 1.5,
+                  ),
+                ),
+                child: TextField(
+                  controller: passwordController,
+                  obscureText: !showPassword,
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: isDark ? Colors.white : AppColors.authBgBottom,
+                  ),
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                    hintText: loc.tr('password'),
+                    hintStyle: GoogleFonts.poppins(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: isDark ? Colors.white.withOpacity(0.3) : const Color(0xFF624294).withOpacity(0.3),
+                    ),
+                    suffixIcon: GestureDetector(
+                      onTap: () => setState(() => showPassword = !showPassword),
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: Icon(
+                          showPassword ? Icons.visibility_rounded : Icons.visibility_off_rounded,
+                          color: isDark ? Colors.white.withOpacity(0.5) : const Color(0xFF624294).withOpacity(0.5),
+                          size: 18,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(ctx);
+                Future.delayed(const Duration(milliseconds: 100), () {
+                  passwordController.dispose();
+                });
+              },
+              child: Text(
+                loc.tr('cancel'),
+                style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w700, color: const Color(0xFF624294)),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                final password = passwordController.text;
+                Navigator.pop(ctx);
+                Future.delayed(const Duration(milliseconds: 100), () {
+                  passwordController.dispose();
+                });
+                _deleteAccount(password);
+              },
+              child: Text(
+                loc.tr('delete'),
+                style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.red),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _deleteAccount(String password) async {
+    if (password.isEmpty) {
+      HapticFeedback.heavyImpact();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(loc.tr('password_required')),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    final userProvider = context.read<UserProvider>();
+    final success = await userProvider.deleteAccount(password: password);
+
+    if (!mounted) return;
+
+    if (success) {
+      HapticFeedback.mediumImpact();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(loc.tr('account_deleted_successfully')),
+          backgroundColor: Colors.green,
+        ),
+      );
+      // Navigate to login screen after deletion
+      Future.delayed(const Duration(seconds: 1), () {
+        if (mounted) {
+          // Import LoginScreen at the top of the file
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (_) => const LoginScreen()),
+            (route) => false,
+          );
+        }
+      });
+    } else {
+      HapticFeedback.heavyImpact();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(userProvider.errorMessage ?? loc.tr('failed_to_delete_account')),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   Widget _buildInfoCard(bool isDark) {
@@ -469,7 +614,12 @@ class _ChangePasswordScreenState extends State<_ChangePasswordScreen> {
       _newPasswordController.clear();
       _confirmPasswordController.clear();
       Future.delayed(const Duration(seconds: 2), () {
-        if (mounted) Navigator.pop(context);
+        if (mounted) {
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (_) => const LoginScreen()),
+            (route) => false,
+          );
+        }
       });
     } else {
       _showError(userProvider.errorMessage ?? loc.tr('failed_to_change_password'));
