@@ -58,7 +58,7 @@ class _BottomNavWrapperState extends State<BottomNavWrapper> {
 
       // Silently update FCM token on the backend
       await userProvider.updateFcmToken(fcmToken, deviceId);
-      debugPrint("FCM Token synced with backend.");
+      debugPrint("FCM Token synced with backend: $fcmToken");
     } catch (e) {
       debugPrint("Failed to sync FCM token: $e");
     }
