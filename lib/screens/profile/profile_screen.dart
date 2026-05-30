@@ -14,6 +14,8 @@ import '../../services/localization_service.dart';
 import '../../services/language_id_service.dart';
 import '../../theme/theme_notifier.dart';
 import '../prayer_history/prayer_history_screen.dart';
+import 'update_profile_screen.dart';
+import 'account_security_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -426,15 +428,45 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final phone = [user.countryCode, user.phone]
         .where((s) => s.isNotEmpty)
         .join(' ');
-    return _WhiteCard(
-      child: Column(
-        children: [
-          _InfoRow(icon: Icons.email_outlined,    label: loc.tr('email_address'), value: user.email.isNotEmpty ? user.email : '—'),
-          _divider(),
-          _InfoRow(icon: Icons.phone_outlined,    label: loc.tr('phone_number'),  value: phone.isNotEmpty ? phone : '—'),
-          _divider(),
-          _InfoRow(icon: Icons.schedule_outlined, label: loc.tr('region'),      value: user.timezone.isNotEmpty ? user.timezone : '—'),
-        ],
+    return GestureDetector(
+      onTap: () {
+        HapticFeedback.lightImpact();
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => const UpdateProfileScreen()),
+        );
+      },
+      child: _WhiteCard(
+        child: Column(
+          children: [
+            _InfoRow(icon: Icons.email_outlined,    label: loc.tr('email_address'), value: user.email.isNotEmpty ? user.email : '—'),
+            _divider(),
+            _InfoRow(icon: Icons.phone_outlined,    label: loc.tr('phone_number'),  value: phone.isNotEmpty ? phone : '—'),
+            _divider(),
+            _InfoRow(icon: Icons.schedule_outlined, label: loc.tr('region'),      value: user.timezone.isNotEmpty ? user.timezone : '—'),
+            _divider(),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              child: Row(
+                children: [
+                  Container(
+                    width: 42, height: 42,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(14),
+                      color: const Color(0xFF624294).withOpacity(0.08),
+                      border: Border.all(color: const Color(0xFF624294).withOpacity(0.15), width: 1),
+                    ),
+                    child: Icon(Icons.edit_rounded, color: const Color(0xFF624294), size: 20),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Text(loc.tr('update_account_details').toUpperCase(), style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w700, letterSpacing: 1.0, color: AppColors.authBgBottom)),
+                  ),
+                  Icon(Icons.chevron_right_rounded, color: const Color(0xFF624294).withOpacity(0.3), size: 24),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -489,7 +521,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
           child: _SettingRow(icon: Icons.history_rounded, title: loc.tr('counting_history')),
         ),
         const SizedBox(height: 12),
-        _SettingRow(icon: Icons.security_rounded, title: loc.tr('account_security')),
+        GestureDetector(
+          onTap: () {
+            HapticFeedback.lightImpact();
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const AccountSecurityScreen()),
+            );
+          },
+          child: _SettingRow(icon: Icons.security_rounded, title: loc.tr('account_security')),
+        ),
         const SizedBox(height: 12),
         _SettingRow(icon: Icons.help_outline_rounded, title: loc.tr('help_support')),
       ],

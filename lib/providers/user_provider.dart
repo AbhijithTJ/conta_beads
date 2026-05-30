@@ -93,6 +93,63 @@ class UserProvider extends ChangeNotifier {
     }
   }
 
+  /// Update user profile via PUT /api/user/update-profile
+  Future<bool> updateProfile({
+    String? name,
+    String? email,
+    String? countryCode,
+    String? phone,
+    String? password,
+    String? timezone,
+    String? deviceId,
+    String? fcmToken,
+  }) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final request = UpdateProfileRequest(
+        name: name,
+        email: email,
+        countryCode: countryCode,
+        phone: phone,
+        password: password,
+        timezone: timezone,
+        deviceId: deviceId,
+        fcmToken: fcmToken,
+      );
+
+      final res = await ApiClient.instance.put(
+        AppConfig.updateProfilePath,
+        body: request.toJson(),
+      );
+
+      final data = res.data['user'] as Map<String, dynamic>? ?? res.data;
+      _user = UserData.fromJson(data);
+
+      // Update session with new data
+      await SessionService.instance.saveProfileExtras(
+        timezone: _user?.timezone,
+        createdAt: _user?.createdAt,
+      );
+
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } on ApiException catch (e) {
+      _errorMessage = e.message;
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    } catch (e) {
+      _errorMessage = 'Failed to update profile.';
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
   void clear() {
     _user = null;
     _errorMessage = null;

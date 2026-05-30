@@ -61,6 +61,42 @@ class LoginResponse {
   }
 }
 
+/// Request payload for PUT /api/user/update-profile
+class UpdateProfileRequest {
+  final String? name;
+  final String? email;
+  final String? countryCode;
+  final String? phone;
+  final String? password;
+  final String? timezone;
+  final String? deviceId;
+  final String? fcmToken;
+
+  const UpdateProfileRequest({
+    this.name,
+    this.email,
+    this.countryCode,
+    this.phone,
+    this.password,
+    this.timezone,
+    this.deviceId,
+    this.fcmToken,
+  });
+
+  Map<String, dynamic> toJson() {
+    final map = <String, dynamic>{};
+    if (name != null) map['name'] = name;
+    if (email != null) map['email'] = email;
+    if (countryCode != null) map['country_code'] = countryCode;
+    if (phone != null) map['phone'] = phone;
+    if (password != null) map['password'] = password;
+    if (timezone != null) map['timezone'] = timezone;
+    if (deviceId != null) map['device_id'] = deviceId;
+    if (fcmToken != null) map['fcm_token'] = fcmToken;
+    return map;
+  }
+}
+
 class UserData {
   final int? id;
   final String? name;
