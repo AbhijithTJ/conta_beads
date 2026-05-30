@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "168360567831",
+    "project_id": "upper-room-22dbb",
+    "storage_bucket": "upper-room-22dbb.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:168360567831:android:cc9a128d03a451ad22e852",
+        "android_client_info": {
+          "package_name": "in.co.upperroom.contabeads"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDekEay-YkQMajPF-skIWKbj7WPAMC_RAM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

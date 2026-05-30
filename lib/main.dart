@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'config/app_config.dart';
@@ -15,11 +16,18 @@ import 'providers/reverb_provider.dart';
 import 'screens/splash/splash_screen.dart';
 import 'screens/theme_select/theme_select_screen.dart';
 import 'services/localization_service.dart';
+import 'services/notification_service.dart';
 import 'services/session_service.dart';
 import 'theme/theme_notifier.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Firebase
+  await Firebase.initializeApp();
+
+  // Initialize Notifications
+  await NotificationService.instance.initialize();
 
   // Load SharedPreferences once into memory — all subsequent reads are sync.
   await SessionService.instance.init();
