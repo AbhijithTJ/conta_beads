@@ -8,6 +8,7 @@ import '../../providers/user_provider.dart';
 import '../../theme/theme_notifier.dart';
 import '../../services/localization_service.dart';
 import '../../login_and_register/login_screen.dart';
+import 'update_profile_screen.dart';
 
 class AccountSecurityScreen extends StatefulWidget {
   const AccountSecurityScreen({super.key});
@@ -103,6 +104,21 @@ class _AccountSecurityScreenState extends State<AccountSecurityScreen> {
                     HapticFeedback.lightImpact();
                     Navigator.of(context).push(
                       MaterialPageRoute(builder: (_) => const _ChangePasswordScreen()),
+                    );
+                  },
+                ),
+                const SizedBox(height: 12),
+
+                // Update Account Details Option
+                _buildSecurityOption(
+                  icon: Icons.person_outline_rounded,
+                  title: loc.tr('update_account_details'),
+                  subtitle: 'Change your name, email, phone number and country code',
+                  isDark: isDark,
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const UpdateProfileScreen()),
                     );
                   },
                 ),
