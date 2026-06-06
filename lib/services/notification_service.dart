@@ -46,7 +46,7 @@ class NotificationService {
 
     // Configure Local Notifications
     const AndroidInitializationSettings initializationSettingsAndroid =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+        AndroidInitializationSettings('@drawable/ic_stat_notification');
     const DarwinInitializationSettings initializationSettingsIOS =
         DarwinInitializationSettings();
     const InitializationSettings initializationSettings = InitializationSettings(
