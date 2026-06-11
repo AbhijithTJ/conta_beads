@@ -24,71 +24,67 @@ class NotificationService {
   final FlutterLocalNotificationsPlugin _localNotifications = FlutterLocalNotificationsPlugin();
 
   Future<void> initialize() async {
-    // Request permissions
-    NotificationSettings settings = await _messaging.requestPermission(
-      alert: true,
-      badge: true,
-      sound: true,
-      provisional: false, // Don't use provisional authorization
-    );
+    try {
+      // Request permissions
+      await _messaging.requestPermission(
+        alert: true,
+        badge: true,
+        sound: true,
+        provisional: false,
+      );
 
-    if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-      debugPrint('User granted notification permission');
-    } else if (settings.authorizationStatus == AuthorizationStatus.provisional) {
-      debugPrint('User granted provisional notification permission');
-    } else {
-      debugPrint('User declined or has not accepted notification permission');
-    }
+      // Get FCM Token (non-blocking, don't await result if not needed immediately)
+      _messaging.getToken().then((token) {
+        debugPrint("FCM Token: $token");
+      }).catchError((e) {
+        debugPrint("Error fetching FCM token: $e");
+      });
 
-    // Get FCM Token
-    String? token = await _messaging.getToken();
-    debugPrint("FCM Token: $token");
+      // Configure Local Notifications
+      const AndroidInitializationSettings initializationSettingsAndroid =
+          AndroidInitializationSettings('@drawable/ic_stat_notification');
+      const DarwinInitializationSettings initializationSettingsIOS =
+          DarwinInitializationSettings();
+      const InitializationSettings initializationSettings = InitializationSettings(
+        android: initializationSettingsAndroid,
+        iOS: initializationSettingsIOS,
+      );
 
-    // Configure Local Notifications
-    const AndroidInitializationSettings initializationSettingsAndroid =
-        AndroidInitializationSettings('@drawable/ic_stat_notification');
-    const DarwinInitializationSettings initializationSettingsIOS =
-        DarwinInitializationSettings();
-    const InitializationSettings initializationSettings = InitializationSettings(
-      android: initializationSettingsAndroid,
-      iOS: initializationSettingsIOS,
-    );
+      await _localNotifications.initialize(
+        initializationSettings,
+      );
 
-    await _localNotifications.initialize(
-      initializationSettings,
-      onDidReceiveNotificationResponse: (details) {
-        // Handle notification tap
-      },
-    );
+      // Create Android Notification Channel
+      const AndroidNotificationChannel channel = AndroidNotificationChannel(
+        'high_importance_channel', // id
+        'High Importance Notifications', // title
+        description: 'This channel is used for important notifications.',
+        importance: Importance.max,
+      );
 
-    // Create Android Notification Channel
-    const AndroidNotificationChannel channel = AndroidNotificationChannel(
-      'high_importance_channel', // id
-      'High Importance Notifications', // title
-      description: 'This channel is used for important notifications.',
-      importance: Importance.max,
-    );
+      await _localNotifications
+          .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin>()
+          ?.createNotificationChannel(channel);
 
-    await _localNotifications
-        .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
-        ?.createNotificationChannel(channel);
+      // Set background handler
+      FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
-    // Set background handler
-    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+      // Handle background message tap
+      FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+        debugPrint('A new onMessageOpenedApp event was published!');
+      });
 
-    // Handle background message tap (when app is in background but not terminated)
-    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      debugPrint('A new onMessageOpenedApp event was published!');
-    });
-
-    // Handle terminated state message tap
-    RemoteMessage? initialMessage = await _messaging.getInitialMessage();
-    if (initialMessage != null) {
-      debugPrint('App opened from terminated state via notification');
+      // Handle terminated state message tap
+      _messaging.getInitialMessage().then((initialMessage) {
+        if (initialMessage != null) {
+          debugPrint('App opened from terminated state via notification');
+        }
+      });
+    } catch (e) {
+      debugPrint("NotificationService initialization error: $e");
     }
   }
-
   Future<String?> getToken() async {
     try {
       return await _messaging.getToken();

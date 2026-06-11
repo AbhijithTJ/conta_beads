@@ -23,11 +23,15 @@ import 'theme/theme_notifier.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize Firebase
-  await Firebase.initializeApp();
+  try {
+    // Initialize Firebase
+    await Firebase.initializeApp();
 
-  // Initialize Notifications
-  await NotificationService.instance.initialize();
+    // Initialize Notifications
+    await NotificationService.instance.initialize();
+  } catch (e) {
+    debugPrint('[Main] Firebase/Notification initialization error: $e');
+  }
 
   // Load SharedPreferences once into memory — all subsequent reads are sync.
   await SessionService.instance.init();
