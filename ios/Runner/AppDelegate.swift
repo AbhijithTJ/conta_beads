@@ -1,6 +1,5 @@
 import Flutter
 import UIKit
-import Firebase
 
 @main
 @objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
@@ -8,7 +7,8 @@ import Firebase
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
-    FirebaseApp.configure()
+    // NOTE: Firebase initialization is now handled in Dart (main.dart)
+    // Remove native FirebaseApp.configure() to prevent conflicts
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 
