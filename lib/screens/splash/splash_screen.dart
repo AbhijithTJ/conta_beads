@@ -29,21 +29,27 @@ class _SplashScreenState extends State<SplashScreen>
 
     _gifCtrl.addStatusListener((status) {
       if (status == AnimationStatus.completed && mounted) {
-        // Route logic:
-        // 1. If logged in → go to OnboardingWrapper (which checks onboarding flag)
-        // 2. If not logged in → show theme selection first
-        final destination = SessionService.instance.isLoggedIn
-            ? const OnboardingWrapper()
-            : ThemeSelectScreen(onComplete: () {});
+        try {
+          // Route logic:
+          // 1. If logged in → go to OnboardingWrapper (which checks onboarding flag)
+          // 2. If not logged in → show theme selection first
+          final destination = SessionService.instance.isLoggedIn
+              ? const OnboardingWrapper()
+              : ThemeSelectScreen(onComplete: () {});
 
-        Navigator.of(context).pushReplacement(
-          PageRouteBuilder(
-            pageBuilder: (_, __, ___) => destination,
-            transitionsBuilder: (_, animation, __, child) =>
-                FadeTransition(opacity: animation, child: child),
-            transitionDuration: const Duration(milliseconds: 800),
-          ),
-        );
+          if (!mounted) return;
+
+          Navigator.of(context).pushReplacement(
+            PageRouteBuilder(
+              pageBuilder: (_, __, ___) => destination,
+              transitionsBuilder: (_, animation, __, child) =>
+                  FadeTransition(opacity: animation, child: child),
+              transitionDuration: const Duration(milliseconds: 800),
+            ),
+          );
+        } catch (e) {
+          debugPrint('[SplashScreen] Navigation error: $e');
+        }
       }
     });
   }

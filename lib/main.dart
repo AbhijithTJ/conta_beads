@@ -82,23 +82,35 @@ class _AppViewState extends State<_AppView> {
   @override
   void initState() {
     super.initState();
-    // Initialize WebSocket after providers are ready
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _initializeWebSocket();
+    // Defer WebSocket initialization to after first frame on iOS
+    // This prevents context access issues on iOS
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (mounted) {
+        _initializeWebSocket();
+      }
     });
   }
 
   /// Initialize Reverb WebSocket connection
   Future<void> _initializeWebSocket() async {
+    if (!mounted) return;
+    
     try {
+      // Check if context is still valid
+      if (!context.mounted) return;
+      
       final reverbProvider = context.read<ReverbProvider>();
       
       // Initialize Reverb and wait for connection
       await reverbProvider.initialize();
+      
+      if (!mounted) return;
       debugPrint('[App] Reverb connected');
 
       // Subscribe to dashboard channel (will wait for connection if needed)
       await reverbProvider.subscribe('dashboard');
+      
+      if (!mounted) return;
       debugPrint('[App] Subscribed to dashboard');
 
       // Setup WebSocket listeners in GlobalCountsProvider
@@ -108,6 +120,8 @@ class _AppViewState extends State<_AppView> {
       debugPrint('[App] Reverb initialized and subscribed to dashboard');
     } catch (e) {
       debugPrint('[App] Reverb initialization error: $e');
+      // Don't crash the app if WebSocket initialization fails
+      // Users can still use the app without real-time updates
     }
   }
 
