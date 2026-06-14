@@ -900,138 +900,251 @@ class _FilledCard extends StatelessWidget {
     required this.onRemove,
   });
 
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: isDark
-              ? const Color(0xFF624294)
-              : const Color(0xFF624294).withOpacity(0.15),
-          width: isDark ? 2.0 : 1.5,
-        ),
-        boxShadow: isDark
-            ? [
-                BoxShadow(
-                  color: const Color(0xFF624294).withOpacity(0.3),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
-                ),
-              ]
-            : [
-                BoxShadow(
-                  color: const Color(0xFF624294).withOpacity(0.10),
-                  blurRadius: 16,
-                  spreadRadius: 1,
-                  offset: const Offset(0, 6),
-                ),
-                BoxShadow(
-                  color: Colors.white.withOpacity(0.80),
-                  blurRadius: 4,
-                  offset: const Offset(0, -2),
-                ),
-              ],
-      ),
-      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Avatar with remove button overlay
-          Stack(
-            clipBehavior: Clip.none,
+  void _showPriestDetail(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (ctx) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 24),
+          padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF624294).withOpacity(0.25),
+                blurRadius: 30,
+                offset: const Offset(0, 10),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
+              // ── Priest Avatar ──
               Container(
-                width: 64, height: 64,
+                width: 80,
+                height: 80,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: const Color(0xFFEDE0ED),
-                  border: Border.all(
-                    color: const Color(0xFF624294).withOpacity(0.15),
-                    width: 1.5,
+                  gradient: LinearGradient(
+                    colors: [
+                      const Color(0xFF7B55A8).withOpacity(0.8),
+                      const Color(0xFF624294).withOpacity(0.8),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF624294).withOpacity(0.3),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
                 child: const Icon(
                   Icons.person_rounded,
-                  size: 36,
-                  color: Color(0xFF624294),
+                  size: 44,
+                  color: Colors.white,
                 ),
               ),
-              // Remove (×) button — top-right of avatar
-              Positioned(
-                top: -4, right: -4,
-                child: GestureDetector(
-                  onTap: onRemove,
-                  child: Container(
-                    width: 22, height: 22,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: const Color(0xFFE53935),
-                      border: Border.all(color: Colors.white, width: 1.5),
-                    ),
-                    child: const Icon(
-                      Icons.close_rounded,
-                      size: 13,
-                      color: Colors.white,
-                    ),
+              const SizedBox(height: 20),
+              // ── Full Priest Name ──
+              Text(
+                priest.displayName,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.poppins(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                  color: const Color(0xFF624294),
+                ),
+              ),
+              const SizedBox(height: 24),
+              // ── Remove Button ──
+              GestureDetector(
+                onTap: () {
+                  Navigator.pop(ctx);
+                  onRemove();
+                },
+                child: Container(
+                  width: double.infinity,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE53935),
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFFE53935).withOpacity(0.3),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.delete_outline_rounded, color: Colors.white, size: 20),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Remove Priest',
+                        style: GoogleFonts.poppins(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 8),
-          // Priest name with auto-shrinking text
-          Text(
-            priest.displayName,
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: GoogleFonts.poppins(
-              fontSize: 12,
-              fontWeight: FontWeight.w800,
-              color: const Color(0xFF624294),
-            ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => _showPriestDetail(context),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isDark
+                ? const Color(0xFF624294)
+                : const Color(0xFF624294).withOpacity(0.15),
+            width: isDark ? 2.0 : 1.5,
           ),
-          const SizedBox(height: 2),
-          Text(
-            'Pray for me',
-            textAlign: TextAlign.center,
-            style: GoogleFonts.poppins(
-              fontSize: 9,
-              color: const Color(0xFF624294).withOpacity(0.55),
-              height: 1.4,
+          boxShadow: isDark
+              ? [
+                  BoxShadow(
+                    color: const Color(0xFF624294).withOpacity(0.3),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ]
+              : [
+                  BoxShadow(
+                    color: const Color(0xFF624294).withOpacity(0.10),
+                    blurRadius: 16,
+                    spreadRadius: 1,
+                    offset: const Offset(0, 6),
+                  ),
+                  BoxShadow(
+                    color: Colors.white.withOpacity(0.80),
+                    blurRadius: 4,
+                    offset: const Offset(0, -2),
+                  ),
+                ],
+        ),
+        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Avatar with remove button overlay
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Container(
+                  width: 64, height: 64,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: const Color(0xFFEDE0ED),
+                    border: Border.all(
+                      color: const Color(0xFF624294).withOpacity(0.15),
+                      width: 1.5,
+                    ),
+                  ),
+                  child: const Icon(
+                    Icons.person_rounded,
+                    size: 36,
+                    color: Color(0xFF624294),
+                  ),
+                ),
+                // Remove (×) button — top-right of avatar
+                Positioned(
+                  top: -4, right: -4,
+                  child: GestureDetector(
+                    onTap: onRemove,
+                    child: Container(
+                      width: 22, height: 22,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: const Color(0xFFE53935),
+                        border: Border.all(color: Colors.white, width: 1.5),
+                      ),
+                      child: const Icon(
+                        Icons.close_rounded,
+                        size: 13,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ),
-          const SizedBox(height: 10),
-          // "Selected" badge
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-            decoration: BoxDecoration(
-              color: const Color(0xFF624294),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Text(
-              'SELECTED',
-              style: GoogleFonts.poppins(
-                fontSize: 9,
-                fontWeight: FontWeight.w800,
-                color: Colors.white,
-                letterSpacing: 0.5,
+            const SizedBox(height: 8),
+            // Priest name with ellipsis for long names
+            SizedBox(
+              height: 18,
+              child: Text(
+                priest.displayName,
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.poppins(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w800,
+                  color: const Color(0xFF624294),
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            slotLabel,
-            style: GoogleFonts.poppins(
-              fontSize: 10,
-              fontWeight: FontWeight.w600,
-              color: const Color(0xFF624294).withOpacity(0.4),
+            const SizedBox(height: 2),
+            Text(
+              'Pray for me',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.poppins(
+                fontSize: 9,
+                color: const Color(0xFF624294).withOpacity(0.55),
+                height: 1.4,
+              ),
             ),
-          ),
-        ],
+            const SizedBox(height: 10),
+            // "Selected" badge
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              decoration: BoxDecoration(
+                color: const Color(0xFF624294),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                'SELECTED',
+                style: GoogleFonts.poppins(
+                  fontSize: 9,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              slotLabel,
+              style: GoogleFonts.poppins(
+                fontSize: 10,
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFF624294).withOpacity(0.4),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1051,138 +1164,251 @@ class _SavedSlotCard extends StatelessWidget {
     required this.onUnadopt,
   });
 
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: isDark
-              ? const Color(0xFF624294)
-              : const Color(0xFF624294).withOpacity(0.15),
-          width: isDark ? 2.0 : 1.5,
-        ),
-        boxShadow: isDark
-            ? [
-                BoxShadow(
-                  color: const Color(0xFF624294).withOpacity(0.3),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
-                ),
-              ]
-            : [
-                BoxShadow(
-                  color: const Color(0xFF624294).withOpacity(0.10),
-                  blurRadius: 16,
-                  spreadRadius: 1,
-                  offset: const Offset(0, 6),
-                ),
-                BoxShadow(
-                  color: Colors.white.withOpacity(0.80),
-                  blurRadius: 4,
-                  offset: const Offset(0, -2),
-                ),
-              ],
-      ),
-      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Avatar with remove button overlay
-          Stack(
-            clipBehavior: Clip.none,
+  void _showPriestDetail(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (ctx) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 24),
+          padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF624294).withOpacity(0.25),
+                blurRadius: 30,
+                offset: const Offset(0, 10),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
+              // ── Priest Avatar ──
               Container(
-                width: 64, height: 64,
+                width: 80,
+                height: 80,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: const Color(0xFFEDE0ED),
-                  border: Border.all(
-                    color: const Color(0xFF624294).withOpacity(0.15),
-                    width: 1.5,
+                  gradient: LinearGradient(
+                    colors: [
+                      const Color(0xFF7B55A8).withOpacity(0.8),
+                      const Color(0xFF624294).withOpacity(0.8),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF624294).withOpacity(0.3),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
                 child: const Icon(
                   Icons.person_rounded,
-                  size: 36,
-                  color: Color(0xFF624294),
+                  size: 44,
+                  color: Colors.white,
                 ),
               ),
-              // Remove (×) button — top-right of avatar
-              Positioned(
-                top: -4, right: -4,
-                child: GestureDetector(
-                  onTap: onUnadopt,
-                  child: Container(
-                    width: 22, height: 22,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: const Color(0xFFE53935),
-                      border: Border.all(color: Colors.white, width: 1.5),
-                    ),
-                    child: const Icon(
-                      Icons.close_rounded,
-                      size: 13,
-                      color: Colors.white,
-                    ),
+              const SizedBox(height: 20),
+              // ── Full Priest Name ──
+              Text(
+                priest.displayName,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.poppins(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                  color: const Color(0xFF624294),
+                ),
+              ),
+              const SizedBox(height: 24),
+              // ── Remove Button ──
+              GestureDetector(
+                onTap: () {
+                  Navigator.pop(ctx);
+                  onUnadopt();
+                },
+                child: Container(
+                  width: double.infinity,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE53935),
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFFE53935).withOpacity(0.3),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.delete_outline_rounded, color: Colors.white, size: 20),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Unadopt Priest',
+                        style: GoogleFonts.poppins(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 8),
-          // Priest name with auto-shrinking text
-          Text(
-            priest.displayName,
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: GoogleFonts.poppins(
-              fontSize: 12,
-              fontWeight: FontWeight.w800,
-              color: const Color(0xFF624294),
-            ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => _showPriestDetail(context),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isDark
+                ? const Color(0xFF624294)
+                : const Color(0xFF624294).withOpacity(0.15),
+            width: isDark ? 2.0 : 1.5,
           ),
-          const SizedBox(height: 2),
-          Text(
-            'Pray for me',
-            textAlign: TextAlign.center,
-            style: GoogleFonts.poppins(
-              fontSize: 9,
-              color: const Color(0xFF624294).withOpacity(0.55),
-              height: 1.4,
+          boxShadow: isDark
+              ? [
+                  BoxShadow(
+                    color: const Color(0xFF624294).withOpacity(0.3),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ]
+              : [
+                  BoxShadow(
+                    color: const Color(0xFF624294).withOpacity(0.10),
+                    blurRadius: 16,
+                    spreadRadius: 1,
+                    offset: const Offset(0, 6),
+                  ),
+                  BoxShadow(
+                    color: Colors.white.withOpacity(0.80),
+                    blurRadius: 4,
+                    offset: const Offset(0, -2),
+                  ),
+                ],
+        ),
+        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Avatar with remove button overlay
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Container(
+                  width: 64, height: 64,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: const Color(0xFFEDE0ED),
+                    border: Border.all(
+                      color: const Color(0xFF624294).withOpacity(0.15),
+                      width: 1.5,
+                    ),
+                  ),
+                  child: const Icon(
+                    Icons.person_rounded,
+                    size: 36,
+                    color: Color(0xFF624294),
+                  ),
+                ),
+                // Remove (×) button — top-right of avatar
+                Positioned(
+                  top: -4, right: -4,
+                  child: GestureDetector(
+                    onTap: onUnadopt,
+                    child: Container(
+                      width: 22, height: 22,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: const Color(0xFFE53935),
+                        border: Border.all(color: Colors.white, width: 1.5),
+                      ),
+                      child: const Icon(
+                        Icons.close_rounded,
+                        size: 13,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ),
-          const SizedBox(height: 10),
-          // "SAVED" badge
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-            decoration: BoxDecoration(
-              color: const Color(0xFF4CAF50),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Text(
-              'SAVED',
-              style: GoogleFonts.poppins(
-                fontSize: 9,
-                fontWeight: FontWeight.w800,
-                color: Colors.white,
-                letterSpacing: 0.5,
+            const SizedBox(height: 8),
+            // Priest name with ellipsis for long names
+            SizedBox(
+              height: 18,
+              child: Text(
+                priest.displayName,
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.poppins(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w800,
+                  color: const Color(0xFF624294),
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            '$slotNumber/3',
-            style: GoogleFonts.poppins(
-              fontSize: 10,
-              fontWeight: FontWeight.w600,
-              color: const Color(0xFF624294).withOpacity(0.4),
+            const SizedBox(height: 2),
+            Text(
+              'Pray for me',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.poppins(
+                fontSize: 9,
+                color: const Color(0xFF624294).withOpacity(0.55),
+                height: 1.4,
+              ),
             ),
-          ),
-        ],
+            const SizedBox(height: 10),
+            // "SAVED" badge
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              decoration: BoxDecoration(
+                color: const Color(0xFF4CAF50),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                'SAVED',
+                style: GoogleFonts.poppins(
+                  fontSize: 9,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              '$slotNumber/3',
+              style: GoogleFonts.poppins(
+                fontSize: 10,
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFF624294).withOpacity(0.4),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
