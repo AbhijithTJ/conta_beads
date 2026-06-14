@@ -10,6 +10,7 @@ import '../../providers/auth_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../providers/language_provider.dart';
 import '../../providers/home_provider.dart';
+import '../../providers/adopt_priest_provider.dart';
 import '../../services/localization_service.dart';
 import '../../services/language_id_service.dart';
 import '../../theme/theme_notifier.dart';
@@ -307,6 +308,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         const SizedBox(height: 12),
                         _buildDetailsCard(),
                         const SizedBox(height: 28),
+                        _buildAdoptedPriestsSection(sectionLabelColor),
+                        const SizedBox(height: 28),
+                        const SizedBox(height: 28),
                         _buildSectionLabel(loc.tr('settings'), sectionLabelColor),
                         const SizedBox(height: 12),
                         _buildSettingsList(),
@@ -409,6 +413,103 @@ class _ProfileScreenState extends State<ProfileScreen> {
         const SizedBox(width: 12),
         _StatBox(value: '${user.chapelPrayedTotal}', label: 'Chaplet'),
       ],
+    );
+  }
+
+  Widget _buildAdoptedPriestsSection(Color sectionLabelColor) {
+    return Consumer<AdoptPriestProvider>(
+      builder: (context, adoptProvider, _) {
+        final isDark = themeNotifier.isDark;
+        final priests = adoptProvider.savedPriests;
+
+        // Don't show section if no priests
+        if (priests.isEmpty) {
+          return const SizedBox.shrink();
+        }
+
+        return Column(
+          children: [
+            _buildSectionLabel('Your Adopted Priests', sectionLabelColor),
+            const SizedBox(height: 12),
+            ...priests.asMap().entries.map((entry) {
+              final index = entry.key;
+              final priest = entry.value;
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: _WhiteCard(
+                  child: Row(
+                    children: [
+                      // Avatar with number
+                      Container(
+                        width: 50,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: LinearGradient(
+                            colors: [
+                              const Color(0xFF7B55A8).withOpacity(0.8),
+                              const Color(0xFF624294).withOpacity(0.8),
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFF624294).withOpacity(0.3),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Center(
+                          child: Text(
+                            '${index + 1}',
+                            style: GoogleFonts.poppins(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w800,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 14),
+                      // Priest name
+                      Expanded(
+                        child: Text(
+                          priest.displayName,
+                          style: GoogleFonts.poppins(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF624294),
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      // Saved badge
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF4CAF50),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          'SAVED',
+                          style: GoogleFonts.poppins(
+                            fontSize: 8,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.white,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }).toList(),
+          ],
+        );
+      },
     );
   }
 
