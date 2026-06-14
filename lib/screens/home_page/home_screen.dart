@@ -318,6 +318,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         children: [
                           const SizedBox(height: 16),
                           _buildHeader(provider, isDark),
+                          const SizedBox(height: 24),
+                          _buildGreeting(provider, isDark),
                           const SizedBox(height: 20),
                           _buildQuoteCard(provider, isDark),
                           const SizedBox(height: 24),
@@ -434,6 +436,40 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   // ── Header ──────────────────────────────────────────────────────────────────
 
+  Widget _buildGreeting(HomeProvider provider, bool isDark) {
+    final userName = provider.data?.user?.name ?? 'Guest';
+    final hour = DateTime.now().hour;
+    String greeting = 'Good Morning';
+    if (hour >= 12 && hour < 17) {
+      greeting = 'Good Afternoon';
+    } else if (hour >= 17) {
+      greeting = 'Good Evening';
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '$greeting, $userName \u{1F44B}',
+          style: GoogleFonts.poppins(
+            fontSize: 20,
+            fontWeight: FontWeight.w700,
+            color: isDark ? Colors.white : const Color(0xFF22014D),
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          "Let's grow closer to God today.",
+          style: GoogleFonts.poppins(
+            fontSize: 14,
+            fontWeight: FontWeight.w400,
+            color: isDark ? Colors.white.withOpacity(0.7) : const Color(0xFF624294).withOpacity(0.7),
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildHeader(HomeProvider provider, bool isDark) {
     final logoAsset =
         isDark ? 'assets/splash/ur_logo.png' : 'assets/splash/ur_logo_light.png';
@@ -449,33 +485,57 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Image.asset(logoAsset, width: 52, height: 52),
-        Consumer<LanguageProvider>(
-          builder: (_, languageProvider, __) {
-            return GestureDetector(
-              onTap: _showLanguagePicker,
-              child: Container(
-                height: 40,
-                padding: const EdgeInsets.symmetric(horizontal: 14),
-                decoration: BoxDecoration(
-                  color: langBg,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: borderColor, width: 1.5),
+        Row(
+          children: [
+            Consumer<LanguageProvider>(
+              builder: (_, languageProvider, __) {
+                return GestureDetector(
+                  onTap: _showLanguagePicker,
+                  child: Container(
+                    height: 40,
+                    padding: const EdgeInsets.symmetric(horizontal: 14),
+                    decoration: BoxDecoration(
+                      color: langBg,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: borderColor, width: 1.5),
+                    ),
+                    child: Row(mainAxisSize: MainAxisSize.min, children: [
+                      Icon(Icons.language_rounded, color: langText, size: 16),
+                      const SizedBox(width: 6),
+                      Text(languageProvider.selectedLanguage,
+                          style: GoogleFonts.poppins(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              color: langText)),
+                      const SizedBox(width: 4),
+                      Icon(Icons.keyboard_arrow_down_rounded,
+                          color: langText.withOpacity(0.7), size: 16),
+                    ]),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(width: 16),
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Icon(Icons.notifications_none_rounded, color: langText, size: 28),
+                Positioned(
+                  right: 2,
+                  top: 2,
+                  child: Container(
+                    width: 10,
+                    height: 10,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF8B5CF6),
+                      shape: BoxShape.circle,
+                      border: Border.all(color: isDark ? const Color(0xFF22014D) : const Color(0xFFF0EBF0), width: 1.5),
+                    ),
+                  ),
                 ),
-                child: Row(mainAxisSize: MainAxisSize.min, children: [
-                  Icon(Icons.language_rounded, color: langText, size: 16),
-                  const SizedBox(width: 6),
-                  Text(languageProvider.selectedLanguage,
-                      style: GoogleFonts.poppins(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                          color: langText)),
-                  const SizedBox(width: 4),
-                  Icon(Icons.keyboard_arrow_down_rounded,
-                      color: langText.withOpacity(0.7), size: 16),
-                ]),
-              ),
-            );
-          },
+              ],
+            ),
+          ],
         ),
       ],
     );
@@ -488,7 +548,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         ? AppColors.authBgBottom.withOpacity(0.20)
         : const Color(0xFF624294).withOpacity(0.15);
     final borderColor = isDark
-        ? Colors.white
+        ? Colors.white.withOpacity(0.5)
         : const Color(0xFF624294).withOpacity(0.12);
     final activeDotColor =
         isDark ? const Color(0xFF624294) : AppColors.goldPrimary;
@@ -516,8 +576,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         opacity: _quoteFadeAnim,
         child: Container(
           width: double.infinity,
-          height: 160,
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          height: 180,
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(22),
@@ -531,61 +590,100 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   offset: const Offset(0, 6))
             ],
           ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+          child: Stack(
+            clipBehavior: Clip.none,
             children: [
-              Text('\u275D',
-                  style: TextStyle(
-                      fontSize: 20,
-                      color: const Color(0xFF624294).withOpacity(0.45),
-                      height: 1.0)),
-              const SizedBox(height: 6),
-              Expanded(
-                child: Center(
-                  child: Text(
-                    quote.quotation,
-                    textAlign: TextAlign.center,
-                    maxLines: 5,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                        fontSize: 13,
-                        fontWeight:
-                            isDark ? FontWeight.w500 : FontWeight.w700,
-                        color: const Color(0xFF624294),
-                        fontStyle: FontStyle.italic,
-                        height: 1.4,
-                        letterSpacing: 0.2),
-                  ),
+
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('\u275D',
+                        style: TextStyle(
+                            fontSize: 20,
+                            color: const Color(0xFF624294).withOpacity(0.45),
+                            height: 1.0)),
+                    const SizedBox(height: 6),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 4, right: 30),
+                        child: Text(
+                          quote.quotation,
+                          maxLines: 4,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                              fontSize: 13,
+                              fontWeight:
+                                  isDark ? FontWeight.w500 : FontWeight.w700,
+                              color: const Color(0xFF624294),
+                              fontStyle: FontStyle.italic,
+                              height: 1.4,
+                              letterSpacing: 0.2),
+                        ),
+                      ),
+                    ),
+                    if (quote.reference.isNotEmpty)
+                      Text(
+                          quote.reference.startsWith('—')
+                              ? quote.reference
+                              : '— ${quote.reference}',
+                          style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xFF624294),
+                              letterSpacing: 1.2)),
+                  ],
                 ),
               ),
-              const SizedBox(height: 8),
-              if (quote.reference.isNotEmpty)
-                Text(
-                    quote.reference.startsWith('—')
-                        ? quote.reference
-                        : '— ${quote.reference}',
-                    style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF624294),
-                        letterSpacing: 1.2)),
-              const SizedBox(height: 10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(quotes.length, (i) {
-                  return AnimatedContainer(
-                    duration: const Duration(milliseconds: 300),
-                    width: i == safeIndex ? 18 : 6,
-                    height: 6,
-                    margin: const EdgeInsets.symmetric(horizontal: 3),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(3),
-                      color: i == safeIndex
-                          ? activeDotColor
-                          : const Color(0xFF624294).withOpacity(0.25),
+              // Dots centered at bottom
+              Positioned(
+                bottom: 12,
+                left: 0,
+                right: 0,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(quotes.length, (i) {
+                    return AnimatedContainer(
+                      duration: const Duration(milliseconds: 300),
+                      width: i == safeIndex ? 16 : 6,
+                      height: 6,
+                      margin: const EdgeInsets.symmetric(horizontal: 2),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(3),
+                        color: i == safeIndex
+                            ? activeDotColor
+                            : const Color(0xFF624294).withOpacity(0.25),
+                      ),
+                    );
+                  }),
+                ),
+              ),
+              // Avatar
+              Positioned(
+                bottom: -15,
+                right: 20,
+                child: Container(
+                  width: 70,
+                  height: 70,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 3),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF624294).withOpacity(0.3),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: ClipOval(
+                    child: Image.asset(
+                      'assets/demo/adopt a priest.png',
+                      fit: BoxFit.cover,
                     ),
-                  );
-                }),
+                  ),
+                ),
               ),
             ],
           ),
@@ -598,8 +696,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       bool isDark, Color shadowColor, Color borderColor) {
     return Container(
       width: double.infinity,
-      height: 160,
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      height: 180,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(22),
@@ -610,32 +707,72 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           BoxShadow(color: shadowColor, blurRadius: 20, offset: const Offset(0, 6))
         ],
       ),
-      child: const Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+      child: Stack(
+        clipBehavior: Clip.none,
         children: [
-          Text('\u275D',
-              style: TextStyle(
-                  fontSize: 20,
-                  color: Color(0xFF624294),
-                  height: 1.0)),
-          SizedBox(height: 6),
-          Text(
-            '"With God, all things are possible."',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-                fontSize: 14.5,
-                fontWeight: FontWeight.w700,
-                color: Color(0xFF624294),
-                fontStyle: FontStyle.italic,
-                height: 1.5),
+
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('\u275D',
+                    style: TextStyle(
+                        fontSize: 20,
+                        color: Color(0xFF624294),
+                        height: 1.0)),
+                const SizedBox(height: 6),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 4, right: 30),
+                    child: Text(
+                      '"With God, all things are possible."',
+                      maxLines: 4,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                          fontSize: 14.5,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF624294),
+                          fontStyle: FontStyle.italic,
+                          height: 1.5),
+                    ),
+                  ),
+                ),
+                Text('Matthew 19:26',
+                    style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF624294),
+                        letterSpacing: 1.2)),
+              ],
+            ),
           ),
-          SizedBox(height: 8),
-          Text('Matthew 19:26',
-              style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFF624294),
-                  letterSpacing: 1.2)),
+          // Avatar
+          Positioned(
+            bottom: -15,
+            right: 20,
+            child: Container(
+              width: 70,
+              height: 70,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.white, width: 3),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF624294).withOpacity(0.3),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: ClipOval(
+                child: Image.asset(
+                  'assets/demo/adopt a priest.png',
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -809,7 +946,7 @@ class _QuoteSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      height: 160,
+      height: 180,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(22),
