@@ -311,39 +311,13 @@ class _PriestCard extends StatelessWidget {
 
           // ── Priest Info ─────────────────────────────────────────────
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  priest.displayName,
-                  style: GoogleFonts.poppins(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: const Color(0xFF624294),
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  priest.originalName,
-                  style: GoogleFonts.poppins(
-                    fontSize: 12,
-                    color: const Color(0xFF624294).withOpacity(0.5),
-                  ),
-                ),
-                if (priest.note.isNotEmpty) ...[
-                  const SizedBox(height: 6),
-                  Text(
-                    priest.note,
-                    style: GoogleFonts.poppins(
-                      fontSize: 11,
-                      color: const Color(0xFF624294).withOpacity(0.4),
-                      fontStyle: FontStyle.italic,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ],
+            child: Text(
+              priest.displayName,
+              style: GoogleFonts.poppins(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                color: const Color(0xFF624294),
+              ),
             ),
           ),
 
