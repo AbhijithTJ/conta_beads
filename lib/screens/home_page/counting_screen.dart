@@ -973,25 +973,134 @@ class _CountingScreenState extends State<CountingScreen>
 
   Widget _buildCountButtons() {
     final isDark = themeNotifier.isDark;
-    final iconColor = isDark ? Colors.white : const Color(0xFF624294);
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        AnimatedBuilder(
-          animation: _decrementScaleAnim,
-          builder: (context, child) => Transform.scale(scale: _decrementScaleAnim.value, child: child),
-          child: GestureDetector(
-            onTap: _decrement,
-            child: Icon(Icons.remove_rounded, color: iconColor, size: 36),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: AnimatedBuilder(
+              animation: _decrementScaleAnim,
+              builder: (context, child) => Transform.scale(scale: _decrementScaleAnim.value, child: child),
+              child: GestureDetector(
+                onTap: _decrement,
+                child: Container(
+                  height: 56,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF7B55A8), Color(0xFF624294)],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                    ),
+                    borderRadius: BorderRadius.circular(28),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF2A0A5E),
+                        blurRadius: 0,
+                        offset: const Offset(0, 4),
+                      ),
+                      BoxShadow(
+                        color: const Color(0xFF624294).withOpacity(0.45),
+                        blurRadius: 12,
+                        offset: const Offset(0, 6),
+                      ),
+                    ],
+                    border: Border.all(
+                      color: Colors.white.withOpacity(0.15),
+                      width: 1.5,
+                    ),
+                  ),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(28),
+                      gradient: LinearGradient(
+                        colors: [
+                          Colors.white.withOpacity(0.10),
+                          Colors.transparent,
+                        ],
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                      ),
+                    ),
+                    child: Center(
+                      child: Text(
+                        '−',
+                        style: GoogleFonts.poppins(
+                          color: Colors.white,
+                          fontSize: 32,
+                          fontWeight: FontWeight.w700,
+                          height: 1.0,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
           ),
         ),
-        const SizedBox(width: 60),
-        AnimatedBuilder(
-          animation: _incrementScaleAnim,
-          builder: (context, child) => Transform.scale(scale: _incrementScaleAnim.value, child: child),
-          child: GestureDetector(
-            onTap: _increment,
-            child: Icon(Icons.add_rounded, color: iconColor, size: 40),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: AnimatedBuilder(
+              animation: _incrementScaleAnim,
+              builder: (context, child) => Transform.scale(scale: _incrementScaleAnim.value, child: child),
+              child: GestureDetector(
+                onTap: _increment,
+                child: Container(
+                  height: 56,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF7B55A8), Color(0xFF624294)],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                    ),
+                    borderRadius: BorderRadius.circular(28),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF2A0A5E),
+                        blurRadius: 0,
+                        offset: const Offset(0, 4),
+                      ),
+                      BoxShadow(
+                        color: const Color(0xFF624294).withOpacity(0.45),
+                        blurRadius: 12,
+                        offset: const Offset(0, 6),
+                      ),
+                    ],
+                    border: Border.all(
+                      color: Colors.white.withOpacity(0.15),
+                      width: 1.5,
+                    ),
+                  ),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(28),
+                      gradient: LinearGradient(
+                        colors: [
+                          Colors.white.withOpacity(0.10),
+                          Colors.transparent,
+                        ],
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                      ),
+                    ),
+                    child: Center(
+                      child: Text(
+                        '+',
+                        style: GoogleFonts.poppins(
+                          color: Colors.white,
+                          fontSize: 32,
+                          fontWeight: FontWeight.w700,
+                          height: 1.0,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
           ),
         ),
       ],
