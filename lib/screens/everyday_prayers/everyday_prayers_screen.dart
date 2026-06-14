@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -353,6 +354,8 @@ class _EverydayPrayersScreenState extends State<EverydayPrayersScreen> {
 
   // ── Handle prayer tap (text or link) ─────────────────────────────────────────
   void _handlePrayerTap(PrayerDocument prayer) {
+    developer.log('Prayer tapped: ${prayer.title}, type: ${prayer.type}, link: ${prayer.link}');
+    
     if (prayer.type == 'link') {
       _openPrayerDocument(prayer);
     } else if (prayer.type == 'text') {
@@ -429,17 +432,70 @@ class _EverydayPrayersScreenState extends State<EverydayPrayersScreen> {
 
   // ── Open prayer document (link type) ──────────────────────────────────────────
   Future<void> _openPrayerDocument(PrayerDocument document) async {
-    if (document.type == 'link' && document.link != null) {
-      final uri = Uri.parse(document.link!);
+    try {
+      if (document.link == null || document.link!.isEmpty) {
+        _showErrorSnackBar('No link available for ${document.title}');
+        return;
+      }
+
+      String urlString = document.link!.trim();
+      
+      developer.log('Opening URL: $urlString');
+
+      // Ensure URL has a proper scheme
+      if (!urlString.startsWith('http://') && !urlString.startsWith('https://')) {
+        urlString = 'https://$urlString';
+        developer.log('Added https:// scheme. New URL: $urlString');
+      }
+
+      final Uri uri = Uri.parse(urlString);
+
+      developer.log('Parsed URI: $uri');
+
+      // Check if URL can be launched
       if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
+        developer.log('URL can be launched, launching in external app...');
+        final bool launched = await launchUrl(
+          uri,
+          mode: LaunchMode.externalApplication,
+        );
+        
+        if (!launched) {
+          developer.log('Failed to launch URL');
+          _showErrorSnackBar('Could not open ${document.title}');
+        } else {
+          developer.log('URL launched successfully');
+        }
       } else {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Could not open ${document.title}')),
+        developer.log('Cannot launch URL: $urlString');
+        
+        // Try alternative: open in webview or browser fallback
+        try {
+          developer.log('Attempting to launch with webview fallback...');
+          await launchUrl(
+            uri,
+            mode: LaunchMode.inAppWebView,
           );
+        } catch (e) {
+          developer.log('Webview fallback failed: $e');
+          _showErrorSnackBar('Could not open link. Please try again.');
         }
       }
+    } catch (e, stackTrace) {
+      developer.log('Error opening prayer document: $e', stackTrace: stackTrace);
+      _showErrorSnackBar('Error: Could not open the link');
     }
+  }
+
+  void _showErrorSnackBar(String message) {
+    if (!mounted) return;
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red.shade600,
+        duration: const Duration(seconds: 3),
+      ),
+    );
   }
 }

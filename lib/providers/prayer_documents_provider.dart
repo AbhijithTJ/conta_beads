@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'dart:developer' as developer;
 import '../config/app_config.dart';
 import '../models/prayer_documents_model.dart';
 import '../services/api_client.dart';
@@ -45,15 +46,25 @@ class PrayerDocumentsProvider extends ChangeNotifier {
       final response = await ApiClient.instance.get(
         '/api/prayer-documents',
       );
+      developer.log('API Response: ${response.data}');
+      
       _data = PrayerDocumentsData.fromJson(response.data);
+      
+      developer.log('Parsed ${_data?.documents.length ?? 0} prayer documents');
+      for (var doc in _data?.documents ?? []) {
+        developer.log('Document: ${doc.title}, Type: ${doc.type}, Link: ${doc.link}');
+      }
+      
       _status = PrayerDocumentsStatus.loaded;
       _error = null;
     } on ApiException catch (e) {
       _status = PrayerDocumentsStatus.error;
       _error = e.message;
-    } catch (_) {
+      developer.log('API Error: ${e.message}');
+    } catch (e) {
       _status = PrayerDocumentsStatus.error;
       _error = 'Failed to load prayer documents.';
+      developer.log('Fetch Error: $e');
     }
 
     notifyListeners();
