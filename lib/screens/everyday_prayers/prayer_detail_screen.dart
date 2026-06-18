@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:page_flip/page_flip.dart';
+import 'package:audioplayers/audioplayers.dart';
 import '../../colors/colors.dart';
 import '../../theme/theme_notifier.dart';
 import '../../models/prayer_documents_model.dart';
@@ -22,11 +23,27 @@ class _PrayerDetailScreenState extends State<PrayerDetailScreen> {
   late List<String> _prayerPages;
   int _currentPageIndex = 0;
   final _controller = GlobalKey<PageFlipWidgetState>();
+  final _audioPlayer = AudioPlayer();
 
   @override
   void initState() {
     super.initState();
     _paginatePrayerContent();
+  }
+
+  @override
+  void dispose() {
+    _audioPlayer.dispose();
+    super.dispose();
+  }
+
+  /// Play page flip sound effect
+  Future<void> _playPageFlipSound() async {
+    try {
+      await _audioPlayer.play(AssetSource('sounds/page_flip.mp3'));
+    } catch (e) {
+      debugPrint('Error playing page flip sound: $e');
+    }
   }
 
   /// Split prayer content into pages based on HTML structure and character count
@@ -190,6 +207,7 @@ class _PrayerDetailScreenState extends State<PrayerDetailScreen> {
                       ),
                     ],
                     onPageFlipped: (pageNumber) {
+                      _playPageFlipSound();
                       setState(() {
                         _currentPageIndex = pageNumber;
                       });
