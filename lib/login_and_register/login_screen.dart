@@ -1,6 +1,7 @@
 import 'dart:ui';
-import 'package:firebase_messaging/firebase_messaging.dart';
+import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:local_auth/local_auth.dart';
@@ -30,6 +31,7 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _obscurePassword = true;
   bool _biometricAvailable = false;
   bool _hasCredentialsSaved = false;
+  bool _isBiometricLoading = false;
 
   final List<Map<String, String>> _languages = [
     {'code': 'EN', 'name': 'English'},
@@ -52,43 +54,94 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _initBiometric() async {
-    final canCheck = await _localAuth.canCheckBiometrics;
-    final isSupported = await _localAuth.isDeviceSupported();
-    final session = SessionService.instance;
-    
-    // Check if credentials are actually saved
-    final savedCreds = await session.getBiometricCredentials();
-    final hasCredentials = savedCreds != null;
+    developer.log('Biometric: Initializing biometric system');
 
-    setState(() {
-      _biometricAvailable = canCheck && isSupported;
-      _hasCredentialsSaved = hasCredentials;
-      final saved = session.contact ?? '';
-      if (saved.isNotEmpty) _contactController.text = saved;
-    });
+    try {
+      final canCheck = await _localAuth.canCheckBiometrics;
+      final isSupported = await _localAuth.isDeviceSupported();
+      final session = SessionService.instance;
+      
+      developer.log('Biometric: canCheckBiometrics=$canCheck, isSupported=$isSupported');
+      
+      // Check if credentials are actually saved
+      final savedCreds = await session.getBiometricCredentials();
+      final hasCredentials = savedCreds != null;
 
-    if (_biometricAvailable && session.biometricEnabled && hasCredentials) {
-      await Future.delayed(const Duration(milliseconds: 400));
-      _authenticateWithBiometric();
+      developer.log('Biometric: hasCredentials=$hasCredentials, biometricEnabled=${session.biometricEnabled}');
+
+      setState(() {
+        _biometricAvailable = canCheck && isSupported;
+        _hasCredentialsSaved = hasCredentials;
+        final saved = session.contact ?? '';
+        if (saved.isNotEmpty) _contactController.text = saved;
+      });
+
+      // Only auto-trigger if all conditions are met
+      // IMPORTANT: Don't auto-trigger from initState, do it from first frame instead
+      // This avoids the FragmentActivity context issue
+      if (_biometricAvailable && session.biometricEnabled && hasCredentials) {
+        developer.log('Biometric: All conditions met, scheduling biometric for first frame');
+        // Schedule for after first frame to ensure proper activity context
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          developer.log('Biometric: Triggering biometric from first frame');
+          if (mounted) {
+            _authenticateWithBiometric();
+          }
+        });
+      } else {
+        developer.log('Biometric: Skipping auto-trigger (available=$_biometricAvailable, enabled=${session.biometricEnabled}, creds=$hasCredentials)');
+      }
+    } catch (e) {
+      developer.log('Biometric: Error during initialization - $e');
+      setState(() {
+        _biometricAvailable = false;
+        _hasCredentialsSaved = false;
+      });
     }
   }
 
   Future<void> _authenticateWithBiometric() async {
-    // Fetch saved credentials from secure storage (Keystore/Keychain).
+    // Fetch saved credentials from secure storage
     final creds = await SessionService.instance.getBiometricCredentials();
     if (creds == null) {
+      developer.log('Biometric: No saved credentials found');
       _showError('No saved credentials. Please log in with your password first.');
       return;
     }
 
+    // Add UI feedback that we're attempting biometric
+    setState(() => _isBiometricLoading = true);
+
+    developer.log('Biometric: Starting authentication');
+
     try {
       final authenticated = await _localAuth.authenticate(
         localizedReason: 'Use biometrics to sign in to Rosary Bank',
-        options: const AuthenticationOptions(biometricOnly: false, stickyAuth: true),
+        options: const AuthenticationOptions(
+          biometricOnly: false, 
+          stickyAuth: false,  // ✅ Add timeout instead of indefinite
+        ),
       );
-      if (!authenticated || !mounted) return;
 
-      // Fingerprint passed — replay the login API with saved credentials.
+      developer.log('Biometric: Authentication result = $authenticated');
+
+      if (!authenticated) {
+        developer.log('Biometric: User cancelled or failed');
+        if (mounted) {
+          setState(() => _isBiometricLoading = false);
+          _showError('Biometric authentication cancelled. Please try again.');
+        }
+        return;
+      }
+
+      if (!mounted) {
+        developer.log('Biometric: Widget no longer mounted');
+        return;
+      }
+
+      developer.log('Biometric: Authentication successful, calling API');
+
+      // Replay the login API with saved credentials
       final auth = context.read<AuthProvider>();
       final userProvider = context.read<UserProvider>();
 
@@ -97,7 +150,7 @@ class _LoginScreenState extends State<LoginScreen> {
       try {
         fcmToken = await FirebaseMessaging.instance.getToken() ?? '';
       } catch (e) {
-        debugPrint('Error getting FCM token: $e');
+        developer.log('Biometric: Error getting FCM token: $e');
       }
 
       final success = await auth.login(
@@ -106,16 +159,42 @@ class _LoginScreenState extends State<LoginScreen> {
         fcmToken: fcmToken,
       );
 
-      if (!mounted) return;
+      if (!mounted) {
+        developer.log('Biometric: Widget unmounted before login completed');
+        return;
+      }
 
       if (success) {
+        developer.log('Biometric: Login successful');
         if (auth.user != null) userProvider.setUser(auth.user!);
         _navigateToHome();
       } else {
-        // Credentials may have changed server-side (e.g. password reset).
+        developer.log('Biometric: API login failed - ${auth.errorMessage}');
+        setState(() => _isBiometricLoading = false);
         _showError('Biometric login failed. Please log in with your password.');
       }
-    } catch (_) {}
+    } on PlatformException catch (e) {
+      developer.log('Biometric: PlatformException - ${e.code}: ${e.message}');
+      
+      if (mounted) setState(() => _isBiometricLoading = false);
+      
+      // Handle specific platform errors
+      if (e.code == 'NotAvailable') {
+        _showError('Biometric authentication not available on this device.');
+      } else if (e.code == 'NotEnrolled') {
+        _showError('No biometric data enrolled. Please set up biometrics in settings.');
+      } else if (e.code == 'LockedOut') {
+        _showError('Too many failed attempts. Please try again later.');
+      } else if (e.code == 'PermanentlyLockedOut') {
+        _showError('Biometric is locked. Please use your password to login.');
+      } else {
+        _showError('Biometric authentication failed: ${e.message}');
+      }
+    } catch (e) {
+      developer.log('Biometric: Unexpected error - $e');
+      if (mounted) setState(() => _isBiometricLoading = false);
+      _showError('An unexpected error occurred. Please try again.');
+    }
   }
 
   Future<void> _handleLogin() async {
@@ -818,7 +897,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Widget _buildBiometricButton() {
     return GestureDetector(
-      onTap: _authenticateWithBiometric,
+      onTap: _isBiometricLoading ? null : _authenticateWithBiometric,
       child: Container(
         width: double.infinity,
         height: 46,
@@ -826,23 +905,39 @@ class _LoginScreenState extends State<LoginScreen> {
           color: Colors.transparent,
           borderRadius: BorderRadius.circular(30),
           border: Border.all(
-              color: const Color(0xFF624294).withOpacity(0.45), width: 1.5),
+            color: const Color(0xFF624294).withOpacity(_isBiometricLoading ? 0.25 : 0.45),
+            width: 1.5,
+          ),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.fingerprint, color: Color(0xFF624294), size: 22),
+            if (_isBiometricLoading)
+              const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation(Color(0xFF624294)),
+                ),
+              )
+            else
+              const Icon(Icons.fingerprint, color: Color(0xFF624294), size: 22),
             const SizedBox(width: 8),
             Flexible(
-              child: Text(loc.tr('use_biometric'),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.poppins(
-                    color: const Color(0xFF624294),
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                  )),
+              child: Text(
+                _isBiometricLoading 
+                  ? 'Verifying...' 
+                  : loc.tr('use_biometric'),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.poppins(
+                  color: const Color(0xFF624294),
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ),
           ],
         ),

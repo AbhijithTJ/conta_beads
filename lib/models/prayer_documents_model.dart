@@ -23,6 +23,7 @@ class PrayerDocumentLanguage {
 class PrayerDocument {
   final int id;
   final String title;
+  final String? description; // Short description/subtitle
   final String type; // 'link' or 'text'
   final String? link; // URL for link type
   final String? data; // HTML content for text type
@@ -34,6 +35,7 @@ class PrayerDocument {
   const PrayerDocument({
     required this.id,
     required this.title,
+    this.description,
     required this.type,
     this.link,
     this.data,
@@ -45,15 +47,16 @@ class PrayerDocument {
 
   factory PrayerDocument.fromJson(Map<String, dynamic> json) {
     return PrayerDocument(
-      id:         json['id']         as int,
-      title:      json['title']      as String,
-      type:       json['type']       as String,
-      link:       json['link']       as String?,
-      data:       json['data']       as String?,
-      imageFile:  json['image_file'] as String? ?? '',
-      imagePath:  json['image_path'] as String? ?? '',
-      languageId: json['language_id'] as int,
-      language:   PrayerDocumentLanguage.fromJson(json['language'] as Map<String, dynamic>),
+      id:          json['id']          as int,
+      title:       json['title']       as String,
+      description: json['description'] as String?,
+      type:        json['type']        as String,
+      link:        json['link']        as String?,
+      data:        json['data']        as String?,
+      imageFile:   json['image_file']  as String? ?? '',
+      imagePath:   json['image_path']  as String? ?? '',
+      languageId:  json['language_id'] as int,
+      language:    PrayerDocumentLanguage.fromJson(json['language'] as Map<String, dynamic>),
     );
   }
 }

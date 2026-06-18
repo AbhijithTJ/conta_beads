@@ -233,24 +233,24 @@ class _EverydayPrayersScreenState extends State<EverydayPrayersScreen> {
                                   child: Text(
                                     loc.tr('onboarding_prayers_title'),
                                     style: GoogleFonts.poppins(
-                                      fontSize: 24,
+                                      fontSize: 28,
                                       fontWeight: FontWeight.w800,
                                       color: titleColor,
                                       letterSpacing: 0.5,
                                     ),
                                   ),
                                 ),
-                                Center(
-                                  child: Text(
-                                    loc.tr('onboarding_prayers_desc'),
-                                    style: GoogleFonts.poppins(
-                                      fontSize: 12,
-                                      color: subColor,
-                                      letterSpacing: 0.3,
-                                    ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  loc.tr('onboarding_prayers_desc'),
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 13,
+                                    color: subColor,
+                                    letterSpacing: 0.3,
+                                    height: 1.4,
                                   ),
                                 ),
-                                const SizedBox(height: 24),
+                                const SizedBox(height: 28),
 
                                 // ── Prayer grid ─────────────────────────────────
                                 if (documents.isNotEmpty) ...[
@@ -293,62 +293,113 @@ class _EverydayPrayersScreenState extends State<EverydayPrayersScreen> {
 
   // ── Prayer grid ─────────────────────────────────────────────────────────────
   Widget _buildPrayerGrid(bool isDark, Color titleColor, List<PrayerDocument> documents) {
-    // Display all documents in the prayer grid
+    // Display all documents in the prayer grid (2-column layout)
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: documents.length,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        crossAxisSpacing: 12,
+        crossAxisCount: 2,
+        crossAxisSpacing: 16,
         mainAxisSpacing: 16,
-        childAspectRatio: 0.72,
+        childAspectRatio: 0.65,
       ),
       itemBuilder: (context, i) {
         final prayer = documents[i];
         return GestureDetector(
           onTap: () => _handlePrayerTap(prayer),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildGlassCard(
-                isDark: isDark,
-                height: 92,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(14),
-                  child: Image.network(
-                    prayer.imagePath,
-                    fit: BoxFit.cover,
-                    width: double.infinity,
-                    height: double.infinity,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        color: isDark ? Colors.grey[800] : Colors.grey[200],
-                        child: Icon(
-                          Icons.image_not_supported,
-                          color: isDark ? Colors.grey[400] : Colors.grey[600],
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                prayer.title,
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
-                style: GoogleFonts.poppins(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w600,
-                  color: titleColor,
-                  height: 1.4,
-                ),
-              ),
-            ],
-          ),
+          child: _buildPrayerCard(isDark, titleColor, prayer),
         );
       },
+    );
+  }
+
+  // ── Prayer card with image, title, and description ──────────────────────────
+  Widget _buildPrayerCard(bool isDark, Color titleColor, PrayerDocument prayer) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(20),
+      child: Stack(
+        children: [
+          // ── Background image ────────────────────────────────────────────
+          Image.network(
+            prayer.imagePath,
+            fit: BoxFit.cover,
+            width: double.infinity,
+            height: double.infinity,
+            errorBuilder: (context, error, stackTrace) {
+              return Container(
+                color: isDark ? Colors.grey[800] : Colors.grey[200],
+                child: Icon(
+                  Icons.image_not_supported,
+                  color: isDark ? Colors.grey[400] : Colors.grey[600],
+                ),
+              );
+            },
+          ),
+
+          // ── Dark overlay for better text visibility ─────────────────────
+          Positioned.fill(
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.black.withOpacity(0.2),
+                    Colors.black.withOpacity(0.5),
+                  ],
+                  stops: const [0.0, 1.0],
+                ),
+              ),
+            ),
+          ),
+
+          // ── Church cross icon (top-right) ──────────────────────────────
+          Positioned(
+            top: 12,
+            right: 12,
+            child: Text(
+              '✝',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+
+          // ── Title only (bottom) ─────────────────────────────────────────
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.transparent,
+                    Colors.black.withOpacity(0.6),
+                  ],
+                ),
+              ),
+              padding: const EdgeInsets.fromLTRB(12, 28, 12, 12),
+              child: Text(
+                prayer.title,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.poppins(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                  height: 1.2,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
