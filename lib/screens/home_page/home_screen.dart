@@ -515,26 +515,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 );
               },
             ),
-            const SizedBox(width: 16),
-            Stack(
-              clipBehavior: Clip.none,
-              children: [
-                Icon(Icons.notifications_none_rounded, color: langText, size: 28),
-                Positioned(
-                  right: 2,
-                  top: 2,
-                  child: Container(
-                    width: 10,
-                    height: 10,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF8B5CF6),
-                      shape: BoxShape.circle,
-                      border: Border.all(color: isDark ? const Color(0xFF22014D) : const Color(0xFFF0EBF0), width: 1.5),
-                    ),
-                  ),
-                ),
-              ],
-            ),
           ],
         ),
       ],
@@ -593,6 +573,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           child: Stack(
             clipBehavior: Clip.none,
             children: [
+              // ── Background image ────────────────────────────────────────
+              Positioned.fill(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(22),
+                  child: Image.asset(
+                    'assets/demo/qoutes.png',
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
 
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
@@ -659,13 +649,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   }),
                 ),
               ),
-              // Avatar
+              // Avatar positioned at right bottom end
               Positioned(
                 bottom: -15,
-                right: 20,
+                right: 16,
                 child: Container(
-                  width: 70,
-                  height: 70,
+                  width: 80,
+                  height: 80,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     border: Border.all(color: Colors.white, width: 3),
@@ -681,6 +671,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     child: Image.asset(
                       'assets/demo/adopt a priest.png',
                       fit: BoxFit.cover,
+                      width: 80,
+                      height: 80,
                     ),
                   ),
                 ),
@@ -710,7 +702,18 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       child: Stack(
         clipBehavior: Clip.none,
         children: [
+          // ── Background image ────────────────────────────────────────
+          Positioned.fill(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(22),
+              child: Image.asset(
+                'assets/demo/qoutes.png',
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
 
+          // ── Quote content (left side) ────────────────────────────
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
             child: Column(
@@ -747,13 +750,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               ],
             ),
           ),
-          // Avatar
+          // Avatar positioned at right bottom end
           Positioned(
             bottom: -15,
-            right: 20,
+            right: 16,
             child: Container(
-              width: 70,
-              height: 70,
+              width: 80,
+              height: 80,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(color: Colors.white, width: 3),
@@ -769,6 +772,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 child: Image.asset(
                   'assets/demo/adopt a priest.png',
                   fit: BoxFit.cover,
+                  width: 80,
+                  height: 80,
                 ),
               ),
             ),
