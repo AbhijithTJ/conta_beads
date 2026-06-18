@@ -322,7 +322,7 @@ class _PrayerDetailScreenState extends State<PrayerDetailScreen> {
             children: [
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(45, 40, 40, 20),
+                  padding: const EdgeInsets.fromLTRB(45, 40, 40, 12),
                   child: cleanedContent.isNotEmpty
                       ? Html(
                           data: cleanedContent,
@@ -343,7 +343,7 @@ class _PrayerDetailScreenState extends State<PrayerDetailScreen> {
               ),
               // Footer with Page Number
               Padding(
-                padding: const EdgeInsets.fromLTRB(40, 0, 40, 30),
+                padding: const EdgeInsets.fromLTRB(40, 0, 40, 12),
                 child: Column(
                   children: [
                     Container(
@@ -351,7 +351,7 @@ class _PrayerDetailScreenState extends State<PrayerDetailScreen> {
                       height: 1,
                       color: const Color(0xFFE8E2D8),
                     ),
-                    const SizedBox(height: 15),
+                    const SizedBox(height: 8),
                     Text(
                       pageNum.toString(),
                       style: GoogleFonts.playfairDisplay(
