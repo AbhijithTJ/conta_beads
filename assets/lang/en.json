@@ -42,7 +42,7 @@
   "email_address": "Email Address",
   "phone_number": "Phone Number",
   "region": "Region",
-  "counting_history": "Counting History",
+  "counting_history": "My Prayer History",
   "account_security": "Account Security",
   "help_support": "Help & Support",
   "make_it_yours": "Make it yours",
@@ -176,5 +176,8 @@
   "unadopt_priest": "Unadopt Priest",
   "priest_unadopted": "Priest unadopted",
   "error_loading_priests": "Error: {error}",
-  "no_available_priests": "No available priests"
+  "no_available_priests": "No available priests",
+  "country_code": "Country Code",
+  "adopted_priests": "My Adopted Priest",
+  "no_adopted_priests": "No adopted priests yet"
 }

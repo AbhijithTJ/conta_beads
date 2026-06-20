@@ -42,7 +42,7 @@
   "email_address": "ഇമെയിൽ വിലാസം",
   "phone_number": "ഫോൺ നമ്പർ",
   "region": "പ്രദേശം",
-  "counting_history": "എണ്ണൽ ചരിത്രം",
+  "counting_history": "എന്റെ പ്രാർത്ഥനാ ചരിത്രം",
   "account_security": "അക്കൗണ്ട് സുരക്ഷ",
   "help_support": "സഹായം & പിന്തുണ",
   "make_it_yours": "നിങ്ങളുടേതാക്കുക",
@@ -176,5 +176,8 @@
   "unadopt_priest": "പുരോഹിതനെ സ്വീകരണം നിരസിക്കുക",
   "priest_unadopted": "പുരോഹിതനെ സ്വീകരണം നിരസിച്ചു",
   "error_loading_priests": "പിശക്: {error}",
-  "no_available_priests": "ഇതര പുരോഹിതരില്ല"
+  "no_available_priests": "ഇതര പുരോഹിതരില്ല",
+  "country_code": "രാജ്യ കോഡ്",
+  "adopted_priests": "ഞാൻ ദത്തെടുത്ത വൈദികൻ",
+  "no_adopted_priests": "ഇതുവരെ സ്വീകരിച്ച പുരോഹിതരില്ല"
 }

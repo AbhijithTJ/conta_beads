@@ -419,7 +419,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget _buildAdoptedPriestsSection(Color sectionLabelColor) {
     return Consumer<AdoptPriestProvider>(
       builder: (context, adoptProvider, _) {
-        final isDark = themeNotifier.isDark;
         final priests = adoptProvider.savedPriests;
 
         // Don't show section if no priests
@@ -429,7 +428,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
         return Column(
           children: [
-            _buildSectionLabel('Your Adopted Priests', sectionLabelColor),
+            _buildSectionLabel(loc.tr('adopted_priests'), sectionLabelColor),
             const SizedBox(height: 12),
             ...priests.asMap().entries.map((entry) {
               final index = entry.key;
@@ -493,7 +492,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
-                          'SAVED',
+                          loc.tr('saved'),
                           style: GoogleFonts.poppins(
                             fontSize: 8,
                             fontWeight: FontWeight.w800,
