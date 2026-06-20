@@ -4,11 +4,13 @@ class HomeQuote {
   final int id;
   final String quotation;
   final String reference;
+  final String image;
 
   const HomeQuote({
     required this.id,
     required this.quotation,
     required this.reference,
+    required this.image,
   });
 
   factory HomeQuote.fromJson(Map<String, dynamic> json) {
@@ -16,6 +18,7 @@ class HomeQuote {
       id:         json['id']         as int,
       quotation:  json['quotation']  as String,
       reference:  json['reference']  as String? ?? '',
+      image:      json['image']      as String? ?? '',
     );
   }
 }

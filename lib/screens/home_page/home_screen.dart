@@ -577,10 +577,23 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               Positioned.fill(
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(22),
-                  child: Image.asset(
-                    'assets/demo/qoutes.png',
-                    fit: BoxFit.cover,
-                  ),
+                  child: quote.image.isNotEmpty
+                      ? CachedNetworkImage(
+                          imageUrl: quote.image,
+                          fit: BoxFit.cover,
+                          placeholder: (context, url) => Image.asset(
+                            'assets/demo/qoutes.png',
+                            fit: BoxFit.cover,
+                          ),
+                          errorWidget: (context, url, error) => Image.asset(
+                            'assets/demo/qoutes.png',
+                            fit: BoxFit.cover,
+                          ),
+                        )
+                      : Image.asset(
+                          'assets/demo/qoutes.png',
+                          fit: BoxFit.cover,
+                        ),
                 ),
               ),
 
