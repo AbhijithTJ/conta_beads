@@ -4,8 +4,10 @@ import 'package:provider/provider.dart';
 import '../../theme/theme_notifier.dart';
 import '../../config/app_config.dart';
 import '../../services/api_client.dart';
+import '../../services/localization_service.dart';
 import '../../models/priest_model.dart';
 import '../../providers/adopt_priest_provider.dart';
+import '../../providers/language_provider.dart';
 import 'adopt_priest_success_screen.dart';
 import 'suggest_priest_screen.dart';
 
@@ -114,7 +116,7 @@ class _AdoptPriestScreenState extends State<AdoptPriestScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Error: ${e.message}',
+              loc.tr('error_loading_priests', args: {'error': e.message}),
               style: GoogleFonts.poppins(color: Colors.white),
             ),
             backgroundColor: Colors.red,
@@ -157,7 +159,7 @@ class _AdoptPriestScreenState extends State<AdoptPriestScreen> {
               ),
               const SizedBox(height: 20),
               Text(
-                'Choose a Priest',
+                loc.tr('choose_a_priest'),
                 style: GoogleFonts.poppins(
                   fontSize: 18,
                   fontWeight: FontWeight.w800,
@@ -166,7 +168,7 @@ class _AdoptPriestScreenState extends State<AdoptPriestScreen> {
               ),
               const SizedBox(height: 4),
               Text(
-                'Select one to add to your prayer list',
+                loc.tr('select_one_to_add'),
                 style: GoogleFonts.poppins(
                   fontSize: 12,
                   color: isDark
@@ -235,7 +237,7 @@ class _AdoptPriestScreenState extends State<AdoptPriestScreen> {
                                     ),
                                   ),
                                   Text(
-                                    'Pray for me',
+                                    loc.tr('pray_for_me'),
                                     style: GoogleFonts.poppins(
                                       fontSize: 11,
                                       color: isDark
@@ -336,26 +338,28 @@ class _AdoptPriestScreenState extends State<AdoptPriestScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-      canPop: true,
-      onPopInvokedWithResult: (didPop, result) {
-        if (didPop) {
-          // Clear slots when leaving the screen
-          _resetSlots();
-        }
-      },
-      child: ValueListenableBuilder<bool>(
-        valueListenable: themeNotifier,
-        builder: (_, isDark, __) {
-          final titleColor = isDark ? Colors.white : const Color(0xFF624294);
-          final subColor = isDark
-            ? Colors.white.withOpacity(0.65)
-            : const Color(0xFF624294).withOpacity(0.6);
+    return Consumer<LanguageProvider>(
+      builder: (context, languageProvider, _) {
+        return PopScope(
+          canPop: true,
+          onPopInvokedWithResult: (didPop, result) {
+            if (didPop) {
+              // Clear slots when leaving the screen
+              _resetSlots();
+            }
+          },
+          child: ValueListenableBuilder<bool>(
+            valueListenable: themeNotifier,
+            builder: (_, isDark, __) {
+              final titleColor = isDark ? Colors.white : const Color(0xFF624294);
+              final subColor = isDark
+                ? Colors.white.withOpacity(0.65)
+                : const Color(0xFF624294).withOpacity(0.6);
 
-        return Scaffold(
-          body: Stack(
-            children: [
-              // ── Base dark bg ─────────────────────────────────────────
+            return Scaffold(
+              body: Stack(
+                children: [
+                  // ── Base dark bg ─────────────────────────────────────────
               if (isDark)
                 Positioned.fill(
                   child: Container(color: const Color(0xFF1c023d)),
@@ -503,7 +507,7 @@ class _AdoptPriestScreenState extends State<AdoptPriestScreen> {
                       children: [
                         const SizedBox(height: 8),
                         Text(
-                          'Adopt a priest',
+                          loc.tr('adopt_a_priest'),
                           style: GoogleFonts.poppins(
                             fontSize: 26,
                             fontWeight: FontWeight.w800,
@@ -512,7 +516,7 @@ class _AdoptPriestScreenState extends State<AdoptPriestScreen> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          "Pray for God's anointed ones",
+                          loc.tr('pray_for_anointed'),
                           style: GoogleFonts.poppins(
                             fontSize: 13,
                             fontWeight: FontWeight.w500,
@@ -521,7 +525,7 @@ class _AdoptPriestScreenState extends State<AdoptPriestScreen> {
                         ),
                         const SizedBox(height: 24),
                         Text(
-                          'Choose your Priest',
+                          loc.tr('choose_your_priest'),
                           style: GoogleFonts.poppins(
                             fontSize: 18,
                             fontWeight: FontWeight.w800,
@@ -559,7 +563,7 @@ class _AdoptPriestScreenState extends State<AdoptPriestScreen> {
                                               ScaffoldMessenger.of(context).showSnackBar(
                                                 SnackBar(
                                                   content: Text(
-                                                    'Priest unadopted',
+                                                    loc.tr('priest_unadopted'),
                                                     style: GoogleFonts.poppins(
                                                         color: Colors.white),
                                                   ),
@@ -641,7 +645,7 @@ class _AdoptPriestScreenState extends State<AdoptPriestScreen> {
                               const SizedBox(width: 10),
                               Expanded(
                                 child: Text(
-                                  'You may select up to 3 priests',
+                                  loc.tr('select_up_to_3_priests'),
                                   style: GoogleFonts.poppins(
                                     fontSize: 12,
                                     color: isDark
@@ -700,7 +704,9 @@ class _AdoptPriestScreenState extends State<AdoptPriestScreen> {
                                             ),
                                           )
                                         : Text(
-                                            'Adopt $_filledCount Priest${_filledCount > 1 ? 's' : ''}',
+                                            _filledCount > 1
+                                                ? loc.tr('adopt_button_plural', args: {'count': _filledCount.toString()})
+                                                : loc.tr('adopt_button', args: {'count': _filledCount.toString()}),
                                             style: GoogleFonts.poppins(
                                               color: Colors.white,
                                               fontSize: 16,
@@ -740,7 +746,7 @@ class _AdoptPriestScreenState extends State<AdoptPriestScreen> {
                             ),
                             child: Center(
                               child: Text(
-                                'Suggest a Priest',
+                                loc.tr('suggest_a_priest'),
                                 style: GoogleFonts.poppins(
                                   color: titleColor,
                                   fontSize: 16,
@@ -765,6 +771,8 @@ class _AdoptPriestScreenState extends State<AdoptPriestScreen> {
         );
         },
       ),
+        );
+      },
     );
   }
 }
@@ -858,7 +866,7 @@ class _EmptySlot extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             Text(
-              'Add Priest',
+              loc.tr('add_priest'),
               textAlign: TextAlign.center,
               style: GoogleFonts.poppins(
                 fontSize: 11,
@@ -989,7 +997,7 @@ class _FilledCard extends StatelessWidget {
                       const Icon(Icons.delete_outline_rounded, color: Colors.white, size: 20),
                       const SizedBox(width: 8),
                       Text(
-                        'Remove Priest',
+                        loc.tr('remove_priest'),
                         style: GoogleFonts.poppins(
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
@@ -1108,7 +1116,7 @@ class _FilledCard extends StatelessWidget {
             ),
             const SizedBox(height: 2),
             Text(
-              'Pray for me',
+              loc.tr('pray_for_me'),
               textAlign: TextAlign.center,
               style: GoogleFonts.poppins(
                 fontSize: 9,
@@ -1125,7 +1133,7 @@ class _FilledCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
-                'SELECTED',
+                loc.tr('selected'),
                 style: GoogleFonts.poppins(
                   fontSize: 9,
                   fontWeight: FontWeight.w800,
@@ -1253,7 +1261,7 @@ class _SavedSlotCard extends StatelessWidget {
                       const Icon(Icons.delete_outline_rounded, color: Colors.white, size: 20),
                       const SizedBox(width: 8),
                       Text(
-                        'Unadopt Priest',
+                        loc.tr('unadopt_priest'),
                         style: GoogleFonts.poppins(
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
@@ -1372,7 +1380,7 @@ class _SavedSlotCard extends StatelessWidget {
             ),
             const SizedBox(height: 2),
             Text(
-              'Pray for me',
+              loc.tr('pray_for_me'),
               textAlign: TextAlign.center,
               style: GoogleFonts.poppins(
                 fontSize: 9,
@@ -1389,7 +1397,7 @@ class _SavedSlotCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
-                'SAVED',
+                loc.tr('saved'),
                 style: GoogleFonts.poppins(
                   fontSize: 9,
                   fontWeight: FontWeight.w800,
