@@ -6,8 +6,10 @@ import 'package:provider/provider.dart';
 import '../../colors/colors.dart';
 import '../../theme/theme_notifier.dart';
 import '../../providers/intentions_provider.dart';
+import '../../providers/language_provider.dart';
 import '../../models/intentions_model.dart';
 import '../../services/language_id_service.dart';
+import '../../services/localization_service.dart' show LocalizationService, loc;
 import 'intention_success_screen.dart';
 
 class IntentionsScreen extends StatefulWidget {
@@ -120,112 +122,116 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<bool>(
-      valueListenable: themeNotifier,
-      builder: (_, isDark, __) {
-        return Scaffold(
-          body: Container(
-            width: double.infinity,
-            height: double.infinity,
-            decoration: isDark
-                ? const BoxDecoration(
-                    gradient: RadialGradient(
-                      center: Alignment(0.0, -0.2),
-                      radius: 1.2,
-                      colors: [
-                        Color(0xFF4A4080),
-                        Color(0xFF2A1F5E),
-                        Color(0xFF100828),
-                      ],
-                      stops: [0.0, 0.50, 1.0],
-                    ),
-                  )
-                : const BoxDecoration(color: Color(0xFFF0EBF0)),
-            child: SafeArea(
-              child: Consumer<IntentionsProvider>(
-                builder: (context, provider, _) {
-                  if (provider.isLoading) {
-                    return Center(
-                      child: CircularProgressIndicator(
+    return Consumer<LanguageProvider>(
+      builder: (_, languageProvider, __) {
+        return ValueListenableBuilder<bool>(
+          valueListenable: themeNotifier,
+          builder: (_, isDark, __) {
+            return Scaffold(
+              body: Container(
+                width: double.infinity,
+                height: double.infinity,
+                decoration: isDark
+                    ? const BoxDecoration(
+                        gradient: RadialGradient(
+                          center: Alignment(0.0, -0.2),
+                          radius: 1.2,
+                          colors: [
+                            Color(0xFF4A4080),
+                            Color(0xFF2A1F5E),
+                            Color(0xFF100828),
+                          ],
+                          stops: [0.0, 0.50, 1.0],
+                        ),
+                      )
+                    : const BoxDecoration(color: Color(0xFFF0EBF0)),
+                child: SafeArea(
+                  child: Consumer<IntentionsProvider>(
+                    builder: (context, provider, _) {
+                      if (provider.isLoading) {
+                        return Center(
+                          child: CircularProgressIndicator(
+                            color: AppColors.goldPrimary,
+                          ),
+                        );
+                      }
+
+                      if (provider.isError) {
+                        return Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.error_outline, size: 48, color: Colors.red.withOpacity(0.7)),
+                              const SizedBox(height: 16),
+                              Text(
+                                loc.tr('failed_to_load_intentions'),
+                                style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.red),
+                              ),
+                              const SizedBox(height: 8),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 24),
+                                child: Text(
+                                  provider.errorMessage ?? loc.tr('unknown_error'),
+                                  textAlign: TextAlign.center,
+                                  style: GoogleFonts.poppins(fontSize: 12, color: Colors.red.withOpacity(0.7)),
+                                ),
+                              ),
+                              const SizedBox(height: 24),
+                              ElevatedButton(
+                                onPressed: () => provider.fetch(),
+                                child: Text(loc.tr('retry')),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+
+                      final data = provider.data;
+                      if (data == null) {
+                        return Center(
+                          child: Text(loc.tr('no_data_available'), style: GoogleFonts.poppins()),
+                        );
+                      }
+
+                      if (data.quotes.isNotEmpty && _quoteTimer == null) {
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          _startQuoteTimer(data.quotes.length);
+                        });
+                      }
+
+                      return RefreshIndicator(
+                        onRefresh: () => provider.fetch(),
                         color: AppColors.goldPrimary,
-                      ),
-                    );
-                  }
-
-                  if (provider.isError) {
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.error_outline, size: 48, color: Colors.red.withOpacity(0.7)),
-                          const SizedBox(height: 16),
-                          Text(
-                            'Failed to load intentions',
-                            style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.red),
+                        child: SingleChildScrollView(
+                          physics: const AlwaysScrollableScrollPhysics(
+                              parent: BouncingScrollPhysics()),
+                          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const SizedBox(height: 32),
+                              _buildHeader(isDark),
+                              const SizedBox(height: 32),
+                              _buildQuoteCard(isDark, data),
+                              const SizedBox(height: 24),
+                              _buildIntentionsGrid(data),
+                              const SizedBox(height: 16),
+                              _buildPrayerRequestsCard(data),
+                              const SizedBox(height: 32),
+                              _buildDivider(isDark),
+                              const SizedBox(height: 32),
+                              _buildRequestRosaryCard(isDark),
+                              const SizedBox(height: 48),
+                            ],
                           ),
-                          const SizedBox(height: 8),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 24),
-                            child: Text(
-                              provider.errorMessage ?? 'Unknown error',
-                              textAlign: TextAlign.center,
-                              style: GoogleFonts.poppins(fontSize: 12, color: Colors.red.withOpacity(0.7)),
-                            ),
-                          ),
-                          const SizedBox(height: 24),
-                          ElevatedButton(
-                            onPressed: () => provider.fetch(),
-                            child: const Text('Retry'),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
-
-                  final data = provider.data;
-                  if (data == null) {
-                    return Center(
-                      child: Text('No data available', style: GoogleFonts.poppins()),
-                    );
-                  }
-
-                  if (data.quotes.isNotEmpty && _quoteTimer == null) {
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      _startQuoteTimer(data.quotes.length);
-                    });
-                  }
-
-                  return RefreshIndicator(
-                    onRefresh: () => provider.fetch(),
-                    color: AppColors.goldPrimary,
-                    child: SingleChildScrollView(
-                      physics: const AlwaysScrollableScrollPhysics(
-                          parent: BouncingScrollPhysics()),
-                      padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const SizedBox(height: 32),
-                          _buildHeader(isDark),
-                          const SizedBox(height: 32),
-                          _buildQuoteCard(isDark, data),
-                          const SizedBox(height: 24),
-                          _buildIntentionsGrid(data),
-                          const SizedBox(height: 16),
-                          _buildPrayerRequestsCard(data),
-                          const SizedBox(height: 32),
-                          _buildDivider(isDark),
-                          const SizedBox(height: 32),
-                          _buildRequestRosaryCard(isDark),
-                          const SizedBox(height: 48),
-                        ],
-                      ),
-                    ),
-                  );
-                },
+                        ),
+                      );
+                    },
+                  ),
+                ),
               ),
-            ),
-          ),
+            );
+          },
         );
       },
     );
@@ -247,10 +253,10 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
           ),
         ),
         const SizedBox(height: 16),
-        Text('Intentions',
+        Text(loc.tr('intentions_title'),
             style: GoogleFonts.poppins(fontSize: 42, fontWeight: FontWeight.w900, color: titleColor, letterSpacing: -1, height: 1.0)),
         const SizedBox(height: 8),
-        Text('HEARTS UNITED IN PRAYER',
+        Text(loc.tr('hearts_united_in_prayer'),
             style: GoogleFonts.poppins(fontSize: 10, fontWeight: FontWeight.w700, color: subColor, letterSpacing: 2.5)),
       ],
     );
@@ -267,7 +273,7 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
           border: Border.all(color: isDark ? Colors.white : const Color(0xFF624294).withOpacity(0.12), width: isDark ? 2.0 : 1.5),
         ),
         child: Center(
-          child: Text('No quotes available', style: GoogleFonts.poppins(color: const Color(0xFF624294).withOpacity(0.5))),
+          child: Text(loc.tr('no_quotes_available'), style: GoogleFonts.poppins(color: const Color(0xFF624294).withOpacity(0.5))),
         ),
       );
     }
@@ -358,7 +364,7 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
           border: Border.all(color: const Color(0xFF624294).withOpacity(0.15), width: 1.5),
         ),
         child: Center(
-          child: Text('No intentions available', style: GoogleFonts.poppins(color: const Color(0xFF624294).withOpacity(0.5))),
+          child: Text(loc.tr('no_intentions_available'), style: GoogleFonts.poppins(color: const Color(0xFF624294).withOpacity(0.5))),
         ),
       );
     }
@@ -476,7 +482,7 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Community Prayers',
+                    Text(loc.tr('community_prayers'),
                         style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w900, color: const Color(0xFF624294), letterSpacing: -0.5)),
                   ],
                 ),
@@ -500,7 +506,7 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Active Requests',
+                      loc.tr('active_requests_label'),
                       style: GoogleFonts.poppins(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
@@ -633,10 +639,10 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('BORROW ${_isRosaryMode ? 'ROSARIES' : 'CHAPLETS'}',
+                    Text(_isRosaryMode ? loc.tr('borrow_rosaries_heading') : loc.tr('borrow_chaplets_heading'),
                         style: GoogleFonts.poppins(fontSize: 10, fontWeight: FontWeight.w800, color: const Color(0xFF624294).withOpacity(0.8), letterSpacing: 1.8)),
                     const SizedBox(height: 2),
-                    Text('Share your intention',
+                    Text(loc.tr('share_your_intention'),
                         style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.authBgBottom, letterSpacing: -0.5)),
                   ],
                 ),
@@ -646,7 +652,7 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
           const SizedBox(height: 20),
           _buildPrayerToggleButton(),
           const SizedBox(height: 20),
-          Text('Borrow prayers from the community. (Your intention remains private while the community entrusts you to Mother Mary.)',
+          Text(loc.tr('borrow_prayers_description'),
               style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.authBgMid.withOpacity(0.7), height: 1.6)),
           const SizedBox(height: 20),
           ClipRRect(
@@ -659,7 +665,7 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
                 maxLines: 4,
                 style: GoogleFonts.poppins(fontSize: 15, color: AppColors.authBgBottom, fontWeight: FontWeight.w600),
                 decoration: InputDecoration(
-                  hintText: 'Write your intention...',
+                  hintText: loc.tr('write_your_intention'),
                   hintStyle: GoogleFonts.poppins(color: const Color(0xFF624294).withOpacity(0.3), fontSize: 14, fontWeight: FontWeight.w500),
                   filled: true,
                   fillColor: Colors.white.withOpacity(0.7),
@@ -681,7 +687,7 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Borrow Rosaries',
+                    Text(_isRosaryMode ? loc.tr('borrow_rosaries_label') : loc.tr('borrow_chaplets_label'),
                         style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w700, color: const Color(0xFF624294).withOpacity(0.7))),
                     const SizedBox(height: 6),
                     TextField(
@@ -690,7 +696,7 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
                       keyboardType: TextInputType.number,
                       style: GoogleFonts.poppins(fontSize: 15, color: const Color(0xFF624294), fontWeight: FontWeight.w700),
                       decoration: InputDecoration(
-                        hintText: 'e.g. 3',
+                        hintText: loc.tr('example_count'),
                         hintStyle: GoogleFonts.poppins(color: const Color(0xFF624294).withOpacity(0.35), fontSize: 14),
                         filled: true,
                         fillColor: Colors.white.withOpacity(0.8),
@@ -707,7 +713,7 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text('Your Total',
+                  Text(loc.tr('your_total_label'),
                       style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w700, color: const Color(0xFF624294).withOpacity(0.7))),
                   const SizedBox(height: 6),
                   Container(
@@ -741,10 +747,10 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
       onTap: () async {
         if (_intentionController.text.isEmpty) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Row(children: const [
-              Icon(Icons.info_outline, color: Colors.white, size: 20),
-              SizedBox(width: 10),
-              Text('Please write your intention', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+            content: Row(children: [
+              const Icon(Icons.info_outline, color: Colors.white, size: 20),
+              const SizedBox(width: 10),
+              Text(loc.tr('please_write_intention'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
             ]),
             backgroundColor: Colors.redAccent,
             behavior: SnackBarBehavior.floating,
@@ -757,10 +763,10 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
         final count = int.tryParse(_rosaryCountController.text.trim()) ?? 0;
         if (count <= 0) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Row(children: const [
-              Icon(Icons.info_outline, color: Colors.white, size: 20),
-              SizedBox(width: 10),
-              Text('Please enter a valid count', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+            content: Row(children: [
+              const Icon(Icons.info_outline, color: Colors.white, size: 20),
+              const SizedBox(width: 10),
+              Text(loc.tr('please_enter_valid_count'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
             ]),
             backgroundColor: Colors.redAccent,
             behavior: SnackBarBehavior.floating,
@@ -841,7 +847,7 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
                         ),
                       ),
                     )
-                  : Text('Borrow ${_isRosaryMode ? 'Rosaries' : 'Chaplets'}',
+                  : Text(_isRosaryMode ? loc.tr('borrow_button_rosary') : loc.tr('borrow_button_chaplet'),
                       style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w800, color: Colors.white, letterSpacing: 0.5)),
             ),
           );
@@ -899,8 +905,8 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            tab('Rosary', _isRosaryMode, () => setState(() => _isRosaryMode = true)),
-            tab('Chaplet', !_isRosaryMode, () => setState(() => _isRosaryMode = false)),
+            tab(loc.tr('rosary_toggle_intentions'), _isRosaryMode, () => setState(() => _isRosaryMode = true)),
+            tab(loc.tr('chaplet_toggle_intentions'), !_isRosaryMode, () => setState(() => _isRosaryMode = false)),
           ],
         ),
       ),

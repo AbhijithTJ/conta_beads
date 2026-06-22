@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../../colors/colors.dart';
+import '../../services/localization_service.dart' show loc;
 
 class IntentionSuccessScreen extends StatefulWidget {
   final String intention;
@@ -90,9 +91,9 @@ class _IntentionSuccessScreenState extends State<IntentionSuccessScreen>
                     opacity: _opacityAnimation,
                     child: Column(
                       children: [
-                        const Text(
-                          'Intention Received',
-                          style: TextStyle(
+                        Text(
+                          loc.tr('intention_received'),
+                          style: const TextStyle(
                             fontSize: 32,
                             fontWeight: FontWeight.w900,
                             color: Colors.white,
