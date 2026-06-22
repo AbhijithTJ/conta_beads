@@ -7,8 +7,10 @@ import '../../models/global_counts_model.dart';
 import '../../models/home_model.dart';
 import '../../providers/global_counts_provider.dart';
 import '../../providers/home_provider.dart';
+import '../../providers/language_provider.dart';
 import '../../providers/reverb_provider.dart';
 import '../../providers/user_provider.dart';
+import '../../services/localization_service.dart' show LocalizationService, loc;
 import '../../theme/theme_notifier.dart';
 
 class GlobalCountsScreen extends StatefulWidget {
@@ -119,62 +121,66 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<bool>(
-      valueListenable: themeNotifier,
-      builder: (_, isDark, __) {
-        final bgColor =
-            isDark ? const Color(0xFF22014D) : const Color(0xFFF0EBF0);
-        return Scaffold(
-          body: Container(
-            width: double.infinity,
-            height: double.infinity,
-            decoration: isDark
-                ? const BoxDecoration(
-                    gradient: RadialGradient(
-                      center: Alignment(0.0, -0.2),
-                      radius: 1.2,
-                      colors: [
-                        Color(0xFF4A4080),
-                        Color(0xFF2A1F5E),
-                        Color(0xFF100828),
-                      ],
-                      stops: [0.0, 0.50, 1.0],
-                    ),
-                  )
-                : BoxDecoration(color: bgColor),
-            child: SafeArea(
-              child: Consumer2<GlobalCountsProvider, UserProvider>(
-                builder: (_, provider, userProvider, __) {
-                  final homeQuotes = context.read<HomeProvider>().data?.quotes ?? [];
-                  final currentUserId = userProvider.userId;
-                  return RefreshIndicator(
-                    onRefresh: () => provider.fetchAll(),
-                    color: AppColors.goldPrimary,
-                    child: SingleChildScrollView(
-                      physics: const AlwaysScrollableScrollPhysics(
-                          parent: BouncingScrollPhysics()),
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                      child: Column(
-                        children: [
-                          const SizedBox(height: 24),
-                          _buildCinematicSection(0, _buildHeader(isDark)),
-                          const SizedBox(height: 16),
-                          _buildCinematicSection(1, _buildQuoteCard(isDark, homeQuotes)),
-                          const SizedBox(height: 16),
-                          _buildCinematicSection(2, _buildGlobalCountCard(provider, isDark)),
-                          const SizedBox(height: 16),
-                          _buildCinematicSection(3, _buildStatsRow(provider)),
-                          const SizedBox(height: 16),
-                          _buildCinematicSection(4, _buildTopOfferingsCard(provider, currentUserId)),
-                          const SizedBox(height: 40),
-                        ],
-                      ),
-                    ),
-                  );
-                },
+    return Consumer<LanguageProvider>(
+      builder: (_, languageProvider, __) {
+        return ValueListenableBuilder<bool>(
+          valueListenable: themeNotifier,
+          builder: (_, isDark, __) {
+            final bgColor =
+                isDark ? const Color(0xFF22014D) : const Color(0xFFF0EBF0);
+            return Scaffold(
+              body: Container(
+                width: double.infinity,
+                height: double.infinity,
+                decoration: isDark
+                    ? const BoxDecoration(
+                        gradient: RadialGradient(
+                          center: Alignment(0.0, -0.2),
+                          radius: 1.2,
+                          colors: [
+                            Color(0xFF4A4080),
+                            Color(0xFF2A1F5E),
+                            Color(0xFF100828),
+                          ],
+                          stops: [0.0, 0.50, 1.0],
+                        ),
+                      )
+                    : BoxDecoration(color: bgColor),
+                child: SafeArea(
+                  child: Consumer2<GlobalCountsProvider, UserProvider>(
+                    builder: (_, provider, userProvider, __) {
+                      final homeQuotes = context.read<HomeProvider>().data?.quotes ?? [];
+                      final currentUserId = userProvider.userId;
+                      return RefreshIndicator(
+                        onRefresh: () => provider.fetchAll(),
+                        color: AppColors.goldPrimary,
+                        child: SingleChildScrollView(
+                          physics: const AlwaysScrollableScrollPhysics(
+                              parent: BouncingScrollPhysics()),
+                          padding: const EdgeInsets.symmetric(horizontal: 24),
+                          child: Column(
+                            children: [
+                              const SizedBox(height: 24),
+                              _buildCinematicSection(0, _buildHeader(isDark)),
+                              const SizedBox(height: 16),
+                              _buildCinematicSection(1, _buildQuoteCard(isDark, homeQuotes)),
+                              const SizedBox(height: 16),
+                              _buildCinematicSection(2, _buildGlobalCountCard(provider, isDark)),
+                              const SizedBox(height: 16),
+                              _buildCinematicSection(3, _buildStatsRow(provider)),
+                              const SizedBox(height: 16),
+                              _buildCinematicSection(4, _buildTopOfferingsCard(provider, currentUserId)),
+                              const SizedBox(height: 40),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
               ),
-            ),
-          ),
+            );
+          },
         );
       },
     );
@@ -217,7 +223,7 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
             borderRadius: BorderRadius.circular(30),
             border: Border.all(color: badgeBorder),
           ),
-          child: Text('COMMUNITY PRAYER',
+          child: Text(loc.tr('community_prayer_badge'),
               style: GoogleFonts.poppins(
                   fontSize: 10,
                   letterSpacing: 2,
@@ -225,14 +231,14 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
                   color: badgeText)),
         ),
         const SizedBox(height: 18),
-        Text('Global Count',
+        Text(loc.tr('global_count_title'),
             style: GoogleFonts.poppins(
                 fontSize: 36,
                 fontWeight: FontWeight.w900,
                 color: titleColor,
                 letterSpacing: -1)),
         const SizedBox(height: 6),
-        Text('EVERY BEAD COUNTS',
+        Text(loc.tr('every_bead_counts'),
             style: GoogleFonts.poppins(
                 fontSize: 10,
                 letterSpacing: 1.5,
@@ -300,8 +306,8 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          tab('Rosary',  _isRosaryMode,  () => _onToggle(true)),
-          tab('Chaplet', !_isRosaryMode, () => _onToggle(false)),
+          tab(loc.tr('rosary_toggle'),  _isRosaryMode,  () => _onToggle(true)),
+          tab(loc.tr('chaplet_toggle'), !_isRosaryMode, () => _onToggle(false)),
         ],
       ),
     );
@@ -315,8 +321,8 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
     final total       = data.communityTotal;
     final percentage  = goal > 0 ? (total / goal) * 100 : 0.0;
     final countLabel  = _isRosaryMode
-        ? 'ROSARIES PRAYED WORLDWIDE'
-        : 'TOTAL DIVINE MERCY CHAPLETS OFFERED';
+        ? loc.tr('rosaries_prayed_worldwide')
+        : loc.tr('divine_mercy_chaplets_offered');
 
     return _GlassCard(
       child: Column(
@@ -348,7 +354,7 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Goal: ${_formatNumber(goal)}',
+              Text('${loc.tr('goal')}: ${_formatNumber(goal)}',
                   style: GoogleFonts.poppins(
                       fontSize: 12,
                       color: AppColors.authBgMid.withOpacity(0.5),
@@ -388,12 +394,12 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
 
   Widget _buildStatsRow(GlobalCountsProvider provider) {
     final data  = provider.dataFor(_isRosaryMode ? PrayerType.rosary : PrayerType.divineMercy);
-    final label = _isRosaryMode ? 'Rosaries' : 'Chaplets';
+    final label = _isRosaryMode ? loc.tr('rosaries_label') : loc.tr('chaplets_label');
 
     return _GlassCard(
       child: Column(
         children: [
-          Text('YOUR CONTRIBUTION',
+          Text(loc.tr('your_contribution'),
               style: GoogleFonts.poppins(
                   fontSize: 10,
                   letterSpacing: 2,
@@ -425,14 +431,14 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
                   ],
                 ),
           const SizedBox(height: 4),
-          Text('Today: ${data.yourToday}',
+          Text('${loc.tr('today_prefix')}: ${data.yourToday}',
               style: GoogleFonts.poppins(
                   fontSize: 14,
                   fontWeight: FontWeight.w800,
                   color: AppColors.goldDark)),
           if (data.yourPosition > 0) ...[
             const SizedBox(height: 6),
-            Text('Rank #${data.yourPosition}',
+            Text('${loc.tr('rank_prefix')} #${data.yourPosition}',
                 style: GoogleFonts.poppins(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
@@ -463,8 +469,8 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
       final ref   = q.reference.trim();
       quoteAuthor = ref.isEmpty ? '' : (ref.startsWith('—') ? ref : '— $ref');
     } else {
-      quoteText   = '"With God, all things are possible."';
-      quoteAuthor = '— Matthew 19:26';
+      quoteText   = loc.tr('fallback_quote');
+      quoteAuthor = loc.tr('fallback_quote_author');
     }
 
     return GestureDetector(
@@ -553,7 +559,7 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
   Widget _buildTopOfferingsCard(GlobalCountsProvider provider, int currentUserId) {
     final data        = provider.dataFor(_isRosaryMode ? PrayerType.rosary : PrayerType.divineMercy);
     final leaderboard = data.leaderboard;
-    final prayerLabel = _isRosaryMode ? 'Rosaries offered' : 'Chaplets offered';
+    final prayerLabel = _isRosaryMode ? loc.tr('rosaries_offered') : loc.tr('chaplets_offered');
 
     return _GlassCard(
       padding: const EdgeInsets.all(24),
@@ -562,7 +568,7 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Top Offerings',
+              Text(loc.tr('top_offerings_header'),
                   style: GoogleFonts.poppins(
                       fontSize: 18,
                       fontWeight: FontWeight.w900,
@@ -580,7 +586,7 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
           else if (leaderboard.isEmpty)
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 24),
-              child: Text('No data yet',
+              child: Text(loc.tr('no_data_yet'),
                   style: GoogleFonts.poppins(
                       fontSize: 14,
                       color: AppColors.authBgMid.withOpacity(0.5))),
@@ -668,20 +674,22 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
                     ),
                     if (isYou) ...[
                       const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 2),
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                              colors: [AppColors.goldDark, AppColors.goldPrimary]),
-                          borderRadius: BorderRadius.circular(6),
+                      Flexible(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                                colors: [AppColors.goldDark, AppColors.goldPrimary]),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(loc.tr('you_badge'),
+                              style: const TextStyle(
+                                  fontSize: 8,
+                                  fontWeight: FontWeight.w900,
+                                  color: Colors.white,
+                                  letterSpacing: 0.5)),
                         ),
-                        child: const Text('YOU',
-                            style: TextStyle(
-                                fontSize: 8,
-                                fontWeight: FontWeight.w900,
-                                color: Colors.white,
-                                letterSpacing: 0.5)),
                       ),
                     ],
                   ],
@@ -704,7 +712,7 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
                       fontSize: 22,
                       fontWeight: FontWeight.w900,
                       color: isYou ? AppColors.goldDark : AppColors.authBgBottom)),
-              Text('today: ${entry.todayCount}',
+              Text('${loc.tr('today_count_prefix')}: ${entry.todayCount}',
                   style: GoogleFonts.poppins(
                       fontSize: 10,
                       color: isYou
@@ -754,7 +762,7 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
       builder: (_, reverbProvider, __) {
         // Always show LIVE badge in green - no offline state
         const statusColor = Colors.green;
-        const statusText = 'LIVE';
+        final statusText = loc.tr('live_badge');
 
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -783,8 +791,8 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
                 ),
               ),
               const SizedBox(width: 6),
-              const Text(statusText,
-                  style: TextStyle(
+              Text(statusText,
+                  style: const TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.w900,
                       color: statusColor,
