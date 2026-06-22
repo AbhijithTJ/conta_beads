@@ -255,7 +255,7 @@ class _CountingScreenState extends State<CountingScreen>
     if (_activeCount == 0) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Please add at least one count before saving.'),
+          content: Text(loc.tr('min_count_error')),
           backgroundColor: Colors.red.shade600,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
@@ -279,15 +279,15 @@ class _CountingScreenState extends State<CountingScreen>
       // Show loading indicator
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Row(
+          content: Row(
             children: [
-              SizedBox(
+              const SizedBox(
                 width: 20,
                 height: 20,
                 child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation(Colors.white)),
               ),
-              SizedBox(width: 10),
-              Text('Saving...', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+              const SizedBox(width: 10),
+              Text(loc.tr('saving'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
             ],
           ),
           backgroundColor: AppColors.goldDark,
@@ -353,7 +353,7 @@ class _CountingScreenState extends State<CountingScreen>
               const Icon(Icons.error_outline, color: Colors.white, size: 20),
               const SizedBox(width: 10),
               Expanded(
-                child: Text('API Error: ${e.message}', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 14)),
+                child: Text('${loc.tr('api_error')}: ${e.message}', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 14)),
               ),
             ],
           ),
@@ -374,7 +374,7 @@ class _CountingScreenState extends State<CountingScreen>
               const Icon(Icons.error_outline, color: Colors.white, size: 20),
               const SizedBox(width: 10),
               Expanded(
-                child: Text('Error: $e', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 14)),
+                child: Text('${loc.tr('error')}: $e', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 14)),
               ),
             ],
           ),
@@ -390,34 +390,36 @@ class _CountingScreenState extends State<CountingScreen>
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final isDark = themeNotifier.isDark;
-    return Scaffold(
-      resizeToAvoidBottomInset: true,
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: isDark
-            ? const BoxDecoration(
-                gradient: RadialGradient(
-                  center: Alignment(0.0, -0.4),
-                  radius: 0.85,
-                  colors: [
-                    Color(0xFF321060),
-                    Color(0xFF220850),
-                    Color(0xFF1c023d),
-                  ],
-                  stops: [0.0, 0.5, 1.0],
-                ),
-              )
-            : const BoxDecoration(color: Color(0xFFF0EBF0)),
-        child: Stack(
-          children: [
-            // ── Blended top image ──
-            Positioned(
-              top: -90,
-              left: 0,
-              right: 0,
+    return Consumer<LanguageProvider>(
+      builder: (context, languageProvider, _) {
+        final size = MediaQuery.of(context).size;
+        final isDark = themeNotifier.isDark;
+        return Scaffold(
+          resizeToAvoidBottomInset: true,
+          body: Container(
+            width: double.infinity,
+            height: double.infinity,
+            decoration: isDark
+                ? const BoxDecoration(
+                    gradient: RadialGradient(
+                      center: Alignment(0.0, -0.4),
+                      radius: 0.85,
+                      colors: [
+                        Color(0xFF321060),
+                        Color(0xFF220850),
+                        Color(0xFF1c023d),
+                      ],
+                      stops: [0.0, 0.5, 1.0],
+                    ),
+                  )
+                : const BoxDecoration(color: Color(0xFFF0EBF0)),
+            child: Stack(
+              children: [
+                // ── Blended top image ──
+                Positioned(
+                  top: -90,
+                  left: 0,
+                  right: 0,
               child: ShaderMask(
                 shaderCallback: (rect) => LinearGradient(
                   begin: Alignment.topCenter,
@@ -489,6 +491,8 @@ class _CountingScreenState extends State<CountingScreen>
           ],
         ),
       ),
+        );
+      },
     );
   }
 
@@ -548,8 +552,8 @@ class _CountingScreenState extends State<CountingScreen>
   }
 
   final List<Map<String, String>> _languages = [
-    {'code': 'EN', 'name': 'English'},
-    {'code': 'ML', 'name': 'Malayalam'},
+    {'code': 'EN', 'name': 'english', 'displayName': 'English'},
+    {'code': 'ML', 'name': 'malayalam', 'displayName': 'Malayalam'},
   ];
 
   void _showLanguagePicker() {
@@ -602,11 +606,11 @@ class _CountingScreenState extends State<CountingScreen>
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: _languages.map((lang) {
-                        final isSelected = lang['name'] == languageProvider.selectedLanguage;
+                        final isSelected = lang['name'] == languageProvider.selectedLanguage.toLowerCase();
                         return GestureDetector(
                           onTap: () async {
-                            await languageProvider.setLanguage(lang['name']!);
-                            languageIdService.setLanguageByName(lang['name']!);
+                            await languageProvider.setLanguage(lang['displayName']!);
+                            languageIdService.setLanguageByName(lang['displayName']!);
                             if (!mounted) return;
                             Navigator.pop(ctx);
 
@@ -653,7 +657,7 @@ class _CountingScreenState extends State<CountingScreen>
                                 const SizedBox(width: 14),
                                 Expanded(
                                   child: Text(
-                                    lang['name']!,
+                                    loc.tr(lang['name']!),
                                     style: TextStyle(
                                       fontSize: 15, fontWeight: FontWeight.w600,
                                       color: isSelected ? Colors.white : Colors.white.withOpacity(0.70),
@@ -685,8 +689,8 @@ class _CountingScreenState extends State<CountingScreen>
         : const Color(0xFF624294).withOpacity(0.10);
 
     final homeProvider = context.read<HomeProvider>();
-    String rosaryTitle = 'Rosary';
-    String chapletTitle = 'Chaplet';
+    String rosaryTitle = loc.tr('rosary_label');
+    String chapletTitle = loc.tr('chaplet_label');
 
     if (homeProvider.hasData) {
       try {
@@ -779,7 +783,7 @@ class _CountingScreenState extends State<CountingScreen>
               ),
             ),
             const SizedBox(width: 10),
-            Text('Upper Room',
+            Text(loc.tr('upper_room'),
                 style: GoogleFonts.poppins(fontSize: 22, fontWeight: FontWeight.w900, color: titleColor, letterSpacing: 0.5)),
           ],
         ),
@@ -842,7 +846,7 @@ class _CountingScreenState extends State<CountingScreen>
 
         // Fallback to hardcoded strings
         final prayer = _isRosary ? _rosaryPrayer : _chapletPrayer;
-        final title  = _isRosary ? 'Rosary Prayers' : 'Divine Mercy Chaplet';
+        final title  = _isRosary ? loc.tr('rosary_prayers') : loc.tr('divine_mercy_chaplet');
         return _PrayerInlineCard(
           prayer: prayer,
           title: title,
@@ -954,7 +958,7 @@ class _CountingScreenState extends State<CountingScreen>
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    _isRosary ? loc.tr('rosary_counted') : 'Chaplet Counted',
+                    _isRosary ? loc.tr('rosary_counted') : loc.tr('chaplet_counted'),
                     style: GoogleFonts.poppins(
                       fontSize: 10,
                       fontWeight: FontWeight.w500,
@@ -1519,7 +1523,7 @@ class _PrayerInlineCardState extends State<_PrayerInlineCard> {
                   ),
                 ),
                 Text(
-                  _speed == 0 ? 'Off' : '${_speed.toInt()}',
+                  _speed == 0 ? loc.tr('stopped') : '${_speed.toInt()}',
                   style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: widget.accentColor),
                 ),
               ],
@@ -1683,10 +1687,10 @@ class _PrayerExpandedModalState extends State<_PrayerExpandedModal> {
                     children: [
                       Icon(Icons.speed_rounded, color: widget.accentColor, size: 16),
                       const SizedBox(width: 8),
-                      Text('Scroll Speed', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: widget.darkColor)),
+                      Text(loc.tr('scroll_speed'), style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: widget.darkColor)),
                       const Spacer(),
                       Text(
-                        _speed == 0 ? 'Stopped' : '${_speed.toInt()}',
+                        _speed == 0 ? loc.tr('stopped') : '${_speed.toInt()}',
                         style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: widget.accentColor),
                       ),
                     ],
