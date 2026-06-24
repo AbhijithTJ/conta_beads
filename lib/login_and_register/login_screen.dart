@@ -439,6 +439,48 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
+  Future<void> _showDebugTokens() async {
+    String? apnsToken;
+    String? fcmToken;
+    try {
+      apnsToken = await FirebaseMessaging.instance.getAPNSToken();
+    } catch (e) {
+      apnsToken = 'Error: $e';
+    }
+    try {
+      fcmToken = await FirebaseMessaging.instance.getToken();
+    } catch (e) {
+      fcmToken = 'Error: $e';
+    }
+
+    if (!mounted) return;
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Debug Tokens'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('APNs Token:', style: TextStyle(fontWeight: FontWeight.bold)),
+              SelectableText(apnsToken ?? 'null'),
+              const SizedBox(height: 10),
+              const Text('FCM Token:', style: TextStyle(fontWeight: FontWeight.bold)),
+              SelectableText(fcmToken ?? 'null'),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // Read provider state here — inside build() — before any nested builders.
@@ -510,7 +552,10 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget _buildHeader(String logoAsset, Color subColor) {
     return Column(
       children: [
-        Image.asset(logoAsset, width: 160, height: 160),
+        GestureDetector(
+          onLongPress: _showDebugTokens,
+          child: Image.asset(logoAsset, width: 160, height: 160),
+        ),
         const SizedBox(height: 6),
         Text.rich(
           TextSpan(
