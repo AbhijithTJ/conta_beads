@@ -33,7 +33,18 @@ class NotificationService {
         provisional: false,
       );
 
-      // Get FCM Token (non-blocking, don't await result if not needed immediately)
+      // For iOS, wait for the APNs token before getting the FCM token
+      if (defaultTargetPlatform == TargetPlatform.iOS) {
+        String? apnsToken = await _messaging.getAPNSToken();
+        if (apnsToken == null) {
+          debugPrint("APNs Token is null. Waiting briefly...");
+          await Future.delayed(const Duration(seconds: 3));
+          apnsToken = await _messaging.getAPNSToken();
+        }
+        debugPrint("APNs Token: $apnsToken");
+      }
+
+      // Get FCM Token
       _messaging.getToken().then((token) {
         debugPrint("FCM Token: $token");
       }).catchError((e) {
@@ -87,6 +98,17 @@ class NotificationService {
   }
   Future<String?> getToken() async {
     try {
+      if (defaultTargetPlatform == TargetPlatform.iOS) {
+        String? apnsToken = await _messaging.getAPNSToken();
+        if (apnsToken == null) {
+          debugPrint("APNs Token is null. Waiting briefly...");
+          await Future.delayed(const Duration(seconds: 3));
+          apnsToken = await _messaging.getAPNSToken();
+        }
+        if (apnsToken == null) {
+          debugPrint("Failed to get APNs Token. FCM token might not be generated.");
+        }
+      }
       return await _messaging.getToken();
     } catch (e) {
       debugPrint("Error fetching FCM token: $e");
