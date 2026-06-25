@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import '../../providers/home_provider.dart';
+import '../../models/home_model.dart';
 import '../../colors/colors.dart';
 import '../../theme/theme_notifier.dart';
 import '../../providers/prayer_documents_provider.dart';
@@ -102,9 +105,34 @@ class _EverydayPrayersScreenState extends State<EverydayPrayersScreen> {
                         SizedBox(
                           height: 280,
                           width: double.infinity,
-                          child: Image.asset(
-                            'assets/demo/every day.png',
-                            fit: BoxFit.cover,
+                          child: Builder(
+                            builder: (context) {
+                              final homeProvider = Provider.of<HomeProvider>(context);
+                              final sections = homeProvider.data?.sections ?? [];
+                              final section = sections.firstWhere(
+                                (s) => s.id == 1002, // Every Day Prayers ID
+                                orElse: () => HomeSection(id: -1, title: '', description: '', image: '', route: '', icon: '', type: '', order: 0)
+                              );
+                              
+                              if (section.image.isNotEmpty) {
+                                return CachedNetworkImage(
+                                  imageUrl: section.image,
+                                  fit: BoxFit.cover,
+                                  placeholder: (context, url) => Image.asset(
+                                    'assets/demo/every day.png',
+                                    fit: BoxFit.cover,
+                                  ),
+                                  errorWidget: (context, url, error) => Image.asset(
+                                    'assets/demo/every day.png',
+                                    fit: BoxFit.cover,
+                                  ),
+                                );
+                              }
+                              return Image.asset(
+                                'assets/demo/every day.png',
+                                fit: BoxFit.cover,
+                              );
+                            }
                           ),
                         ),
                         // gradient fade — blends image into background (bottom)

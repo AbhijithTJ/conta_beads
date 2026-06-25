@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../theme/theme_notifier.dart';
+import '../../providers/home_provider.dart';
+import '../../models/home_model.dart';
 import '../../config/app_config.dart';
 import '../../services/api_client.dart';
 import '../../services/localization_service.dart';
@@ -418,9 +421,34 @@ class _AdoptPriestScreenState extends State<AdoptPriestScreen> {
                   SizedBox(
                     height: 300,
                     width: double.infinity,
-                    child: Image.asset(
-                      'assets/demo/adopt a priest.png',
-                      fit: BoxFit.cover,
+                    child: Builder(
+                      builder: (context) {
+                        final homeProvider = Provider.of<HomeProvider>(context);
+                        final sections = homeProvider.data?.sections ?? [];
+                        final section = sections.firstWhere(
+                          (s) => s.id == 1001, // Adopt a Priest ID
+                          orElse: () => HomeSection(id: -1, title: '', description: '', image: '', route: '', icon: '', type: '', order: 0)
+                        );
+                        
+                        if (section.image.isNotEmpty) {
+                          return CachedNetworkImage(
+                            imageUrl: section.image,
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) => Image.asset(
+                              'assets/demo/adopt a priest.png',
+                              fit: BoxFit.cover,
+                            ),
+                            errorWidget: (context, url, error) => Image.asset(
+                              'assets/demo/adopt a priest.png',
+                              fit: BoxFit.cover,
+                            ),
+                          );
+                        }
+                        return Image.asset(
+                          'assets/demo/adopt a priest.png',
+                          fit: BoxFit.cover,
+                        );
+                      }
                     ),
                   ),
                   // Bottom gradient — theme-aware fade into bgColor

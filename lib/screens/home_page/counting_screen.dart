@@ -6,6 +6,7 @@ import 'dart:ui';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../colors/colors.dart';
 import '../../config/app_config.dart';
 import '../../models/rosary_entry_model.dart';
@@ -432,12 +433,47 @@ class _CountingScreenState extends State<CountingScreen>
                   stops: const [0.0, 0.82, 1.0],
                 ).createShader(rect),
                 blendMode: BlendMode.dstIn,
-                child: Image.asset(
-                  _isRosary ? 'assets/demo/mathav.png' : 'assets/demo/i trust you jesus.png',
-                  width: double.infinity,
-                  height: 395,
-                  fit: BoxFit.cover,
-                  alignment: Alignment.topCenter,
+                child: Builder(
+                  builder: (context) {
+                    final homeProvider = Provider.of<HomeProvider>(context);
+                    final sections = homeProvider.data?.sections ?? [];
+                    final targetId = _isRosary ? 1 : 2; // Assuming 1=Rosary Bank, 2=Chaplet based on API
+                    final section = sections.firstWhere(
+                      (s) => s.id == targetId, 
+                      orElse: () => HomeSection(id: -1, title: '', description: '', image: '', route: '', icon: '', type: '', order: 0)
+                    );
+                    
+                    if (section.image.isNotEmpty) {
+                      return CachedNetworkImage(
+                        imageUrl: section.image,
+                        width: double.infinity,
+                        height: 395,
+                        fit: BoxFit.cover,
+                        alignment: Alignment.topCenter,
+                        placeholder: (context, url) => Image.asset(
+                          _isRosary ? 'assets/demo/mathav.png' : 'assets/demo/i trust you jesus.png',
+                          width: double.infinity,
+                          height: 395,
+                          fit: BoxFit.cover,
+                          alignment: Alignment.topCenter,
+                        ),
+                        errorWidget: (context, url, error) => Image.asset(
+                          _isRosary ? 'assets/demo/mathav.png' : 'assets/demo/i trust you jesus.png',
+                          width: double.infinity,
+                          height: 395,
+                          fit: BoxFit.cover,
+                          alignment: Alignment.topCenter,
+                        ),
+                      );
+                    }
+                    return Image.asset(
+                      _isRosary ? 'assets/demo/mathav.png' : 'assets/demo/i trust you jesus.png',
+                      width: double.infinity,
+                      height: 395,
+                      fit: BoxFit.cover,
+                      alignment: Alignment.topCenter,
+                    );
+                  }
                 ),
               ),
             ),
