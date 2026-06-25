@@ -29,11 +29,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   Timer? _quoteTimer;
   int _currentQuoteIndex = 0;
 
-  // Quick count drag handle
-  double _dragOffset = 0;
-  bool _dragging = false;
-  static const double _dragThreshold = 80;
-
   final List<Map<String, String>> _languages = [
     {'code': 'EN', 'name': 'English'},
     {'code': 'ML', 'name': 'Malayalam'},
@@ -332,103 +327,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 },
               ),
             ),
-            _buildDragHandle(size),
           ],
-        ),
-      ),
-    );
-  }
-
-  // ── Drag handle ─────────────────────────────────────────────────────────────
-
-  Widget _buildDragHandle(Size size) {
-    return Positioned(
-      right: 0,
-      top: size.height * 0.40,
-      child: GestureDetector(
-        onTap: () => Navigator.of(context)
-            .push(MaterialPageRoute(builder: (_) => CountingScreen(prayerTypeId: 1))),
-        onHorizontalDragStart: (_) =>
-            setState(() { _dragging = true; _dragOffset = 0; }),
-        onHorizontalDragUpdate: (d) {
-          setState(() => _dragOffset =
-              (_dragOffset - d.delta.dx).clamp(0, _dragThreshold + 20));
-        },
-        onHorizontalDragEnd: (_) {
-          if (_dragOffset >= _dragThreshold) {
-            Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => CountingScreen(prayerTypeId: 1)));
-          }
-          setState(() { _dragOffset = 0; _dragging = false; });
-        },
-        child: AnimatedContainer(
-          duration:
-              _dragging ? Duration.zero : const Duration(milliseconds: 300),
-          curve: Curves.easeOut,
-          transform: Matrix4.translationValues(-_dragOffset, 0, 0),
-          child: Row(
-            children: [
-              if (_dragging && _dragOffset > 8)
-                Container(
-                  width: _dragOffset.clamp(0, _dragThreshold),
-                  height: 80,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        AppColors.chapletAccent.withOpacity(0.0),
-                        AppColors.chapletAccent.withOpacity(0.5)
-                      ],
-                    ),
-                  ),
-                  child: _dragOffset >= _dragThreshold
-                      ? const Center(
-                          child: Icon(Icons.auto_awesome_rounded,
-                              color: Colors.white, size: 20))
-                      : null,
-                ),
-              Container(
-                width: 36,
-                height: 80,
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [AppColors.chapletAccent, AppColors.authPurpleLight],
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                  ),
-                  borderRadius:
-                      const BorderRadius.horizontal(left: Radius.circular(18)),
-                  boxShadow: [
-                    BoxShadow(
-                        color: AppColors.chapletAccent.withOpacity(0.60),
-                        blurRadius: 16,
-                        spreadRadius: 2,
-                        offset: const Offset(3, 0)),
-                    BoxShadow(
-                        color: AppColors.authPurpleLight.withOpacity(0.35),
-                        blurRadius: 8,
-                        offset: const Offset(0, 4)),
-                  ],
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.chevron_left_rounded,
-                        color: Colors.white, size: 22),
-                    const SizedBox(height: 4),
-                    RotatedBox(
-                      quarterTurns: 3,
-                      child: Text('ROSARY',
-                          style: GoogleFonts.poppins(
-                              color: Colors.white.withOpacity(0.90),
-                              fontSize: 8,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: 1.2)),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
         ),
       ),
     );
