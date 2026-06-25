@@ -522,6 +522,35 @@ class _CountingScreenState extends State<CountingScreen>
                   onClose: () => setState(() => _showGlobalPanel = false),
                 ),
               ),
+            // Back button
+            if (Navigator.of(context).canPop())
+              SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: GestureDetector(
+                    onTap: () => Navigator.of(context).pop(),
+                    child: Container(
+                      width: 40, height: 40,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: isDark
+                            ? Colors.black.withOpacity(0.35)
+                            : Colors.white.withOpacity(0.75),
+                        border: Border.all(
+                          color: isDark
+                              ? Colors.white.withOpacity(0.4)
+                              : const Color(0xFF624294).withOpacity(0.25),
+                        ),
+                      ),
+                      child: Icon(
+                        Icons.arrow_back_rounded,
+                        color: isDark ? Colors.white : const Color(0xFF624294),
+                        size: 20,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             // ── Draggable floating button ──
             _buildDraggableFab(size),
           ],
