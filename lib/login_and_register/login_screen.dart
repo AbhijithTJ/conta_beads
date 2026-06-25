@@ -76,18 +76,9 @@ class _LoginScreenState extends State<LoginScreen> {
         if (saved.isNotEmpty) _contactController.text = saved;
       });
 
-      // Only auto-trigger if all conditions are met
-      // IMPORTANT: Don't auto-trigger from initState, do it from first frame instead
-      // This avoids the FragmentActivity context issue
+      // We removed the auto-trigger here so that biometric auth only happens when the user presses the button.
       if (_biometricAvailable && session.biometricEnabled && hasCredentials) {
-        developer.log('Biometric: All conditions met, scheduling biometric for first frame');
-        // Schedule for after first frame to ensure proper activity context
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          developer.log('Biometric: Triggering biometric from first frame');
-          if (mounted) {
-            _authenticateWithBiometric();
-          }
-        });
+        developer.log('Biometric: Auto-trigger disabled per user request. User must tap the button.');
       } else {
         developer.log('Biometric: Skipping auto-trigger (available=$_biometricAvailable, enabled=${session.biometricEnabled}, creds=$hasCredentials)');
       }
