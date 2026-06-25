@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -580,12 +581,44 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     ],
                   ),
                   child: ClipOval(
-                    child: Image.asset(
-                      'assets/demo/adopt a priest.png',
-                      fit: BoxFit.cover,
-                      width: 80,
-                      height: 80,
-                    ),
+                    child: quote.image.isNotEmpty
+                        ? quote.image.toLowerCase().endsWith('.svg')
+                            ? SvgPicture.network(
+                                quote.image,
+                                fit: BoxFit.cover,
+                                width: 80,
+                                height: 80,
+                                placeholderBuilder: (context) => Image.asset(
+                                  'assets/demo/adopt a priest.png',
+                                  fit: BoxFit.cover,
+                                  width: 80,
+                                  height: 80,
+                                ),
+                              )
+                            : CachedNetworkImage(
+                                imageUrl: quote.image,
+                                fit: BoxFit.cover,
+                                width: 80,
+                                height: 80,
+                                placeholder: (context, url) => Image.asset(
+                                  'assets/demo/adopt a priest.png',
+                                  fit: BoxFit.cover,
+                                  width: 80,
+                                  height: 80,
+                                ),
+                                errorWidget: (context, url, error) => Image.asset(
+                                  'assets/demo/adopt a priest.png',
+                                  fit: BoxFit.cover,
+                                  width: 80,
+                                  height: 80,
+                                ),
+                              )
+                        : Image.asset(
+                            'assets/demo/adopt a priest.png',
+                            fit: BoxFit.cover,
+                            width: 80,
+                            height: 80,
+                          ),
                   ),
                 ),
               ),
