@@ -369,14 +369,20 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
       );
     }
 
+    final size = MediaQuery.of(context).size;
+    // Calculate aspect ratio: (screen width - horizontal padding - crossAxisSpacing) / 2
+    final itemWidth = (size.width - 48 - 12) / 2;
+    // Ensure height is at least 175 to prevent overflow
+    final aspectRatio = itemWidth / 175.0;
+
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
         crossAxisSpacing: 12,
         mainAxisSpacing: 12,
-        childAspectRatio: 1.0,
+        childAspectRatio: aspectRatio,
       ),
       itemCount: data.adminIntentions.length,
       itemBuilder: (context, index) {
@@ -402,33 +408,37 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFFB347),
-                  borderRadius: BorderRadius.circular(10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFB347),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(Icons.church_rounded, color: Colors.white, size: 20),
                 ),
-                child: const Icon(Icons.church_rounded, color: Colors.white, size: 20),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                intention.title,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w800, color: const Color(0xFF624294)),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                intention.description,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: GoogleFonts.poppins(fontSize: 10, fontWeight: FontWeight.w500, color: const Color(0xFF624294).withOpacity(0.6)),
-              ),
-            ],
+                const SizedBox(height: 10),
+                Text(
+                  intention.title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w800, color: const Color(0xFF624294)),
+                ),
+                const SizedBox(height: 6),
+                Expanded(
+                  child: Text(
+                    intention.description,
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.poppins(fontSize: 10, fontWeight: FontWeight.w500, color: const Color(0xFF624294).withOpacity(0.6)),
+                  ),
+                ),
+              ],
+            ),
           ),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
