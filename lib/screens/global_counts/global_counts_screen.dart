@@ -331,7 +331,7 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
               style: GoogleFonts.poppins(
                   fontSize: 10,
                   letterSpacing: 2,
-                  color: AppColors.authBgMid.withOpacity(0.5),
+                  color: AppColors.authBgMid,
                   fontWeight: FontWeight.w800)),
           const SizedBox(height: 12),
           provider.isLoading

@@ -1024,12 +1024,16 @@ class _FilledCard extends StatelessWidget {
                     children: [
                       const Icon(Icons.delete_outline_rounded, color: Colors.white, size: 20),
                       const SizedBox(width: 8),
-                      Text(
-                        loc.tr('remove_priest'),
-                        style: GoogleFonts.poppins(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
+                      Flexible(
+                        child: Text(
+                          loc.tr('remove_priest'),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.poppins(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
                     ],
@@ -1162,6 +1166,8 @@ class _FilledCard extends StatelessWidget {
               ),
               child: Text(
                 loc.tr('selected'),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: GoogleFonts.poppins(
                   fontSize: 9,
                   fontWeight: FontWeight.w800,

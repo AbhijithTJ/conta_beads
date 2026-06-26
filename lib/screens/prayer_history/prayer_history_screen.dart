@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../colors/colors.dart';
 import '../../models/prayer_history_model.dart';
 import '../../providers/prayer_history_provider.dart';
+import '../../services/localization_service.dart' show loc;
 import '../../theme/theme_notifier.dart';
 
 class PrayerHistoryScreen extends StatefulWidget {
@@ -24,7 +25,9 @@ class _PrayerHistoryScreenState extends State<PrayerHistoryScreen> {
     _scrollController = ScrollController();
     _scrollController.addListener(_onScroll);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<PrayerHistoryProvider>().fetch();
+      final provider = context.read<PrayerHistoryProvider>();
+      provider.reset(); // Force default to Rosary mode and clear old data
+      provider.fetch();
     });
   }
 
@@ -72,7 +75,7 @@ class _PrayerHistoryScreenState extends State<PrayerHistoryScreen> {
             : const BoxDecoration(color: Color(0xFFF0EBF0));
         return Scaffold(
           appBar: AppBar(
-            title: Text('Prayer History', style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w700)),
+            title: Text(loc.tr('counting_history'), style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w700)),
             centerTitle: true,
             elevation: 0,
             backgroundColor: isDark ? const Color(0xFF22014D) : Colors.white,
@@ -92,20 +95,24 @@ class _PrayerHistoryScreenState extends State<PrayerHistoryScreen> {
                       controller: _scrollController,
                       physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                      child: Column(
-                        children: [
-                          _buildToggleButton(isDark),
-                          const SizedBox(height: 20),
-                          if (provider.isLoading && provider.data == null)
-                            _buildLoadingState()
-                          else if (provider.isError)
-                            _buildErrorState(provider, isDark)
-                          else if (provider.data == null || provider.data!.data.isEmpty)
-                            _buildEmptyState(isDark)
-                          else
-                            _buildHistoryContent(provider, isDark),
-                          const SizedBox(height: 40),
-                        ],
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            _buildToggleButton(isDark),
+                            const SizedBox(height: 20),
+                            if (provider.isLoading && provider.data == null)
+                              _buildLoadingState()
+                            else if (provider.isError)
+                              _buildErrorState(provider, isDark)
+                            else if (provider.data == null || provider.data!.data.isEmpty)
+                              _buildEmptyState(isDark)
+                            else
+                              _buildHistoryContent(provider, isDark),
+                            const SizedBox(height: 40),
+                          ],
+                        ),
                       ),
                     ),
                   );
@@ -163,8 +170,8 @@ class _PrayerHistoryScreenState extends State<PrayerHistoryScreen> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          tab('Rosary',  _isRosaryMode,  () => _onToggle(true)),
-          tab('Chaplet', !_isRosaryMode, () => _onToggle(false)),
+          tab(loc.tr('rosary_toggle'),  _isRosaryMode,  () => _onToggle(true)),
+          tab(loc.tr('chaplet_toggle'), !_isRosaryMode, () => _onToggle(false)),
         ],
       ),
     );
@@ -425,23 +432,22 @@ class _PrayerHistoryScreenState extends State<PrayerHistoryScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.history_rounded, size: 64, color: subColor),
+          const Icon(Icons.history_rounded, size: 64, color: Colors.grey),
           const SizedBox(height: 16),
           Text(
-            'No Prayer History',
+            loc.tr('no_prayer_history'),
             style: GoogleFonts.poppins(
               fontSize: 18,
               fontWeight: FontWeight.w700,
-              color: textColor,
+              color: isDark ? Colors.white : AppColors.authBgBottom,
             ),
           ),
           const SizedBox(height: 8),
           Text(
-            'Start praying to see your history here',
+            loc.tr('start_praying_history'),
             style: GoogleFonts.poppins(
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-              color: subColor,
+              fontSize: 14,
+              color: isDark ? Colors.white70 : Colors.black54,
             ),
             textAlign: TextAlign.center,
           ),
