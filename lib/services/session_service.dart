@@ -68,6 +68,20 @@ class SessionService {
   // ── Initialise once at app startup ──────────────────────────────────────────
   Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
+
+    // On iOS, Keychain items (FlutterSecureStorage) persist across uninstalls.
+    // UserDefaults (_prefs) is wiped. So on a fresh install, we detect missing
+    // first_run flag and wipe secure storage to clear old biometric credentials.
+    final isFirstRun = _prefs.getBool('is_first_run') ?? true;
+    if (isFirstRun) {
+      // If there is no token in prefs, it's a true fresh install (or logged out update).
+      // We safely wipe secure storage. If token exists, it's an app update for a logged-in user.
+      if (_prefs.getString(_kToken) == null) {
+        await _secure.deleteAll();
+      }
+      await _prefs.setBool('is_first_run', false);
+    }
+
     _token              = _prefs.getString(_kToken);
     _contact            = _prefs.getString(_kContact);
     _name               = _prefs.getString(_kName);
