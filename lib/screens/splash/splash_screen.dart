@@ -19,10 +19,10 @@ class _SplashScreenState extends State<SplashScreen>
   void initState() {
     super.initState();
 
-    // Duration matches the GIF's total animation length (182 frames @ ~6.07 s).
+    // Reduced duration so user doesn't have to wait for the entire 6s GIF.
     _gifCtrl = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 6070),
+      duration: const Duration(milliseconds: 2500),
     );
 
     _gifCtrl.forward();
@@ -32,10 +32,13 @@ class _SplashScreenState extends State<SplashScreen>
         try {
           // Route logic:
           // 1. If logged in → go to OnboardingWrapper (which checks onboarding flag)
-          // 2. If not logged in → show theme selection first
+          // 2. If not logged in but has seen onboarding → go directly to LoginScreen
+          // 3. If first install → show ThemeSelectScreen -> Onboarding -> Login
           final destination = SessionService.instance.isLoggedIn
               ? const OnboardingWrapper()
-              : ThemeSelectScreen(onComplete: () {});
+              : (SessionService.instance.onboardingComplete
+                  ? const LoginScreen()
+                  : ThemeSelectScreen(onComplete: () {}));
 
           if (!mounted) return;
 
