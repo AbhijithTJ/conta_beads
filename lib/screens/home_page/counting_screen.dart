@@ -81,7 +81,7 @@ class _CountingScreenState extends State<CountingScreen>
   late Animation<double> _ripple3Anim;
 
   // ── Floating global-count button state ──
-  Offset _fabPosition = const Offset(20, 200);
+  Offset? _fabPosition;
   bool _showGlobalPanel = false;
   late AnimationController _blinkController;
   late Animation<double> _blinkAnimation;
@@ -563,14 +563,16 @@ class _CountingScreenState extends State<CountingScreen>
 
   Widget _buildDraggableFab(Size size) {
     final isDark = themeNotifier.isDark;
+    _fabPosition ??= Offset(size.width - 68, 200);
+
     return Positioned(
-      left: _fabPosition.dx,
-      top: _fabPosition.dy,
+      left: _fabPosition!.dx,
+      top: _fabPosition!.dy,
       child: GestureDetector(
         onPanUpdate: (d) {
           setState(() {
-            final nx = (_fabPosition.dx + d.delta.dx).clamp(0.0, size.width - 56.0);
-            final ny = (_fabPosition.dy + d.delta.dy).clamp(0.0, size.height - 56.0);
+            final nx = (_fabPosition!.dx + d.delta.dx).clamp(0.0, size.width - 56.0);
+            final ny = (_fabPosition!.dy + d.delta.dy).clamp(0.0, size.height - 56.0);
             _fabPosition = Offset(nx, ny);
           });
         },
@@ -1022,13 +1024,17 @@ class _CountingScreenState extends State<CountingScreen>
                     ),
                   ),
                   const SizedBox(height: 6),
-                  Text(
-                    _isRosary ? loc.tr('rosary_counted') : loc.tr('chaplet_counted'),
-                    style: GoogleFonts.poppins(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w500,
-                      color: isDark ? Colors.white.withOpacity(0.65) : const Color(0xFF624294).withOpacity(0.60),
-                      letterSpacing: 1.5,
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Text(
+                      _isRosary ? loc.tr('rosary_counted') : loc.tr('chaplet_counted'),
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.poppins(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w500,
+                        color: isDark ? Colors.white.withOpacity(0.65) : const Color(0xFF624294).withOpacity(0.60),
+                        letterSpacing: 0.5,
+                      ),
                     ),
                   ),
                 ],
@@ -1491,6 +1497,8 @@ class _PrayerInlineCardState extends State<_PrayerInlineCard> {
                   child: Text(
                     widget.title,
                     style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: widget.darkColor, letterSpacing: 1.0),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
                 GestureDetector(
@@ -1681,6 +1689,8 @@ class _PrayerExpandedModalState extends State<_PrayerExpandedModal> {
                     child: Text(
                       widget.title,
                       style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: widget.darkColor, letterSpacing: 0.8),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                   GestureDetector(
