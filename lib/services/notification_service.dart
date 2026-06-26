@@ -33,22 +33,45 @@ class NotificationService {
         provisional: false,
       );
 
-      // For iOS, wait for the APNs token before getting the FCM token
-      if (defaultTargetPlatform == TargetPlatform.iOS) {
-        String? apnsToken = await _messaging.getAPNSToken();
-        if (apnsToken == null) {
-          debugPrint("APNs Token is null. Waiting briefly...");
-          await Future.delayed(const Duration(seconds: 3));
-          apnsToken = await _messaging.getAPNSToken();
-        }
-        debugPrint("APNs Token: $apnsToken");
-      }
+      // 1. Set foreground notification presentation options for iOS
+      await _messaging.setForegroundNotificationPresentationOptions(
+        alert: true, 
+        badge: true, 
+        sound: true,
+      );
 
-      // Get FCM Token
-      _messaging.getToken().then((token) {
-        debugPrint("FCM Token: $token");
-      }).catchError((e) {
-        debugPrint("Error fetching FCM token: $e");
+      // 2. Listen to Token Refreshes
+      _messaging.onTokenRefresh.listen((fcmToken) {
+        debugPrint("FCM Token Refreshed: $fcmToken");
+      }).onError((err) {
+        debugPrint("Error listening to token refresh: $err");
+      });
+
+      // 3. Listen to Foreground Messages
+      FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+        debugPrint('Received foreground message: ${message.messageId}');
+        
+        if (message.notification != null) {
+          // Show local notification for foreground messages
+          _localNotifications.show(
+            message.notification.hashCode,
+            message.notification!.title,
+            message.notification!.body,
+            const NotificationDetails(
+              android: AndroidNotificationDetails(
+                'high_importance_channel',
+                'High Importance Notifications',
+                importance: Importance.max,
+                priority: Priority.high,
+              ),
+              iOS: DarwinNotificationDetails(
+                presentAlert: true,
+                presentBadge: true,
+                presentSound: true,
+              ),
+            ),
+          );
+        }
       });
 
       // Configure Local Notifications
@@ -98,20 +121,35 @@ class NotificationService {
   }
   Future<String?> getToken() async {
     try {
+      // 1. Check Authorization Status explicitly
+      NotificationSettings settings = await _messaging.getNotificationSettings();
+      debugPrint("📱 Dart: Current Auth Status: ${settings.authorizationStatus}");
+
       if (defaultTargetPlatform == TargetPlatform.iOS) {
+        debugPrint("📱 Dart: Requesting APNs token from iOS...");
         String? apnsToken = await _messaging.getAPNSToken();
+        
         if (apnsToken == null) {
-          debugPrint("APNs Token is null. Waiting briefly...");
+          debugPrint("📱 Dart: APNs Token is null. Waiting 3 seconds...");
           await Future.delayed(const Duration(seconds: 3));
           apnsToken = await _messaging.getAPNSToken();
         }
-        if (apnsToken == null) {
-          debugPrint("Failed to get APNs Token. FCM token might not be generated.");
+        
+        if (apnsToken != null) {
+          debugPrint("📱 Dart: SUCCESS - APNs Token received: $apnsToken");
+        } else {
+          debugPrint("📱 Dart: FATAL - APNs Token is STILL null after wait. Check Xcode native logs for 'FAILED to register'.");
+          return null; // Don't even try FCM if APNs failed natively
         }
       }
-      return await _messaging.getToken();
+      
+      debugPrint("📱 Dart: Requesting FCM token...");
+      String? fcmToken = await _messaging.getToken();
+      debugPrint("📱 Dart: SUCCESS - FCM Token: $fcmToken");
+      
+      return fcmToken;
     } catch (e) {
-      debugPrint("Error fetching FCM token: $e");
+      debugPrint("📱 Dart: Error fetching token: $e");
       return null;
     }
   }
