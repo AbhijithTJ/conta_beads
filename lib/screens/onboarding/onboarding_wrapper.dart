@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../bottom_nav_wrapper.dart';
-import 'onboarding_screen.dart';
+import 'onboarding_modified_new.dart';
 import '../../services/session_service.dart';
 
 /// Checks if the user has seen onboarding (sync from SessionService — no FutureBuilder needed).
@@ -22,6 +22,6 @@ class OnboardingWrapper extends StatelessWidget {
     if (hasSeenOnboarding) {
       return const BottomNavWrapper();
     }
-    return OnboardingScreen(onComplete: () => _navigateToHome(context));
+    return OnboardingModifiedNew(onComplete: () => _navigateToHome(context));
   }
 }

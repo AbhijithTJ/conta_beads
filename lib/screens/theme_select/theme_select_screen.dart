@@ -11,7 +11,7 @@ import '../../services/language_id_service.dart';
 import '../../theme/theme_notifier.dart';
 import '../../services/localization_service.dart';
 import '../../login_and_register/login_screen.dart';
-import '../onboarding/onboarding_screen.dart';
+import '../onboarding/onboarding_modified_new.dart';
 
 // Muted gold palette — softer intensity for this screen only
 const Color _goldPrimary = Color(0xFFC4A060);   // was 0xFFD4A843
@@ -80,7 +80,7 @@ class _ThemeSelectScreenState extends State<ThemeSelectScreen>
     
     Navigator.of(currentContext).pushReplacement(
       PageRouteBuilder(
-        pageBuilder: (context, __, ___) => OnboardingScreen(
+        pageBuilder: (context, __, ___) => OnboardingModifiedNew(
           onComplete: () {
             // Use the new context from the page builder
             Navigator.of(context).pushReplacement(
