@@ -69,7 +69,7 @@ class _SplashScreenState extends State<SplashScreen>
       backgroundColor: Colors.black,
       body: Center(
         child: Image.asset(
-          'assets/splash/spalsh_final.gif',
+          'assets/splash/splash_short_org.gif',
           fit: BoxFit.contain,
         ),
       ),
