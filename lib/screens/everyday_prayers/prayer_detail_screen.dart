@@ -359,19 +359,23 @@ class _PrayerDetailScreenState extends State<PrayerDetailScreen> {
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(45, 40, 40, 12),
                   child: cleanedContent.isNotEmpty
-                      ? Html(
-                          data: cleanedContent,
-                          style: {
-                            'body': Style(
-                              fontSize: FontSize(16),
-                              color: textColor,
-                              lineHeight: LineHeight(1.7),
-                              fontFamily: 'Georgia', // Using a serif font for book feel
-                              margin: Margins.zero,
-                            ),
-                            'p': Style(margin: Margins.only(bottom: 16)),
-                            'strong': Style(color: const Color(0xFF2D1F40)),
-                          },
+                      ? Align(
+                          alignment: Alignment.center,
+                          child: Html(
+                            data: cleanedContent,
+                            style: {
+                              'body': Style(
+                                fontSize: FontSize(16),
+                                color: textColor,
+                                lineHeight: LineHeight(1.7),
+                                fontFamily: 'Georgia', // Using a serif font for book feel
+                                margin: Margins.zero,
+                                textAlign: TextAlign.left, // Keep text starting from the left
+                              ),
+                              'p': Style(margin: Margins.only(bottom: 16)),
+                              'strong': Style(color: const Color(0xFF2D1F40)),
+                            },
+                          ),
                         )
                       : const Center(child: Text('...')),
                 ),
