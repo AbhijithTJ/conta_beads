@@ -53,80 +53,97 @@ class _PrayerDetailScreenState extends State<PrayerDetailScreen> {
       return;
     }
 
-    final String content = widget.prayer.data!;
-    const int targetCharsPerPage = 750; // Balanced for most screen sizes
+    String rawContent = widget.prayer.data!;
+    
+    // ── Clean up: Remove empty paragraphs that cause blank pages ─────────
+    rawContent = rawContent.replaceAll(RegExp(r'<p[^>]*>\s*(<br>|&nbsp;|\s)*\s*</p>'), '');
+    rawContent = rawContent.replaceAll(RegExp(r'<h[1-6][^>]*>\s*(<br>|&nbsp;|\s)*\s*</h[1-6]>'), '');
+    
+    // ── Pre-process: Force page breaks around paragraphs containing <strong> ─────────
+    // This isolates bold text onto their own separate pages
+    rawContent = rawContent.replaceAllMapped(RegExp(r'<p[^>]*>\s*<strong>'), (match) => '<!--PAGE_BREAK-->${match.group(0)}');
+    rawContent = rawContent.replaceAllMapped(RegExp(r'</strong>\s*</p>'), (match) => '${match.group(0)}<!--PAGE_BREAK-->');
+    
+    final List<String> chunks = rawContent.split('<!--PAGE_BREAK-->');
+    
+    // We use a safe character limit for block packing. 
+    // This ensures that 2 medium paragraphs won't accidentally combine and overflow.
+    const int targetCharsPerPage = 450; 
     _prayerPages = [];
 
-    int startIndex = 0;
-    while (startIndex < content.length) {
-      int endIndex = startIndex + targetCharsPerPage;
+    for (String chunk in chunks) {
+      String content = chunk.trim();
       
-      if (endIndex >= content.length) {
-        _prayerPages.add(content.substring(startIndex));
-        break;
+      // Skip empty chunks or filler breaks
+      if (content.isEmpty || content == '<p><br></p>' || content == '<br>') {
+        continue;
       }
       
-      // ── Step 1: Look for natural HTML block boundaries ──────────────────
-      // We look for closing tags of blocks like paragraphs, headings, or list items.
-      int lastBlockEnd = -1;
-      final blockTags = ['</p>', '</h1>', '</h2>', '</h3>', '</h4>', '</ul>', '</li>', '<br>', '</div>'];
+      // ── Step 1: Split chunk into atomic HTML blocks (e.g. paragraphs) ─────────
+      List<String> blocks = [];
+      int lastIndex = 0;
+      final blockTags = ['</p>', '</h1>', '</h2>', '</h3>', '</h4>', '</ul>', '</li>', '</div>'];
       
-      for (final tag in blockTags) {
-        int pos = content.lastIndexOf(tag, endIndex);
-        if (pos > startIndex && pos > lastBlockEnd) {
-          lastBlockEnd = pos + tag.length;
-        }
-      }
-      
-      // ── Step 2: Use the best boundary found ──────────────────────────────
-      if (lastBlockEnd != -1 && lastBlockEnd > startIndex + (targetCharsPerPage * 0.5)) {
-        // We found a good HTML block boundary in the last half of the page
-        endIndex = lastBlockEnd;
-      } else {
-        // No block boundary found nearby, look for a sentence boundary
-        int lastSentenceEnd = content.lastIndexOf(RegExp(r'\.\s'), endIndex);
-        if (lastSentenceEnd > startIndex && lastSentenceEnd > startIndex + (targetCharsPerPage * 0.3)) {
-          endIndex = lastSentenceEnd + 1;
-        }
-        // If still no good boundary, we use the character limit but must be careful...
-      }
-      
-      // ── Step 3: Safety Guard — Never split inside a tag ──────────────────
-      // This handles cases like <strong style="color: red">...
-      int lastOpenBracket = content.lastIndexOf('<', endIndex);
-      int lastCloseBracket = content.lastIndexOf('>', endIndex);
-      
-      if (lastOpenBracket > lastCloseBracket) {
-        // We are currently inside a tag, move the split point to the start of the tag
-        endIndex = lastOpenBracket;
-      }
-
-      // ── Step 4: Inline Tag Protection ────────────────────────────────────
-      // If we are splitting after a tag like <strong> or <em>, but before the 
-      // closing </strong>, the styling will be lost on the next page.
-      // We try to avoid splitting mid-sentence if there's an active inline tag.
-      final inlineTags = ['<strong>', '<b>', '<em>', '<i>', '<u>'];
-      for (final tag in inlineTags) {
-        int tagStart = content.lastIndexOf(tag, endIndex);
-        if (tagStart > startIndex) {
-          String closingTag = tag.replaceFirst('<', '</');
-          int tagEnd = content.lastIndexOf(closingTag, endIndex);
-          
-          // If the tag started on this page but hasn't closed yet
-          if (tagStart > tagEnd) {
-            // Move the split to before the opening tag to keep the styled block together
-            endIndex = tagStart;
+      while (lastIndex < content.length) {
+        int bestNext = -1;
+        int bestLen = -1;
+        
+        for (final tag in blockTags) {
+          int pos = content.indexOf(tag, lastIndex);
+          if (pos != -1) {
+            if (bestNext == -1 || pos < bestNext) {
+              bestNext = pos;
+              bestLen = tag.length;
+            }
           }
         }
+        
+        if (bestNext == -1) {
+          blocks.add(content.substring(lastIndex).trim());
+          break;
+        }
+        
+        bestNext += bestLen;
+        blocks.add(content.substring(lastIndex, bestNext).trim());
+        lastIndex = bestNext;
       }
       
-      // ── Step 5: Extract and Clean ─────────────────────────────────────────
-      String pageContent = content.substring(startIndex, endIndex).trim();
-      if (pageContent.isNotEmpty) {
-        _prayerPages.add(pageContent);
+      // ── Step 2: Pack blocks into pages ────────────────────────────────────────
+      // This ensures <p> tags are never cut in half. If adding a paragraph exceeds 
+      // the limit, the ENTIRE paragraph moves to the next page.
+      String currentPage = '';
+      for (String block in blocks) {
+        if (block.isEmpty) continue;
+        
+        if (currentPage.isNotEmpty && (currentPage.length + block.length > targetCharsPerPage)) {
+          _prayerPages.add(currentPage.trim());
+          currentPage = block;
+        } else {
+          currentPage = currentPage.isEmpty ? block : '$currentPage\n$block';
+        }
       }
       
-      startIndex = endIndex;
+      if (currentPage.isNotEmpty) {
+        // Fallback safety for exceptionally huge single paragraphs that must be split
+        if (currentPage.length > 800) {
+          int splitIndex = 0;
+          while (splitIndex < currentPage.length) {
+            int end = splitIndex + 650;
+            if (end >= currentPage.length) {
+              _prayerPages.add(currentPage.substring(splitIndex).trim());
+              break;
+            }
+            int lastSentence = currentPage.lastIndexOf(RegExp(r'\.\s'), end);
+            if (lastSentence > splitIndex) {
+              end = lastSentence + 1;
+            }
+            _prayerPages.add(currentPage.substring(splitIndex, end).trim());
+            splitIndex = end;
+          }
+        } else {
+          _prayerPages.add(currentPage.trim());
+        }
+      }
     }
 
     if (_prayerPages.isEmpty) {
@@ -371,7 +388,7 @@ class _PrayerDetailScreenState extends State<PrayerDetailScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      pageNum.toString(),
+                      '$pageNum / $totalPages',
                       style: GoogleFonts.playfairDisplay(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,

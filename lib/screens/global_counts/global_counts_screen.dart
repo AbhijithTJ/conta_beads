@@ -24,8 +24,6 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
     with TickerProviderStateMixin {
   late AnimationController _blinkController;
   late Animation<double> _blinkAnimation;
-  late AnimationController _quoteFadeController;
-  late Animation<double> _quoteFadeAnim;
   
   // Cinematic Entry Animations
   late AnimationController _entryController;
@@ -48,13 +46,6 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
     _blinkAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _blinkController, curve: Curves.easeInOut),
     );
-
-    _quoteFadeController = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 600));
-    _quoteFadeAnim = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _quoteFadeController, curve: Curves.easeInOut),
-    );
-    _quoteFadeController.forward();
 
     // Cinematic Stagger Setup (5 sections)
     _entryController = AnimationController(
@@ -92,7 +83,6 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
   @override
   void dispose() {
     _blinkController.dispose();
-    _quoteFadeController.dispose();
     _entryController.dispose();
     super.dispose();
   }
@@ -108,14 +98,11 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
   }
 
   void _advanceQuote(bool forward, int quoteCount) {
-    _quoteFadeController.reverse().then((_) {
-      if (!mounted) return;
-      setState(() {
-        _currentQuotePage = forward
-            ? (_currentQuotePage + 1) % quoteCount
-            : (_currentQuotePage - 1 + quoteCount) % quoteCount;
-      });
-      _quoteFadeController.forward();
+    if (!mounted) return;
+    setState(() {
+      _currentQuotePage = forward
+          ? (_currentQuotePage + 1) % quoteCount
+          : (_currentQuotePage - 1 + quoteCount) % quoteCount;
     });
   }
 
@@ -478,23 +465,24 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
         if (d.primaryVelocity == null) return;
         _advanceQuote(d.primaryVelocity! < 0, quoteCount);
       },
-      child: FadeTransition(
-        opacity: _quoteFadeAnim,
-        child: Container(
-          width: double.infinity,
-          height: 160,
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(22),
-            border: Border.all(
-                color: isDark ? Colors.white : borderColor,
-                width: isDark ? 2.0 : 1.5),
-            boxShadow: [
-              BoxShadow(color: shadowColor, blurRadius: 20, offset: const Offset(0, 6))
-            ],
-          ),
+      child: Container(
+        width: double.infinity,
+        height: 180,
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(
+              color: isDark ? Colors.white : borderColor,
+              width: isDark ? 2.0 : 1.5),
+          boxShadow: [
+            BoxShadow(color: shadowColor, blurRadius: 20, offset: const Offset(0, 6))
+          ],
+        ),
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 1500),
           child: Column(
+            key: ValueKey<int>(_currentQuotePage),
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text('\u275D',
@@ -502,25 +490,23 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
                       fontSize: 20,
                       color: const Color(0xFF624294).withOpacity(0.45),
                       height: 1.0)),
-              const SizedBox(height: 6),
               Expanded(
                 child: Center(
-                  child: Text(
-                    quoteText,
-                    textAlign: TextAlign.center,
-                    maxLines: 4,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: isDark ? FontWeight.w500 : FontWeight.w700,
-                        color: const Color(0xFF624294),
-                        fontStyle: FontStyle.italic,
-                        height: 1.4,
-                        letterSpacing: 0.2),
+                  child: SingleChildScrollView(
+                    child: Text(
+                      quoteText,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          fontSize: RegExp(r'[\u0D00-\u0D7F]').hasMatch(quoteText) ? 12 : 13,
+                          fontWeight: isDark ? FontWeight.w500 : FontWeight.w700,
+                          color: const Color(0xFF624294),
+                          fontStyle: FontStyle.italic,
+                          height: 1.4,
+                          letterSpacing: 0.2),
+                    ),
                   ),
                 ),
               ),
-              const SizedBox(height: 8),
               if (quoteAuthor.isNotEmpty)
                 Text(quoteAuthor,
                     style: const TextStyle(
@@ -528,7 +514,6 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
                         fontWeight: FontWeight.w700,
                         color: Color(0xFF624294),
                         letterSpacing: 1.2)),
-              const SizedBox(height: 10),
               if (quoteCount > 1)
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,

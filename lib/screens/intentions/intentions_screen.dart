@@ -27,8 +27,6 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
   int _myTotal = 300;
   bool _isRosaryMode = true;
 
-  late AnimationController _quoteFadeController;
-  late Animation<double> _quoteFadeAnim;
   Timer? _quoteTimer;
   int _currentQuoteIndex = 0;
 
@@ -56,11 +54,6 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
   @override
   void initState() {
     super.initState();
-    _quoteFadeController = AnimationController(vsync: this, duration: const Duration(milliseconds: 600));
-    _quoteFadeAnim = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _quoteFadeController, curve: Curves.easeInOut),
-    );
-    _quoteFadeController.forward();
     _intentionFocus.addListener(() => setState(() {}));
     _rosaryCountFocus.addListener(() => setState(() {}));
     
@@ -79,7 +72,6 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
     _intentionFocus.dispose();
     _rosaryCountFocus.dispose();
     _quoteTimer?.cancel();
-    _quoteFadeController.dispose();
     languageIdService.removeListener(_onLanguageChanged);
     super.dispose();
   }
@@ -87,12 +79,9 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
   void _startQuoteTimer(int quoteCount) {
     _quoteTimer?.cancel();
     if (quoteCount > 0) {
-      _quoteTimer = Timer.periodic(const Duration(seconds: 5), (_) {
-        _quoteFadeController.reverse().then((_) {
-          if (!mounted) return;
-          setState(() => _currentQuoteIndex = (_currentQuoteIndex + 1) % quoteCount);
-          _quoteFadeController.forward();
-        });
+      _quoteTimer = Timer.periodic(const Duration(seconds: 10), (_) {
+        if (!mounted) return;
+        setState(() => _currentQuoteIndex = (_currentQuoteIndex + 1) % quoteCount);
       });
     }
   }
@@ -287,51 +276,46 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
     return GestureDetector(
       onHorizontalDragEnd: (details) {
         if (details.primaryVelocity == null) return;
-        _quoteFadeController.reverse().then((_) {
-          if (!mounted) return;
-          setState(() {
-            if (details.primaryVelocity! < 0) {
-              _currentQuoteIndex = (_currentQuoteIndex + 1) % data.quotes.length;
-            } else {
-              _currentQuoteIndex = (_currentQuoteIndex - 1 + data.quotes.length) % data.quotes.length;
-            }
-          });
-          _quoteFadeController.forward();
+        if (!mounted) return;
+        setState(() {
+          if (details.primaryVelocity! < 0) {
+            _currentQuoteIndex = (_currentQuoteIndex + 1) % data.quotes.length;
+          } else {
+            _currentQuoteIndex = (_currentQuoteIndex - 1 + data.quotes.length) % data.quotes.length;
+          }
         });
       },
-      child: FadeTransition(
-        opacity: _quoteFadeAnim,
-        child: Container(
-          width: double.infinity,
-          height: 160,
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(22),
-            border: Border.all(color: isDark ? Colors.white : borderColor, width: isDark ? 2.0 : 1.5),
-            boxShadow: [BoxShadow(color: shadowColor, blurRadius: 20, offset: const Offset(0, 6))],
-          ),
+      child: Container(
+        width: double.infinity,
+        height: 180,
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(color: isDark ? Colors.white : borderColor, width: isDark ? 2.0 : 1.5),
+          boxShadow: [BoxShadow(color: shadowColor, blurRadius: 20, offset: const Offset(0, 6))],
+        ),
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 1500),
           child: Column(
+            key: ValueKey<int>(_currentQuoteIndex),
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text('\u275D', style: TextStyle(fontSize: 20, color: const Color(0xFF624294).withOpacity(0.45), height: 1.0)),
-              const SizedBox(height: 6),
               Expanded(
                 child: Center(
-                  child: Text(
-                    q.quotation,
-                    textAlign: TextAlign.center,
-                    maxLines: 4,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: 13, fontWeight: isDark ? FontWeight.w500 : FontWeight.w700, color: quoteTextColor, fontStyle: FontStyle.italic, height: 1.4, letterSpacing: 0.2),
+                  child: SingleChildScrollView(
+                    child: Text(
+                      q.quotation,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: RegExp(r'[\u0D00-\u0D7F]').hasMatch(q.quotation) ? 12 : 13, fontWeight: isDark ? FontWeight.w500 : FontWeight.w700, color: quoteTextColor, fontStyle: FontStyle.italic, height: 1.4, letterSpacing: 0.2),
+                    ),
                   ),
                 ),
               ),
-              const SizedBox(height: 8),
               if (q.reference.isNotEmpty)
                 Text('— ${q.reference}',
                     style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Color(0xFF624294), letterSpacing: 1.2)),
-              const SizedBox(height: 10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: List.generate(data.quotes.length, (i) {

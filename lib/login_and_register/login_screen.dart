@@ -663,12 +663,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 await _offerBiometricSetup(contact, password);
               },
               child: Text(loc.tr('set_up_biometric'),
-                  style: TextStyle(
-                      color: AppColors.authPurple,
+                  style: const TextStyle(
+                      color: Color(0xFF624294),
                       fontWeight: FontWeight.w600,
                       fontSize: 13,
                       decoration: TextDecoration.underline,
-                      decorationColor: AppColors.authPurple)),
+                      decorationColor: Color(0xFF624294))),
             ),
           ),
         ],

@@ -382,16 +382,30 @@ class _EverydayPrayersScreenState extends State<EverydayPrayersScreen> {
             ),
           ),
 
-          // ── Church cross icon (top-right) ──────────────────────────────
+          // ── Premium glassmorphism badge (top-right) ─────────────────────────
           Positioned(
-            top: 12,
-            right: 12,
-            child: Text(
-              '✝',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
+            top: 10,
+            right: 10,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+                child: Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Colors.white.withOpacity(0.3),
+                      width: 1,
+                    ),
+                  ),
+                  child: const Icon(
+                    Icons.church_rounded,
+                    color: Colors.white,
+                    size: 16,
+                  ),
+                ),
               ),
             ),
           ),

@@ -24,9 +24,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
-  // Quote rotation
-  late AnimationController _quoteController;
-  late Animation<double> _quoteFadeAnim;
   Timer? _quoteTimer;
   int _currentQuoteIndex = 0;
 
@@ -40,12 +37,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    _quoteController = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 600));
-    _quoteFadeAnim = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _quoteController, curve: Curves.easeInOut),
-    );
-    _quoteController.forward();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _homeProvider = context.read<HomeProvider>();
@@ -57,26 +48,20 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   void _startQuoteTimer(int quoteCount) {
     _quoteTimer?.cancel();
     if (quoteCount <= 1) return;
-    _quoteTimer = Timer.periodic(const Duration(seconds: 5), (_) => _nextQuote(quoteCount));
+    _quoteTimer = Timer.periodic(const Duration(seconds: 10), (_) => _nextQuote(quoteCount));
   }
 
   void _nextQuote(int quoteCount) {
-    _quoteController.reverse().then((_) {
-      if (!mounted) return;
-      setState(() => _currentQuoteIndex = (_currentQuoteIndex + 1) % quoteCount);
-      _quoteController.forward();
-    });
+    if (!mounted) return;
+    setState(() => _currentQuoteIndex = (_currentQuoteIndex + 1) % quoteCount);
   }
 
   void _advanceQuote(bool forward, int quoteCount) {
-    _quoteController.reverse().then((_) {
-      if (!mounted) return;
-      setState(() {
-        _currentQuoteIndex = forward
-            ? (_currentQuoteIndex + 1) % quoteCount
-            : (_currentQuoteIndex - 1 + quoteCount) % quoteCount;
-      });
-      _quoteController.forward();
+    if (!mounted) return;
+    setState(() {
+      _currentQuoteIndex = forward
+          ? (_currentQuoteIndex + 1) % quoteCount
+          : (_currentQuoteIndex - 1 + quoteCount) % quoteCount;
     });
   }
 
@@ -104,7 +89,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   void dispose() {
     _homeProvider.removeListener(_onHomeDataChanged);
     _quoteTimer?.cancel();
-    _quoteController.dispose();
     super.dispose();
   }
 
@@ -452,40 +436,41 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         if (d.primaryVelocity == null) return;
         _advanceQuote(d.primaryVelocity! < 0, quotes.length);
       },
-      child: FadeTransition(
-        opacity: _quoteFadeAnim,
-        child: Container(
-          width: double.infinity,
-          height: 180,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(22),
-            border: Border.all(
-                color: isDark ? Colors.white : borderColor,
-                width: isDark ? 2.0 : 1.5),
-            boxShadow: [
-              BoxShadow(
-                  color: shadowColor,
-                  blurRadius: 20,
-                  offset: const Offset(0, 6))
-            ],
-          ),
-          child: Stack(
-            clipBehavior: Clip.none,
-            children: [
-              // ── Background image ────────────────────────────────────────
-              Positioned.fill(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(22),
-                  child: Image.asset(
-                    'assets/demo/qoutes.png',
-                    fit: BoxFit.cover,
-                  ),
+      child: Container(
+        width: double.infinity,
+        height: 180,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(
+              color: isDark ? Colors.white : borderColor,
+              width: isDark ? 2.0 : 1.5),
+          boxShadow: [
+            BoxShadow(
+                color: shadowColor,
+                blurRadius: 20,
+                offset: const Offset(0, 6))
+          ],
+        ),
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            // ── Background image ────────────────────────────────────────
+            Positioned.fill(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(22),
+                child: Image.asset(
+                  'assets/demo/qoutes.png',
+                  fit: BoxFit.cover,
                 ),
               ),
+            ),
 
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 1500),
+              child: Padding(
+                key: ValueKey<int>(_currentQuoteIndex),
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -494,24 +479,26 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             fontSize: 20,
                             color: const Color(0xFF624294).withOpacity(0.45),
                             height: 1.0)),
-                    const SizedBox(height: 6),
                     Expanded(
                       child: Padding(
-                        padding: const EdgeInsets.only(top: 4, right: 30),
-                        child: Text(
-                          quote.quotation,
-                          maxLines: 4,
-                          overflow: TextOverflow.ellipsis,
+                        padding: const EdgeInsets.only(right: 30),
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: SingleChildScrollView(
+                          child: Text(
+                            quote.quotation,
                           style: TextStyle(
-                              fontSize: 13,
+                              fontSize: RegExp(r'[\u0D00-\u0D7F]').hasMatch(quote.quotation) ? 12 : 13,
                               fontWeight:
                                   isDark ? FontWeight.w500 : FontWeight.w700,
                               color: const Color(0xFF624294),
                               fontStyle: FontStyle.italic,
                               height: 1.4,
                               letterSpacing: 0.2),
+                          ),
                         ),
                       ),
+                    ),
                     ),
                     if (quote.reference.isNotEmpty)
                       Text(
@@ -526,6 +513,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   ],
                 ),
               ),
+            ),
               // Dots centered at bottom
               Positioned(
                 bottom: 12,
@@ -612,7 +600,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ],
           ),
         ),
-      ),
     );
   }
 
