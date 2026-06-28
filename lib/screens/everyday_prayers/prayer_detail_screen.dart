@@ -415,11 +415,7 @@ class _PrayerDetailScreenState extends State<PrayerDetailScreen> {
     
     String cleaned = html;
     
-    // Step 1: Remove all style attributes (handles both style="..." and style='...')
-    cleaned = cleaned.replaceAll(RegExp(r'\s*style\s*=\s*"[^"]*"', caseSensitive: false), '');
-    cleaned = cleaned.replaceAll(RegExp(r"\s*style\s*=\s*'[^']*'", caseSensitive: false), '');
-    
-    // Step 2: Remove extra spaces left after removing attributes (before closing >)
+    // Step 1: Remove extra spaces left after removing attributes (before closing >)
     cleaned = cleaned.replaceAll(RegExp(r'\s+>'), '>');
     
     // Step 3: Remove extra spaces between tags
