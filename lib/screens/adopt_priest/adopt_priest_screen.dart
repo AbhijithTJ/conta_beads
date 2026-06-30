@@ -1049,6 +1049,8 @@ class _FilledCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isMalayalam = Provider.of<LanguageProvider>(context, listen: false).selectedLanguage == 'Malayalam';
+
     return GestureDetector(
       onTap: () => _showPriestDetail(context),
       child: AnimatedContainer(
@@ -1169,7 +1171,7 @@ class _FilledCard extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: GoogleFonts.poppins(
-                  fontSize: 9,
+                  fontSize: isMalayalam ? 7 : 9,
                   fontWeight: FontWeight.w800,
                   color: Colors.white,
                   letterSpacing: 0.5,

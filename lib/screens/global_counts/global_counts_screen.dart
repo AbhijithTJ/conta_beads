@@ -545,6 +545,7 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
     final data        = provider.dataFor(_isRosaryMode ? PrayerType.rosary : PrayerType.divineMercy);
     final leaderboard = data.leaderboard;
     final prayerLabel = _isRosaryMode ? loc.tr('rosaries_offered') : loc.tr('chaplets_offered');
+    final isMalayalam = Provider.of<LanguageProvider>(context, listen: false).selectedLanguage == 'Malayalam';
 
     return _GlassCard(
       padding: const EdgeInsets.all(24),
@@ -553,11 +554,14 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(loc.tr('top_offerings_header'),
-                  style: GoogleFonts.poppins(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w900,
-                      color: AppColors.authBgBottom)),
+              Expanded(
+                child: Text(loc.tr('top_offerings_header'),
+                    style: GoogleFonts.poppins(
+                        fontSize: isMalayalam ? 14 : 18,
+                        fontWeight: FontWeight.w900,
+                        color: AppColors.authBgBottom)),
+              ),
+              const SizedBox(width: 8),
               _buildLiveBadge(),
             ],
           ),
