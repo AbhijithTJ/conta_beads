@@ -21,6 +21,12 @@ class PrayerScrollScreen extends StatefulWidget {
 class _PrayerScrollScreenState extends State<PrayerScrollScreen> {
   final FlutterTts _flutterTts = FlutterTts();
   bool _isPlaying = false;
+  
+  String? _highlightedHtml;
+  List<int> _plainToHtmlMap = [];
+  String _plainTextForMapping = '';
+  String _baseHtml = '';
+  int _currentChunkStartOffset = 0;
 
   @override
   void initState() {
@@ -37,7 +43,31 @@ class _PrayerScrollScreenState extends State<PrayerScrollScreen> {
     _flutterTts.setErrorHandler((msg) {
       developer.log("TTS Error: $msg");
       if (mounted) {
-        setState(() => _isPlaying = false);
+        setState(() {
+          _isPlaying = false;
+          _highlightedHtml = null;
+        });
+      }
+    });
+
+    _flutterTts.setProgressHandler((String text, int startOffset, int endOffset, String word) {
+      if (mounted) {
+        int globalStart = _currentChunkStartOffset + startOffset;
+        int globalEnd = _currentChunkStartOffset + endOffset;
+        
+        if (globalStart < _plainToHtmlMap.length && globalEnd <= _plainToHtmlMap.length && globalStart < globalEnd) {
+          int htmlStart = _plainToHtmlMap[globalStart];
+          int htmlEnd = _plainToHtmlMap[globalEnd - 1] + 1;
+          
+          String newHtml = _baseHtml.substring(0, htmlStart) + 
+                           '<span style="background-color: #FFF9C4; color: black; border-radius: 4px;">' + 
+                           _baseHtml.substring(htmlStart, htmlEnd) + 
+                           '</span>' + 
+                           _baseHtml.substring(htmlEnd);
+          setState(() {
+            _highlightedHtml = newHtml;
+          });
+        }
       }
     });
   }
@@ -61,34 +91,57 @@ class _PrayerScrollScreenState extends State<PrayerScrollScreen> {
     return cleaned.trim();
   }
 
-  String _stripHtmlTags(String html) {
-    RegExp exp = RegExp(r"<[^>]*>", multiLine: true, caseSensitive: true);
-    return html.replaceAll(exp, '').replaceAll('&nbsp;', ' ').trim();
+  void _prepareTextMapping(String html) {
+    _baseHtml = html.replaceAll('&nbsp;', ' ');
+    _plainToHtmlMap = [];
+    StringBuffer plainBuffer = StringBuffer();
+    bool inTag = false;
+    
+    for (int i = 0; i < _baseHtml.length; i++) {
+      if (_baseHtml[i] == '<') {
+        inTag = true;
+      } else if (_baseHtml[i] == '>') {
+        inTag = false;
+      } else if (!inTag) {
+        plainBuffer.write(_baseHtml[i]);
+        _plainToHtmlMap.add(i);
+      }
+    }
+    _plainTextForMapping = plainBuffer.toString();
   }
 
   Future<void> _speak() async {
     if (widget.prayer.data == null) return;
     
-    final text = _stripHtmlTags(widget.prayer.data!);
-    if (text.isEmpty) {
+    final cleanedHtml = _cleanHtmlContent(widget.prayer.data!);
+    _prepareTextMapping(cleanedHtml);
+    
+    final text = _plainTextForMapping;
+    if (text.trim().isEmpty) {
        developer.log('TTS Error: Stripped text is empty.');
        return;
     }
 
-    developer.log('TTS attempting to speak text: ${text.substring(0, text.length > 50 ? 50 : text.length)}...');
-    setState(() => _isPlaying = true);
+    developer.log('TTS attempting to speak text...');
+    setState(() {
+      _isPlaying = true;
+      _highlightedHtml = null;
+    });
 
     const int maxLen = 3500;
     List<String> chunks = [];
+    List<int> chunkStartIndices = [];
     
     if (text.length <= maxLen) {
       chunks.add(text);
+      chunkStartIndices.add(0);
     } else {
       int start = 0;
       while (start < text.length) {
         int end = start + maxLen;
         if (end >= text.length) {
           chunks.add(text.substring(start));
+          chunkStartIndices.add(start);
           break;
         }
         
@@ -102,6 +155,7 @@ class _PrayerScrollScreenState extends State<PrayerScrollScreen> {
           }
         }
         chunks.add(text.substring(start, end));
+        chunkStartIndices.add(start);
         start = end;
       }
     }
@@ -110,6 +164,7 @@ class _PrayerScrollScreenState extends State<PrayerScrollScreen> {
       for (int i = 0; i < chunks.length; i++) {
         if (!_isPlaying) break; // User pressed stop
         
+        _currentChunkStartOffset = chunkStartIndices[i];
         var result = await _flutterTts.speak(chunks[i]);
         if (result != 1) {
           developer.log('TTS speak returned $result (failed) for chunk $i');
@@ -120,14 +175,20 @@ class _PrayerScrollScreenState extends State<PrayerScrollScreen> {
       developer.log('TTS error during speak: $e');
     } finally {
       if (mounted && _isPlaying) {
-        setState(() => _isPlaying = false);
+        setState(() {
+          _isPlaying = false;
+          _highlightedHtml = null;
+        });
       }
     }
   }
 
   Future<void> _stop() async {
     await _flutterTts.stop();
-    setState(() => _isPlaying = false);
+    setState(() {
+      _isPlaying = false;
+      _highlightedHtml = null;
+    });
   }
 
   @override
@@ -188,7 +249,7 @@ class _PrayerScrollScreenState extends State<PrayerScrollScreen> {
                 Padding(
                   padding: const EdgeInsets.all(24.0),
                   child: Html(
-                    data: cleanedContent,
+                    data: _highlightedHtml ?? cleanedContent,
                     style: {
                       'body': Style(
                         fontSize: FontSize(16),

@@ -6,6 +6,8 @@ import 'package:audioplayers/audioplayers.dart';
 import '../../colors/colors.dart';
 import '../../theme/theme_notifier.dart';
 import '../../models/prayer_documents_model.dart';
+import 'package:provider/provider.dart';
+import '../../providers/language_provider.dart';
 
 class PrayerDetailScreen extends StatefulWidget {
   final PrayerDocument prayer;
@@ -78,7 +80,8 @@ class _PrayerDetailScreenState extends State<PrayerDetailScreen> {
       String content = chunk.trim();
       
       // Skip empty chunks or filler breaks
-      if (content.isEmpty || content == '<p><br></p>' || content == '<br>') {
+      String textOnly = content.replaceAll(RegExp(r'<[^>]*>'), '').replaceAll('&nbsp;', '').replaceAll(':', '').trim();
+      if (textOnly.isEmpty) {
         continue;
       }
       
@@ -163,6 +166,11 @@ class _PrayerDetailScreenState extends State<PrayerDetailScreen> {
     return ValueListenableBuilder<bool>(
       valueListenable: themeNotifier,
       builder: (_, isDark, __) {
+        final currentLang = Provider.of<LanguageProvider>(context).selectedLanguage;
+        final isMalayalam = currentLang == 'Malayalam';
+        final double contentFontSize = isMalayalam ? 14 : 16;
+        final double footerFontSize = isMalayalam ? 12 : 14;
+
         // Book-like color palette
         final titleColor = const Color(0xFF2D1F40);
         final bgColor = const Color(0xFFE8E2D8); // Warm desk/table color
@@ -221,12 +229,14 @@ class _PrayerDetailScreenState extends State<PrayerDetailScreen> {
                       // Pages 2+: Content
                       ..._prayerPages.asMap().entries.map((entry) =>
                           _buildContentPage(
-                            paperColor, 
-                            textColor, 
-                            secondaryTextColor, 
-                            entry.value, 
-                            entry.key + 2, 
-                            _prayerPages.length + 1
+                              paperColor,
+                              textColor,
+                              secondaryTextColor,
+                              entry.value,
+                              entry.key + 2,
+                              _prayerPages.length + 1,
+                              contentFontSize,
+                              footerFontSize
                           )
                       ),
                     ],
@@ -329,7 +339,7 @@ class _PrayerDetailScreenState extends State<PrayerDetailScreen> {
   }
 
   // ── Build Content Page ───────────────────────────────────────────────────────
-  Widget _buildContentPage(Color paperColor, Color textColor, Color secondaryTextColor, String pageContent, int pageNum, int totalPages) {
+  Widget _buildContentPage(Color paperColor, Color textColor, Color secondaryTextColor, String pageContent, int pageNum, int totalPages, double contentFontSize, double footerFontSize) {
     final cleanedContent = _cleanHtmlContent(pageContent);
     
     return Container(
@@ -372,7 +382,7 @@ class _PrayerDetailScreenState extends State<PrayerDetailScreen> {
                             data: cleanedContent,
                             style: {
                               'body': Style(
-                                fontSize: FontSize(16),
+                                fontSize: FontSize(contentFontSize),
                                 color: textColor,
                                 lineHeight: LineHeight(1.7),
                                 fontFamily: 'Georgia', // Using a serif font for book feel
@@ -401,7 +411,7 @@ class _PrayerDetailScreenState extends State<PrayerDetailScreen> {
                     Text(
                       '$pageNum / $totalPages',
                       style: GoogleFonts.playfairDisplay(
-                        fontSize: 14,
+                        fontSize: footerFontSize,
                         fontWeight: FontWeight.bold,
                         color: secondaryTextColor.withOpacity(0.7),
                       ),
