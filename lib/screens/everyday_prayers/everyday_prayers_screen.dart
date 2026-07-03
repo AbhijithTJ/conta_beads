@@ -14,6 +14,7 @@ import '../../providers/language_provider.dart';
 import '../../services/localization_service.dart';
 import '../../models/prayer_documents_model.dart';
 import 'prayer_detail_screen.dart';
+import 'prayer_scroll_screen.dart';
 
 class EverydayPrayersScreen extends StatefulWidget {
   const EverydayPrayersScreen({super.key});
@@ -480,7 +481,6 @@ class _EverydayPrayersScreenState extends State<EverydayPrayersScreen> {
                   MaterialPageRoute(
                     builder: (context) => PrayerDetailScreen(
                       prayer: prayer,
-                      isScrollMode: false,
                     ),
                   ),
                 );
@@ -498,9 +498,8 @@ class _EverydayPrayersScreenState extends State<EverydayPrayersScreen> {
                 Navigator.of(context).pop();
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (context) => PrayerDetailScreen(
+                    builder: (context) => PrayerScrollScreen(
                       prayer: prayer,
-                      isScrollMode: true,
                     ),
                   ),
                 );
