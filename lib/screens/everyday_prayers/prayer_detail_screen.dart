@@ -13,7 +13,10 @@ class PrayerDetailScreen extends StatefulWidget {
   const PrayerDetailScreen({
     super.key,
     required this.prayer,
+    this.isScrollMode = false,
   });
+
+  final bool isScrollMode;
 
   @override
   State<PrayerDetailScreen> createState() => _PrayerDetailScreenState();
@@ -153,6 +156,10 @@ class _PrayerDetailScreenState extends State<PrayerDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.isScrollMode) {
+      return _buildScrollView(context);
+    }
+
     return ValueListenableBuilder<bool>(
       valueListenable: themeNotifier,
       builder: (_, isDark, __) {
@@ -436,5 +443,70 @@ class _PrayerDetailScreenState extends State<PrayerDetailScreen> {
     cleaned = cleaned.trim();
     
     return cleaned;
+  }
+
+  Widget _buildScrollView(BuildContext context) {
+    return ValueListenableBuilder<bool>(
+      valueListenable: themeNotifier,
+      builder: (_, isDark, __) {
+        final bgColor = const Color(0xFFE8E2D8);
+        final textColor = const Color(0xFF333333);
+        final titleColor = const Color(0xFF2D1F40);
+        final cleanedContent = _cleanHtmlContent(widget.prayer.data ?? '');
+
+        return Scaffold(
+          backgroundColor: bgColor,
+          appBar: AppBar(
+            backgroundColor: bgColor,
+            elevation: 0,
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back_rounded, color: titleColor),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            title: Text(
+              widget.prayer.title.toUpperCase(),
+              style: GoogleFonts.playfairDisplay(
+                color: titleColor,
+                fontWeight: FontWeight.w800,
+                fontSize: 18,
+              ),
+            ),
+            centerTitle: true,
+          ),
+          body: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            child: Column(
+              children: [
+                if (widget.prayer.imagePath.isNotEmpty)
+                  Image.network(
+                    widget.prayer.imagePath,
+                    width: double.infinity,
+                    height: 250,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                  ),
+                Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Html(
+                    data: cleanedContent,
+                    style: {
+                      'body': Style(
+                        fontSize: FontSize(16),
+                        color: textColor,
+                        lineHeight: LineHeight(1.7),
+                        fontFamily: 'Georgia',
+                        margin: Margins.zero,
+                      ),
+                      'p': Style(margin: Margins.only(bottom: 16)),
+                      'strong': Style(color: titleColor),
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 }

@@ -452,12 +452,75 @@ class _EverydayPrayersScreenState extends State<EverydayPrayersScreen> {
     if (prayer.type == 'link') {
       _openPrayerDocument(prayer);
     } else if (prayer.type == 'text') {
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => PrayerDetailScreen(prayer: prayer),
-        ),
-      );
+      _showReadingModeDialog(prayer);
     }
+  }
+
+  void _showReadingModeDialog(PrayerDocument prayer) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+            loc.tr('choose_reading_mode'),
+            style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+          ),
+          content: Text(
+            loc.tr('how_would_you_like_to_read'),
+            style: GoogleFonts.poppins(fontSize: 14),
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => PrayerDetailScreen(
+                      prayer: prayer,
+                      isScrollMode: false,
+                    ),
+                  ),
+                );
+              },
+              child: Text(
+                loc.tr('book_type'),
+                style: GoogleFonts.poppins(
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF624294),
+                ),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => PrayerDetailScreen(
+                      prayer: prayer,
+                      isScrollMode: true,
+                    ),
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF624294),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: Text(
+                loc.tr('scroll_type'),
+                style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   // ── Frosted glass card — mirrors login screen card style ────────────────────

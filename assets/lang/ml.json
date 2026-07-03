@@ -240,5 +240,9 @@
   "scroll_speed": "സ്ക്രോൾ വേഗം",
   "stopped": "നിർത്തിയത്",
   "english": "ഇംഗ്ലീഷ്",
-  "malayalam": "മലയാളം"
+  "malayalam": "മലയാളം",
+  "choose_reading_mode": "വായനാരീതി തിരഞ്ഞെടുക്കുക",
+  "how_would_you_like_to_read": "ഈ പ്രാർത്ഥന എങ്ങനെ വായിക്കാൻ നിങ്ങൾ ആഗ്രഹിക്കുന്നു?",
+  "book_type": "പുസ്തക രീതി",
+  "scroll_type": "സ്ക്രോൾ രീതി"
 }

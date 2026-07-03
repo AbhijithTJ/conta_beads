@@ -240,5 +240,9 @@
   "scroll_speed": "Scroll Speed",
   "stopped": "Stopped",
   "english": "English",
-  "malayalam": "Malayalam"
+  "malayalam": "Malayalam",
+  "choose_reading_mode": "Choose Reading Mode",
+  "how_would_you_like_to_read": "How would you like to read this prayer?",
+  "book_type": "Book Type",
+  "scroll_type": "Scroll Type"
 }

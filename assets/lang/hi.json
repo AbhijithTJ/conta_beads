@@ -160,5 +160,9 @@
   "delete": "हटाएं",
   "enable_notifications": "सूचनाएं सक्षम करें",
   "notification_permission_description": "प्रार्थना अनुरोधों, सामुदायिक अपडेट, और महत्वपूर्ण अनुस्मारकों के बारे में सूचित रहें ताकि आपका प्रार्थना जीवन सक्रिय रहे।",
-  "allow": "अनुमति दें"
+  "allow": "अनुमति दें",
+  "choose_reading_mode": "Choose Reading Mode",
+  "how_would_you_like_to_read": "How would you like to read this prayer?",
+  "book_type": "Book Type",
+  "scroll_type": "Scroll Type"
 }
