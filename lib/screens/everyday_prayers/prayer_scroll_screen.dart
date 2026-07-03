@@ -5,6 +5,8 @@ import 'package:flutter_tts/flutter_tts.dart';
 import 'dart:developer' as developer;
 import '../../theme/theme_notifier.dart';
 import '../../models/prayer_documents_model.dart';
+import 'package:provider/provider.dart';
+import '../../providers/language_provider.dart';
 
 class PrayerScrollScreen extends StatefulWidget {
   final PrayerDocument prayer;
@@ -39,6 +41,16 @@ class _PrayerScrollScreenState extends State<PrayerScrollScreen> {
     await _flutterTts.setVolume(1.0);
     await _flutterTts.setSpeechRate(0.5);
     await _flutterTts.setPitch(1.0);
+    
+    // Ensure iOS plays sound even if the device is on silent mode
+    await _flutterTts.setIosAudioCategory(
+      IosTextToSpeechAudioCategory.playback,
+      [
+        IosTextToSpeechAudioCategoryOptions.allowBluetooth,
+        IosTextToSpeechAudioCategoryOptions.allowBluetoothA2DP,
+        IosTextToSpeechAudioCategoryOptions.mixWithOthers
+      ]
+    );
 
     _flutterTts.setErrorHandler((msg) {
       developer.log("TTS Error: $msg");
@@ -74,6 +86,7 @@ class _PrayerScrollScreenState extends State<PrayerScrollScreen> {
 
   @override
   void dispose() {
+    _isPlaying = false;
     _flutterTts.stop();
     super.dispose();
   }
@@ -120,6 +133,16 @@ class _PrayerScrollScreenState extends State<PrayerScrollScreen> {
     if (text.trim().isEmpty) {
        developer.log('TTS Error: Stripped text is empty.');
        return;
+    }
+    
+    // Set the appropriate TTS language
+    final currentLang = Provider.of<LanguageProvider>(context, listen: false).selectedLanguage;
+    if (currentLang == 'Malayalam') {
+      await _flutterTts.setLanguage("ml-IN");
+    } else if (currentLang == 'Hindi') {
+      await _flutterTts.setLanguage("hi-IN");
+    } else {
+      await _flutterTts.setLanguage("en-US");
     }
 
     developer.log('TTS attempting to speak text...');
@@ -201,15 +224,25 @@ class _PrayerScrollScreenState extends State<PrayerScrollScreen> {
         final titleColor = const Color(0xFF2D1F40);
         final cleanedContent = _cleanHtmlContent(widget.prayer.data ?? '');
 
-        return Scaffold(
-          backgroundColor: bgColor,
-          appBar: AppBar(
+        return WillPopScope(
+          onWillPop: () async {
+            _isPlaying = false;
+            _flutterTts.stop();
+            return true;
+          },
+          child: Scaffold(
             backgroundColor: bgColor,
-            elevation: 0,
-            leading: IconButton(
-              icon: Icon(Icons.arrow_back_rounded, color: titleColor),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
+            appBar: AppBar(
+              backgroundColor: bgColor,
+              elevation: 0,
+              leading: IconButton(
+                icon: Icon(Icons.arrow_back_rounded, color: titleColor),
+                onPressed: () {
+                  _isPlaying = false;
+                  _flutterTts.stop();
+                  Navigator.of(context).pop();
+                },
+              ),
             title: Text(
               widget.prayer.title.toUpperCase(),
               style: GoogleFonts.playfairDisplay(
@@ -266,8 +299,9 @@ class _PrayerScrollScreenState extends State<PrayerScrollScreen> {
               ],
             ),
           ),
-        );
-      },
+        ),
+      );
+    },
     );
   }
 }
