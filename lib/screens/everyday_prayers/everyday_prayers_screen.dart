@@ -432,12 +432,19 @@ class _EverydayPrayersScreenState extends State<EverydayPrayersScreen> {
                 prayer.title,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: GoogleFonts.poppins(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white,
-                  height: 1.2,
-                ),
+                style: prayer.languageId == 2
+                    ? GoogleFonts.notoSansMalayalam(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                        height: 1.2,
+                      )
+                    : GoogleFonts.poppins(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                        height: 1.2,
+                      ),
               ),
             ),
           ),

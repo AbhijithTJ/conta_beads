@@ -309,12 +309,19 @@ class _PrayerDetailScreenState extends State<PrayerDetailScreen> {
                     Text(
                       widget.prayer.title.toUpperCase(),
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.playfairDisplay(
-                        fontSize: 22,
-                        fontWeight: FontWeight.w800,
-                        color: const Color(0xFF2D1F40),
-                        letterSpacing: 1,
-                      ),
+                      style: widget.prayer.languageId == 2
+                          ? GoogleFonts.notoSansMalayalam(
+                              fontSize: 22,
+                              fontWeight: FontWeight.w800,
+                              color: const Color(0xFF2D1F40),
+                              letterSpacing: 1,
+                            )
+                          : GoogleFonts.playfairDisplay(
+                              fontSize: 22,
+                              fontWeight: FontWeight.w800,
+                              color: const Color(0xFF2D1F40),
+                              letterSpacing: 1,
+                            ),
                     ),
                     const SizedBox(height: 20),
                     const Divider(color: Color(0xFFE8E2D8), thickness: 1),
@@ -475,11 +482,17 @@ class _PrayerDetailScreenState extends State<PrayerDetailScreen> {
             ),
             title: Text(
               widget.prayer.title.toUpperCase(),
-              style: GoogleFonts.playfairDisplay(
-                color: titleColor,
-                fontWeight: FontWeight.w800,
-                fontSize: 18,
-              ),
+              style: widget.prayer.languageId == 2
+                  ? GoogleFonts.notoSansMalayalam(
+                      color: titleColor,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 18,
+                    )
+                  : GoogleFonts.playfairDisplay(
+                      color: titleColor,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 18,
+                    ),
             ),
             centerTitle: true,
           ),

@@ -488,14 +488,21 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           child: SingleChildScrollView(
                           child: Text(
                             quote.quotation,
-                          style: TextStyle(
-                              fontSize: RegExp(r'[\u0D00-\u0D7F]').hasMatch(quote.quotation) ? 12 : 13,
-                              fontWeight:
-                                  isDark ? FontWeight.w500 : FontWeight.w700,
-                              color: const Color(0xFF624294),
-                              fontStyle: FontStyle.italic,
-                              height: 1.4,
-                              letterSpacing: 0.2),
+                          style: RegExp(r'[\u0D00-\u0D7F]').hasMatch(quote.quotation)
+                              ? GoogleFonts.notoSansMalayalam(
+                                  fontSize: 12,
+                                  fontWeight: isDark ? FontWeight.w500 : FontWeight.w700,
+                                  color: const Color(0xFF624294),
+                                  fontStyle: FontStyle.italic,
+                                  height: 1.4,
+                                  letterSpacing: 0.2)
+                              : TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: isDark ? FontWeight.w500 : FontWeight.w700,
+                                  color: const Color(0xFF624294),
+                                  fontStyle: FontStyle.italic,
+                                  height: 1.4,
+                                  letterSpacing: 0.2),
                           ),
                         ),
                       ),
@@ -506,11 +513,17 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           quote.reference.startsWith('—')
                               ? quote.reference
                               : '— ${quote.reference}',
-                          style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                              color: Color(0xFF624294),
-                              letterSpacing: 1.2)),
+                          style: RegExp(r'[\u0D00-\u0D7F]').hasMatch(quote.reference)
+                              ? GoogleFonts.notoSansMalayalam(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  color: const Color(0xFF624294),
+                                  letterSpacing: 1.2)
+                              : const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  color: Color(0xFF624294),
+                                  letterSpacing: 1.2)),
                   ],
                 ),
               ),
@@ -776,14 +789,23 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             section.title,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.poppins(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
-                              color: isDark
-                                  ? Colors.white
-                                  : const Color(0xFF624294),
-                              height: 1.3,
-                            ),
+                            style: RegExp(r'[\u0D00-\u0D7F]').hasMatch(section.title)
+                                ? GoogleFonts.notoSansMalayalam(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700,
+                                    color: isDark
+                                        ? Colors.white
+                                        : const Color(0xFF624294),
+                                    height: 1.3,
+                                  )
+                                : GoogleFonts.poppins(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700,
+                                    color: isDark
+                                        ? Colors.white
+                                        : const Color(0xFF624294),
+                                    height: 1.3,
+                                  ),
                           ),
                         ),
                         Icon(Icons.favorite_rounded,

@@ -308,14 +308,18 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
                     child: Text(
                       q.quotation,
                       textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: RegExp(r'[\u0D00-\u0D7F]').hasMatch(q.quotation) ? 12 : 13, fontWeight: isDark ? FontWeight.w500 : FontWeight.w700, color: quoteTextColor, fontStyle: FontStyle.italic, height: 1.4, letterSpacing: 0.2),
+                      style: RegExp(r'[\u0D00-\u0D7F]').hasMatch(q.quotation)
+                          ? GoogleFonts.notoSansMalayalam(fontSize: 12, fontWeight: isDark ? FontWeight.w500 : FontWeight.w700, color: quoteTextColor, fontStyle: FontStyle.italic, height: 1.4, letterSpacing: 0.2)
+                          : TextStyle(fontSize: 13, fontWeight: isDark ? FontWeight.w500 : FontWeight.w700, color: quoteTextColor, fontStyle: FontStyle.italic, height: 1.4, letterSpacing: 0.2),
                     ),
                   ),
                 ),
               ),
               if (q.reference.isNotEmpty)
                 Text('— ${q.reference}',
-                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Color(0xFF624294), letterSpacing: 1.2)),
+                    style: RegExp(r'[\u0D00-\u0D7F]').hasMatch(q.reference)
+                        ? GoogleFonts.notoSansMalayalam(fontSize: 12, fontWeight: FontWeight.w700, color: const Color(0xFF624294), letterSpacing: 1.2)
+                        : const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Color(0xFF624294), letterSpacing: 1.2)),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: List.generate(data.quotes.length, (i) {
@@ -579,7 +583,9 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
             children: [
               Text(
                 prayer.prayerType,
-                style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w800, color: const Color(0xFF624294)),
+                style: RegExp(r'[\u0D00-\u0D7F]').hasMatch(prayer.prayerType)
+                    ? GoogleFonts.notoSansMalayalam(fontSize: 13, fontWeight: FontWeight.w800, color: const Color(0xFF624294))
+                    : GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w800, color: const Color(0xFF624294)),
               ),
               const SizedBox(height: 8),
               Container(
