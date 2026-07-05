@@ -436,6 +436,8 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     // Read provider state here — inside build() — before any nested builders.
     final isLoading = context.select<AuthProvider, bool>((a) => a.isLoading);
+    // Watch language provider to trigger full screen rebuild on language change
+    context.watch<LanguageProvider>();
 
     return ValueListenableBuilder<bool>(
       valueListenable: themeNotifier,

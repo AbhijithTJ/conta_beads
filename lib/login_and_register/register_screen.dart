@@ -11,6 +11,7 @@ import '../providers/auth_provider.dart';
 import '../providers/user_provider.dart';
 import '../services/session_service.dart';
 import '../services/localization_service.dart';
+import '../providers/language_provider.dart';
 import '../theme/theme_notifier.dart';
 import 'login_screen.dart';
 
@@ -188,6 +189,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Widget build(BuildContext context) {
     // Read provider state at the top of build() — never inside nested builders.
     final isLoading = context.select<AuthProvider, bool>((a) => a.isLoading);
+    context.watch<LanguageProvider>();
 
     return ValueListenableBuilder<bool>(
       valueListenable: themeNotifier,
