@@ -1299,7 +1299,7 @@ class _SavedSlotCard extends StatelessWidget {
                       Text(
                         loc.tr('unadopt_priest'),
                         style: GoogleFonts.poppins(
-                          fontSize: 14,
+                          fontSize: loc.currentLangCode == 'ml' ? 12 : 14,
                           fontWeight: FontWeight.w700,
                           color: Colors.white,
                         ),
