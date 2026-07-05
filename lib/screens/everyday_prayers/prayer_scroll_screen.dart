@@ -137,10 +137,36 @@ class _PrayerScrollScreenState extends State<PrayerScrollScreen> {
     
     // Set the appropriate TTS language
     final currentLang = Provider.of<LanguageProvider>(context, listen: false).selectedLanguage;
+    int? langResult;
+    
     if (currentLang == 'Malayalam') {
-      await _flutterTts.setLanguage("ml-IN");
+      langResult = await _flutterTts.setLanguage("ml-IN");
     } else {
-      await _flutterTts.setLanguage("en-US");
+      langResult = await _flutterTts.setLanguage("en-US");
+    }
+
+    // If setting language failed (returned 0) or is null, it means the voice is not downloaded on the device
+    if (langResult == 0) {
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Text('Voice Missing'),
+            content: Text(
+              currentLang == 'Malayalam'
+                  ? 'The Malayalam voice is not installed on your device. \n\nOn iPhone, please go to Settings > Accessibility > Spoken Content > Voices and download Malayalam (e.g. Lekha).'
+                  : 'The required voice is not installed on your device.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        );
+      }
+      return; // Do not attempt to speak in the wrong language
     }
 
     developer.log('TTS attempting to speak text...');
