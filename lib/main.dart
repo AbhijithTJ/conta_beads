@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
 import 'config/app_config.dart';
 import 'firebase_options.dart';
@@ -17,6 +18,7 @@ import 'providers/reverb_provider.dart';
 import 'screens/splash/splash_screen.dart';
 import 'screens/theme_select/theme_select_screen.dart';
 import 'services/localization_service.dart';
+import 'services/language_id_service.dart';
 import 'services/notification_service.dart';
 import 'services/session_service.dart';
 import 'theme/theme_notifier.dart';
@@ -42,8 +44,13 @@ void main() async {
   // Restore theme from session (sync, no await).
   themeNotifier.setDark(SessionService.instance.isDarkTheme);
 
-  // Load default language.
-  await loc.load('English');
+  // Load saved language.
+  final prefs = await SharedPreferences.getInstance();
+  final savedLanguage = prefs.getString('selected_language') ?? 'English';
+  await loc.load(savedLanguage);
+  
+  // Set language ID for initial API requests
+  languageIdService.setLanguageByName(savedLanguage);
 
   runApp(const AppRoot());
 }

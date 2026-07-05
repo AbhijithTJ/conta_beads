@@ -249,6 +249,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    context.watch<LanguageProvider>();
     final size = MediaQuery.of(context).size;
     return ValueListenableBuilder<bool>(
       valueListenable: themeNotifier,
