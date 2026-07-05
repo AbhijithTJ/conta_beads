@@ -100,27 +100,17 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       // Logo
                       Image.asset(
                         'assets/demo/logo_image.png',
-                        height: 100,
+                        height: 180,
                         errorBuilder: (context, error, stackTrace) {
                            // Fallback if logo name is different
                            return Image.asset(
                              'assets/demo/logo_image_light.png',
-                             height: 100,
-                             errorBuilder: (context, error, stackTrace) => const SizedBox(height: 100),
+                             height: 180,
+                             errorBuilder: (context, error, stackTrace) => const SizedBox(height: 180),
                            );
                         },
                       ),
-                      const SizedBox(height: 16),
-                      const Text(
-                        'Upper Room',
-                        style: TextStyle(
-                          fontSize: 26,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                          letterSpacing: 1.5,
-                        ),
-                      ),
-                      const SizedBox(height: 48),
+                      const SizedBox(height: 24),
 
                       // Card
                       AnimatedSwitcher(
