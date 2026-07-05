@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../theme/theme_notifier.dart';
 import '../../models/priest_model.dart';
+import '../../services/localization_service.dart';
 
 class AdoptPriestSuccessScreen extends StatefulWidget {
   final AdoptPriestsResponse response;
@@ -124,7 +125,7 @@ class _AdoptPriestSuccessScreenState extends State<AdoptPriestSuccessScreen>
                       child: Column(
                         children: [
                           Text(
-                            'Priests Adopted!',
+                            loc.tr('priests_adopted_success'),
                             style: GoogleFonts.poppins(
                               fontSize: 28,
                               fontWeight: FontWeight.w800,
@@ -133,7 +134,9 @@ class _AdoptPriestSuccessScreenState extends State<AdoptPriestSuccessScreen>
                           ),
                           const SizedBox(height: 12),
                           Text(
-                            widget.response.message,
+                            widget.response.adoptedCount == 1 
+                                ? loc.tr('priest_adopted_successfully_msg')
+                                : loc.tr('priests_adopted_successfully_msg', args: {'count': widget.response.adoptedCount.toString()}),
                             textAlign: TextAlign.center,
                             style: GoogleFonts.poppins(
                               fontSize: 14,
@@ -150,7 +153,7 @@ class _AdoptPriestSuccessScreenState extends State<AdoptPriestSuccessScreen>
 
                     // ── Adopted Priests List ─────────────────────────
                     Text(
-                      'Your Adopted Priests',
+                      loc.tr('your_adopted_priests_title'),
                       style: GoogleFonts.poppins(
                         fontSize: 18,
                         fontWeight: FontWeight.w800,
@@ -204,7 +207,7 @@ class _AdoptPriestSuccessScreenState extends State<AdoptPriestSuccessScreen>
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
                           _StatItem(
-                            label: 'Adopted',
+                            label: loc.tr('adopted_stat'),
                             value: '${widget.response.adoptedCount}',
                           ),
                           Container(
@@ -213,7 +216,7 @@ class _AdoptPriestSuccessScreenState extends State<AdoptPriestSuccessScreen>
                             color: const Color(0xFF624294).withOpacity(0.1),
                           ),
                           _StatItem(
-                            label: 'Total',
+                            label: loc.tr('total_stat'),
                             value: '${widget.response.totalAdopted}',
                           ),
                           Container(
@@ -222,7 +225,7 @@ class _AdoptPriestSuccessScreenState extends State<AdoptPriestSuccessScreen>
                             color: const Color(0xFF624294).withOpacity(0.1),
                           ),
                           _StatItem(
-                            label: 'Remaining',
+                            label: loc.tr('remaining_stat'),
                             value: '${widget.response.remainingSlots}',
                           ),
                         ],

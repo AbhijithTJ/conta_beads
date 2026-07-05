@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../colors/colors.dart';
 import '../../models/priest_model.dart';
+import '../../services/localization_service.dart';
 
 class SuggestPriestSuccessScreen extends StatefulWidget {
   final SuggestedPriest priest;
@@ -91,9 +92,9 @@ class _SuggestPriestSuccessScreenState extends State<SuggestPriestSuccessScreen>
                     opacity: _opacityAnimation,
                     child: Column(
                       children: [
-                        const Text(
-                          'Suggestion Submitted',
-                          style: TextStyle(
+                        Text(
+                          loc.tr('suggestion_submitted'),
+                          style: const TextStyle(
                             fontSize: 32,
                             fontWeight: FontWeight.w900,
                             color: Colors.white,
@@ -205,7 +206,7 @@ class _SuggestPriestSuccessScreenState extends State<SuggestPriestSuccessScreen>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Priest Details',
+            loc.tr('priest_details'),
             style: GoogleFonts.poppins(
               fontSize: 14,
               fontWeight: FontWeight.w700,
@@ -214,11 +215,11 @@ class _SuggestPriestSuccessScreenState extends State<SuggestPriestSuccessScreen>
             ),
           ),
           const SizedBox(height: 16),
-          _buildDetailRow('Original Name', widget.priest.originalName),
+          _buildDetailRow(loc.tr('original_name'), widget.priest.originalName),
           const SizedBox(height: 12),
-          _buildDetailRow('Display Name', widget.priest.displayName),
+          _buildDetailRow(loc.tr('display_name'), widget.priest.displayName),
           const SizedBox(height: 12),
-          _buildDetailRow('Status', widget.priest.status),
+          _buildDetailRow(loc.tr('status_label'), widget.priest.status),
           const SizedBox(height: 16),
           Container(
             padding: const EdgeInsets.all(12),
@@ -234,7 +235,7 @@ class _SuggestPriestSuccessScreenState extends State<SuggestPriestSuccessScreen>
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  'Note',
+                  loc.tr('note_label'),
                   style: GoogleFonts.poppins(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
