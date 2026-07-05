@@ -14,9 +14,6 @@ class LocalizationService {
   static const Map<String, String> langCodeMap = {
     'English':   'en',
     'Malayalam': 'ml',
-    'Hindi':     'hi',
-    'Tamil':     'ta',
-    'Latin':     'la',
   };
 
   Future<void> load(String languageName) async {

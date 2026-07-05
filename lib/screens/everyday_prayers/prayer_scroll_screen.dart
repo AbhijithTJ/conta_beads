@@ -139,8 +139,6 @@ class _PrayerScrollScreenState extends State<PrayerScrollScreen> {
     final currentLang = Provider.of<LanguageProvider>(context, listen: false).selectedLanguage;
     if (currentLang == 'Malayalam') {
       await _flutterTts.setLanguage("ml-IN");
-    } else if (currentLang == 'Hindi') {
-      await _flutterTts.setLanguage("hi-IN");
     } else {
       await _flutterTts.setLanguage("en-US");
     }
