@@ -441,7 +441,7 @@ class _EverydayPrayersScreenState extends State<EverydayPrayersScreen> {
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: prayer.languageId == 2
-                    ? GoogleFonts.notoSansMalayalam(
+                    ? GoogleFonts.anekMalayalam(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
                         color: Colors.white,

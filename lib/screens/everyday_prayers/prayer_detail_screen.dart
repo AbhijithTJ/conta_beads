@@ -310,7 +310,7 @@ class _PrayerDetailScreenState extends State<PrayerDetailScreen> {
                       widget.prayer.title.toUpperCase(),
                       textAlign: TextAlign.center,
                       style: widget.prayer.languageId == 2
-                          ? GoogleFonts.notoSansMalayalam(
+                          ? GoogleFonts.anekMalayalam(
                               fontSize: 22,
                               fontWeight: FontWeight.w800,
                               color: const Color(0xFF2D1F40),
@@ -392,7 +392,9 @@ class _PrayerDetailScreenState extends State<PrayerDetailScreen> {
                                 fontSize: FontSize(contentFontSize),
                                 color: textColor,
                                 lineHeight: LineHeight(1.7),
-                                fontFamily: 'Georgia', // Using a serif font for book feel
+                                fontFamily: widget.prayer.languageId == 2 
+                                    ? GoogleFonts.anekMalayalam().fontFamily 
+                                    : 'Georgia', // Using a serif font for book feel
                                 margin: Margins.zero,
                                 textAlign: TextAlign.left, // Keep text starting from the left
                               ),
@@ -483,7 +485,7 @@ class _PrayerDetailScreenState extends State<PrayerDetailScreen> {
             title: Text(
               widget.prayer.title.toUpperCase(),
               style: widget.prayer.languageId == 2
-                  ? GoogleFonts.notoSansMalayalam(
+                  ? GoogleFonts.anekMalayalam(
                       color: titleColor,
                       fontWeight: FontWeight.w800,
                       fontSize: 18,
@@ -517,7 +519,9 @@ class _PrayerDetailScreenState extends State<PrayerDetailScreen> {
                         fontSize: FontSize(16),
                         color: textColor,
                         lineHeight: LineHeight(1.7),
-                        fontFamily: 'Georgia',
+                        fontFamily: widget.prayer.languageId == 2 
+                            ? GoogleFonts.anekMalayalam().fontFamily 
+                            : 'Georgia',
                         margin: Margins.zero,
                       ),
                       'p': Style(margin: Margins.only(bottom: 16)),

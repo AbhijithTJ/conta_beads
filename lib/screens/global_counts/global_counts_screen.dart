@@ -538,7 +538,7 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
                       quoteText,
                       textAlign: TextAlign.center,
                       style: RegExp(r'[\u0D00-\u0D7F]').hasMatch(quoteText)
-                          ? GoogleFonts.notoSansMalayalam(
+                          ? GoogleFonts.anekMalayalam(
                               fontSize: 12,
                               fontWeight: isDark ? FontWeight.w500 : FontWeight.w700,
                               color: const Color(0xFF624294),
@@ -559,7 +559,7 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
               if (quoteAuthor.isNotEmpty)
                 Text(quoteAuthor,
                     style: RegExp(r'[\u0D00-\u0D7F]').hasMatch(quoteAuthor)
-                        ? GoogleFonts.notoSansMalayalam(
+                        ? GoogleFonts.anekMalayalam(
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
                             color: const Color(0xFF624294),

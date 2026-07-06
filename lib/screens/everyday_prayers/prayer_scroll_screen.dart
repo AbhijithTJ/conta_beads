@@ -270,7 +270,7 @@ class _PrayerScrollScreenState extends State<PrayerScrollScreen> {
             title: Text(
               widget.prayer.title.toUpperCase(),
               style: widget.prayer.languageId == 2
-                  ? GoogleFonts.notoSansMalayalam(
+                  ? GoogleFonts.anekMalayalam(
                       color: titleColor,
                       fontWeight: FontWeight.w800,
                       fontSize: 18,

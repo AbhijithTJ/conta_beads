@@ -489,7 +489,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           child: Text(
                             quote.quotation,
                           style: RegExp(r'[\u0D00-\u0D7F]').hasMatch(quote.quotation)
-                              ? GoogleFonts.notoSansMalayalam(
+                              ? GoogleFonts.anekMalayalam(
                                   fontSize: 12,
                                   fontWeight: isDark ? FontWeight.w500 : FontWeight.w700,
                                   color: const Color(0xFF624294),
@@ -514,7 +514,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                               ? quote.reference
                               : '— ${quote.reference}',
                           style: RegExp(r'[\u0D00-\u0D7F]').hasMatch(quote.reference)
-                              ? GoogleFonts.notoSansMalayalam(
+                              ? GoogleFonts.anekMalayalam(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w700,
                                   color: const Color(0xFF624294),
@@ -790,7 +790,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: RegExp(r'[\u0D00-\u0D7F]').hasMatch(section.title)
-                                ? GoogleFonts.notoSansMalayalam(
+                                ? GoogleFonts.anekMalayalam(
                                     fontSize: 13,
                                     fontWeight: FontWeight.w700,
                                     color: isDark
