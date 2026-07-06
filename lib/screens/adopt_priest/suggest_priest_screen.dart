@@ -147,18 +147,49 @@ class _SuggestPriestScreenState extends State<SuggestPriestScreen> {
                     )
                   : const BoxDecoration(color: Color(0xFFF0EBF0)),
               child: SafeArea(
-                child: SingleChildScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: Column(
-                    children: [
-                      const SizedBox(height: 40),
-                      _buildHeader(titleColor, subColor),
-                      const SizedBox(height: 40),
-                      _buildFormCard(isDark, titleColor, subColor, inputBg, inputBorder, hintColor),
-                      const SizedBox(height: 40),
-                    ],
-                  ),
+                child: Stack(
+                  children: [
+                    SingleChildScrollView(
+                      physics: const BouncingScrollPhysics(),
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: Column(
+                        children: [
+                          const SizedBox(height: 40),
+                          _buildHeader(titleColor, subColor),
+                          const SizedBox(height: 40),
+                          _buildFormCard(isDark, titleColor, subColor, inputBg, inputBorder, hintColor),
+                          const SizedBox(height: 40),
+                        ],
+                      ),
+                    ),
+                    if (Navigator.of(context).canPop())
+                      Positioned(
+                        top: 0,
+                        left: 16,
+                        child: GestureDetector(
+                          onTap: () => Navigator.of(context).pop(),
+                          child: Container(
+                            width: 40, height: 40,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: isDark
+                                  ? Colors.black.withOpacity(0.35)
+                                  : Colors.white.withOpacity(0.75),
+                              border: Border.all(
+                                color: isDark
+                                    ? Colors.white.withOpacity(0.4)
+                                    : const Color(0xFF624294).withOpacity(0.25),
+                              ),
+                            ),
+                            child: Icon(
+                              Icons.arrow_back_rounded,
+                              color: isDark ? Colors.white : const Color(0xFF624294),
+                              size: 20,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
               ),
             ),

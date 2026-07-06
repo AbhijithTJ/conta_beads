@@ -11,7 +11,7 @@ import '../../models/intentions_model.dart';
 import '../../services/language_id_service.dart';
 import '../../services/localization_service.dart' show LocalizationService, loc;
 import 'intention_success_screen.dart';
-
+import '../bottom_nav_wrapper.dart';
 class IntentionsScreen extends StatefulWidget {
   const IntentionsScreen({super.key});
 
@@ -135,8 +135,11 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
                       )
                     : const BoxDecoration(color: Color(0xFFF0EBF0)),
                 child: SafeArea(
-                  child: Consumer<IntentionsProvider>(
-                    builder: (context, provider, _) {
+                  child: Stack(
+                    children: [
+                      Positioned.fill(
+                        child: Consumer<IntentionsProvider>(
+                          builder: (context, provider, _) {
                       if (provider.isLoading) {
                         return Center(
                           child: CircularProgressIndicator(
@@ -215,7 +218,44 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
                           ),
                         ),
                       );
-                    },
+                          },
+                        ),
+                      ),
+                      Positioned(
+                        top: 16,
+                        left: 16,
+                        child: GestureDetector(
+                          onTap: () {
+                            if (Navigator.of(context).canPop()) {
+                              Navigator.of(context).pop();
+                            } else {
+                              Navigator.of(context).pushReplacement(
+                                MaterialPageRoute(builder: (_) => const BottomNavWrapper()),
+                              );
+                            }
+                          },
+                          child: Container(
+                              width: 40, height: 40,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: isDark
+                                    ? Colors.black.withOpacity(0.35)
+                                    : Colors.white.withOpacity(0.75),
+                                border: Border.all(
+                                  color: isDark
+                                      ? Colors.white.withOpacity(0.4)
+                                      : const Color(0xFF624294).withOpacity(0.25),
+                                ),
+                              ),
+                              child: Icon(
+                                Icons.arrow_back_rounded,
+                                color: isDark ? Colors.white : const Color(0xFF624294),
+                                size: 20,
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                 ),
               ),

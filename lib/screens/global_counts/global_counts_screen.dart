@@ -12,6 +12,7 @@ import '../../providers/reverb_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../services/localization_service.dart' show LocalizationService, loc;
 import '../../theme/theme_notifier.dart';
+import '../bottom_nav_wrapper.dart';
 
 class GlobalCountsScreen extends StatefulWidget {
   const GlobalCountsScreen({super.key});
@@ -134,8 +135,11 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
                       )
                     : BoxDecoration(color: bgColor),
                 child: SafeArea(
-                  child: Consumer2<GlobalCountsProvider, UserProvider>(
-                    builder: (_, provider, userProvider, __) {
+                  child: Stack(
+                    children: [
+                      Positioned.fill(
+                        child: Consumer2<GlobalCountsProvider, UserProvider>(
+                          builder: (_, provider, userProvider, __) {
                       final homeQuotes = context.read<HomeProvider>().data?.quotes ?? [];
                       final currentUserId = userProvider.userId;
                       return RefreshIndicator(
@@ -161,8 +165,45 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
                             ],
                           ),
                         ),
-                      );
-                    },
+                          );
+                          },
+                        ),
+                      ),
+                      Positioned(
+                        top: 16,
+                        left: 16,
+                        child: GestureDetector(
+                          onTap: () {
+                            if (Navigator.of(context).canPop()) {
+                              Navigator.of(context).pop();
+                            } else {
+                              Navigator.of(context).pushReplacement(
+                                MaterialPageRoute(builder: (_) => const BottomNavWrapper()),
+                              );
+                            }
+                          },
+                          child: Container(
+                            width: 40, height: 40,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: isDark
+                                  ? Colors.black.withOpacity(0.35)
+                                  : Colors.white.withOpacity(0.75),
+                              border: Border.all(
+                                color: isDark
+                                    ? Colors.white.withOpacity(0.4)
+                                    : const Color(0xFF624294).withOpacity(0.25),
+                              ),
+                            ),
+                            child: Icon(
+                              Icons.arrow_back_rounded,
+                              color: isDark ? Colors.white : const Color(0xFF624294),
+                              size: 20,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),

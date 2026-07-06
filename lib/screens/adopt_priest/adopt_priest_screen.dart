@@ -13,7 +13,7 @@ import '../../providers/adopt_priest_provider.dart';
 import '../../providers/language_provider.dart';
 import 'adopt_priest_success_screen.dart';
 import 'suggest_priest_screen.dart';
-
+import '../bottom_nav_wrapper.dart';
 class AdoptPriestScreen extends StatefulWidget {
   const AdoptPriestScreen({super.key});
 
@@ -495,13 +495,20 @@ class _AdoptPriestScreenState extends State<AdoptPriestScreen> {
                     ),
                   ),
                   // Back button
-                  if (Navigator.of(context).canPop())
-                    SafeArea(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: GestureDetector(
-                          onTap: () => Navigator.of(context).pop(),
-                          child: Container(
+                  SafeArea(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: GestureDetector(
+                        onTap: () {
+                          if (Navigator.of(context).canPop()) {
+                            Navigator.of(context).pop();
+                          } else {
+                            Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(builder: (_) => const BottomNavWrapper()),
+                            );
+                          }
+                        },
+                        child: Container(
                             width: 40, height: 40,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,

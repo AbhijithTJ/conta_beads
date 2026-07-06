@@ -15,6 +15,7 @@ import '../../services/localization_service.dart';
 import '../../models/prayer_documents_model.dart';
 import 'prayer_detail_screen.dart';
 import 'prayer_scroll_screen.dart';
+import '../bottom_nav_wrapper.dart';
 
 class EverydayPrayersScreen extends StatefulWidget {
   const EverydayPrayersScreen({super.key});
@@ -178,14 +179,21 @@ class _EverydayPrayersScreenState extends State<EverydayPrayersScreen> {
                             ),
                           ),
                         ),
-                        // back button — only when pushed via navigation
-                        if (Navigator.of(context).canPop())
-                          SafeArea(
-                            child: Padding(
-                              padding: const EdgeInsets.all(16),
-                              child: GestureDetector(
-                                onTap: () => Navigator.of(context).pop(),
-                                child: Container(
+                        // back button — unconditionally shown, fallbacks to home
+                        SafeArea(
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: GestureDetector(
+                              onTap: () {
+                                if (Navigator.of(context).canPop()) {
+                                  Navigator.of(context).pop();
+                                } else {
+                                  Navigator.of(context).pushReplacement(
+                                    MaterialPageRoute(builder: (_) => const BottomNavWrapper()),
+                                  );
+                                }
+                              },
+                              child: Container(
                                   width: 40, height: 40,
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
