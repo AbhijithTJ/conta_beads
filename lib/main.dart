@@ -149,7 +149,7 @@ class _AppViewState extends State<_AppView> {
             brightness: Brightness.light,
             scaffoldBackgroundColor: const Color(0xFFF5EEF5),
             colorScheme: ColorScheme.fromSeed(
-              seedColor: const Color(0xFF3D0227),
+              seedColor: const Color(0xFF624294),
               brightness: Brightness.light,
             ),
             useMaterial3: true,
