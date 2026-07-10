@@ -76,14 +76,16 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
     super.dispose();
   }
 
-  void _startQuoteTimer(int quoteCount) {
+  void _startQuoteTimer() {
     _quoteTimer?.cancel();
-    if (quoteCount > 0) {
-      _quoteTimer = Timer.periodic(const Duration(seconds: 10), (_) {
-        if (!mounted) return;
-        setState(() => _currentQuoteIndex = (_currentQuoteIndex + 1) % quoteCount);
-      });
-    }
+    _quoteTimer = Timer.periodic(const Duration(seconds: 5), (_) {
+      if (!mounted) return;
+      final provider = context.read<IntentionsProvider>();
+      final quotes = provider.data?.quotes;
+      if (quotes != null && quotes.length > 1) {
+        setState(() => _currentQuoteIndex = (_currentQuoteIndex + 1) % quotes.length);
+      }
+    });
   }
 
   void _onLanguageChanged() {
@@ -185,9 +187,9 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
                         );
                       }
 
-                      if (data.quotes.isNotEmpty && _quoteTimer == null) {
+                      if (data.quotes.length > 1 && _quoteTimer == null) {
                         WidgetsBinding.instance.addPostFrameCallback((_) {
-                          _startQuoteTimer(data.quotes.length);
+                          _startQuoteTimer();
                         });
                       }
 
@@ -270,24 +272,21 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
     final titleColor = isDark ? Colors.white : AppColors.authBgBottom;
     final subColor = isDark ? Colors.white.withOpacity(0.5) : AppColors.authBgMid.withOpacity(0.5);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          width: 45,
-          height: 2,
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(colors: [AppColors.goldDark, AppColors.goldPrimary]),
-            borderRadius: BorderRadius.circular(2),
-          ),
-        ),
-        const SizedBox(height: 16),
-        Text(loc.tr('intentions_title'),
-            style: GoogleFonts.poppins(fontSize: 42, fontWeight: FontWeight.w900, color: titleColor, letterSpacing: -1, height: 1.0)),
-        const SizedBox(height: 8),
-        Text(loc.tr('hearts_united_in_prayer'),
-            style: GoogleFonts.poppins(fontSize: 10, fontWeight: FontWeight.w700, color: subColor, letterSpacing: 2.5)),
-      ],
+    return SizedBox(
+      width: double.infinity,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          const SizedBox(height: 18), // Added back to preserve the vertical alignment
+          Text(loc.tr('intentions_title'),
+              textAlign: TextAlign.center,
+              style: GoogleFonts.poppins(fontSize: 42, fontWeight: FontWeight.w900, color: titleColor, letterSpacing: -1, height: 1.0)),
+          const SizedBox(height: 8),
+          Text(loc.tr('hearts_united_in_prayer'),
+              textAlign: TextAlign.center,
+              style: GoogleFonts.poppins(fontSize: 10, fontWeight: FontWeight.w700, color: subColor, letterSpacing: 2.5)),
+        ],
+      ),
     );
   }
 
@@ -336,7 +335,19 @@ class _IntentionsScreenState extends State<IntentionsScreen> with TickerProvider
           boxShadow: [BoxShadow(color: shadowColor, blurRadius: 20, offset: const Offset(0, 6))],
         ),
         child: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 1500),
+          duration: const Duration(milliseconds: 400),
+          transitionBuilder: (Widget child, Animation<double> animation) {
+            return FadeTransition(
+              opacity: animation,
+              child: SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(0.0, 0.15),
+                  end: Offset.zero,
+                ).animate(animation),
+                child: child,
+              ),
+            );
+          },
           child: Column(
             key: ValueKey<int>(_currentQuoteIndex),
             mainAxisAlignment: MainAxisAlignment.center,

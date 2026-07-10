@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import '../colors/colors.dart';
+import '../services/localization_service.dart';
 
 class LogoutAlertDialog extends StatelessWidget {
   const LogoutAlertDialog({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final isMalayalam = loc.currentLangCode == 'ml';
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       backgroundColor: AppColors.cardWhite,
@@ -29,20 +31,20 @@ class LogoutAlertDialog extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 14),
-            const Text(
-              'Log Out',
+            Text(
+              loc.tr('logout'),
               style: TextStyle(
                 color: AppColors.textPrimary,
                 fontWeight: FontWeight.w800,
-                fontSize: 20,
+                fontSize: isMalayalam ? 16 : 20,
               ),
             ),
           ],
         ),
       ),
-      content: const Text(
-        'Please confirm your current count is saved, otherwise your data will be lost.\n\nAre you sure you want to log out?',
-        style: TextStyle(
+      content: Text(
+        loc.tr('logout_confirmation'),
+        style: const TextStyle(
           color: AppColors.textSecondary,
           fontSize: 14,
           height: 1.5,
@@ -65,11 +67,11 @@ class LogoutAlertDialog extends StatelessWidget {
                     ),
                   ),
                   onPressed: () => Navigator.pop(context, false),
-                  child: const Text(
-                    'Cancel',
+                  child: Text(
+                    loc.tr('cancel'),
                     style: TextStyle(
                       color: AppColors.textSecondary,
-                      fontSize: 15,
+                      fontSize: isMalayalam ? 12 : 15,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -88,10 +90,10 @@ class LogoutAlertDialog extends StatelessWidget {
                     ),
                   ),
                   onPressed: () => Navigator.pop(context, true),
-                  child: const Text(
-                    'Log Out',
+                  child: Text(
+                    loc.tr('logout'),
                     style: TextStyle(
-                      fontSize: 15,
+                      fontSize: isMalayalam ? 12 : 15,
                       fontWeight: FontWeight.w700,
                     ),
                   ),

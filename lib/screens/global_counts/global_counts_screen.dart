@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -32,6 +33,7 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
 
   int _currentQuotePage = 0;
   bool _isRosaryMode = true;
+  Timer? _quoteTimer;
 
   static const int rosaryGoal      = 150000000;
   static const int divineMercyGoal = 100000000;
@@ -82,9 +84,33 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!mounted) return;
+    final homeProvider = context.read<HomeProvider>();
+    if (homeProvider.hasData && _quoteTimer == null) {
+      final count = homeProvider.data!.quotes.length;
+      if (count > 1) _startQuoteTimer();
+    }
+  }
+
+  void _startQuoteTimer() {
+    _quoteTimer?.cancel();
+    _quoteTimer = Timer.periodic(const Duration(seconds: 5), (_) {
+      if (!mounted) return;
+      final provider = context.read<HomeProvider>();
+      final quotes = provider.data?.quotes;
+      if (quotes != null && quotes.length > 1) {
+        setState(() => _currentQuotePage = (_currentQuotePage + 1) % quotes.length);
+      }
+    });
+  }
+
+  @override
   void dispose() {
     _blinkController.dispose();
     _entryController.dispose();
+    _quoteTimer?.cancel();
     super.dispose();
   }
 
@@ -140,8 +166,15 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
                       Positioned.fill(
                         child: Consumer2<GlobalCountsProvider, UserProvider>(
                           builder: (_, provider, userProvider, __) {
-                      final homeQuotes = context.read<HomeProvider>().data?.quotes ?? [];
+                      final homeQuotes = context.watch<HomeProvider>().data?.quotes ?? [];
                       final currentUserId = userProvider.userId;
+
+                      if (homeQuotes.length > 1 && _quoteTimer == null) {
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          _startQuoteTimer();
+                        });
+                      }
+
                       return RefreshIndicator(
                         onRefresh: () => provider.fetchAll(),
                         color: AppColors.goldPrimary,
@@ -521,7 +554,19 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
           ],
         ),
         child: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 1500),
+          duration: const Duration(milliseconds: 400),
+          transitionBuilder: (Widget child, Animation<double> animation) {
+            return FadeTransition(
+              opacity: animation,
+              child: SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(0.0, 0.15),
+                  end: Offset.zero,
+                ).animate(animation),
+                child: child,
+              ),
+            );
+          },
           child: Column(
             key: ValueKey<int>(_currentQuotePage),
             mainAxisAlignment: MainAxisAlignment.center,

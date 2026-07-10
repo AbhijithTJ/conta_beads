@@ -45,10 +45,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     });
   }
 
-  void _startQuoteTimer(int quoteCount) {
+  void _startQuoteTimer() {
     _quoteTimer?.cancel();
-    if (quoteCount <= 1) return;
-    _quoteTimer = Timer.periodic(const Duration(seconds: 10), (_) => _nextQuote(quoteCount));
+    _quoteTimer = Timer.periodic(const Duration(seconds: 5), (_) {
+      if (!mounted) return;
+      final provider = context.read<HomeProvider>();
+      final quotes = provider.data?.quotes;
+      if (quotes != null && quotes.length > 1) {
+        setState(() => _currentQuoteIndex = (_currentQuoteIndex + 1) % quotes.length);
+      }
+    });
   }
 
   void _nextQuote(int quoteCount) {
@@ -69,7 +75,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     if (!mounted) return;
     if (_homeProvider.hasData && _quoteTimer == null) {
       final count = _homeProvider.data!.quotes.length;
-      if (count > 1) _startQuoteTimer(count);
+      if (count > 1) _startQuoteTimer();
     }
   }
 
@@ -81,7 +87,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     final provider = context.read<HomeProvider>();
     if (provider.hasData && _quoteTimer == null) {
       final count = provider.data!.quotes.length;
-      if (count > 1) _startQuoteTimer(count);
+      if (count > 1) _startQuoteTimer();
     }
   }
 
@@ -468,7 +474,19 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ),
 
             AnimatedSwitcher(
-              duration: const Duration(milliseconds: 1500),
+              duration: const Duration(milliseconds: 400),
+              transitionBuilder: (Widget child, Animation<double> animation) {
+                return FadeTransition(
+                  opacity: animation,
+                  child: SlideTransition(
+                    position: Tween<Offset>(
+                      begin: const Offset(0.0, 0.15),
+                      end: Offset.zero,
+                    ).animate(animation),
+                    child: child,
+                  ),
+                );
+              },
               child: Padding(
                 key: ValueKey<int>(_currentQuoteIndex),
                 padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
@@ -569,8 +587,20 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       ),
                     ],
                   ),
-                  child: ClipOval(
-                    child: quote.image.isNotEmpty
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 400),
+                    transitionBuilder: (Widget child, Animation<double> animation) {
+                      return FadeTransition(
+                        opacity: animation,
+                        child: ScaleTransition(
+                          scale: Tween<double>(begin: 0.8, end: 1.0).animate(animation),
+                          child: child,
+                        ),
+                      );
+                    },
+                    child: ClipOval(
+                      key: ValueKey<int>(_currentQuoteIndex),
+                      child: quote.image.isNotEmpty
                         ? quote.image.toLowerCase().endsWith('.svg')
                             ? SvgPicture.network(
                                 quote.image,
@@ -608,6 +638,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             width: 80,
                             height: 80,
                           ),
+                    ),
                   ),
                 ),
               ),

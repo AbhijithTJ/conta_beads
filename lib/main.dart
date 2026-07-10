@@ -157,7 +157,7 @@ class _AppViewState extends State<_AppView> {
           darkTheme: ThemeData(
             fontFamily: 'Georgia',
             brightness: Brightness.dark,
-            scaffoldBackgroundColor: const Color(0xFF3D0227),
+            scaffoldBackgroundColor: const Color(0xFF1c023d),
             colorScheme: ColorScheme.fromSeed(
               seedColor: const Color(0xFF9B6B8A),
               brightness: Brightness.dark,

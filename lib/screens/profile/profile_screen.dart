@@ -370,7 +370,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   color: isDark ? AppColors.cardLavender : Colors.white,
                 ),
                 child: Center(
-                  child: Text(initials, style: TextStyle(fontSize: 36, fontWeight: FontWeight.w900, color: isDark ? const Color(0xFF3D0227) : const Color(0xFF624294), letterSpacing: -1)),
+                  child: Text(initials, style: TextStyle(fontSize: 36, fontWeight: FontWeight.w900, color: isDark ? const Color(0xFF1c023d) : const Color(0xFF624294), letterSpacing: -1)),
                 ),
               ),
             ),
@@ -396,7 +396,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ],
             ),
-            child: Icon(Icons.camera_alt_rounded, size: 14, color: isDark ? const Color(0xFF3D0227) : const Color(0xFF624294)),
+            child: Icon(Icons.camera_alt_rounded, size: 14, color: isDark ? const Color(0xFF1c023d) : const Color(0xFF624294)),
           ),
         ),
       ],

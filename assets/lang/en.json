@@ -9,6 +9,8 @@
   "decrease_confirm": "Are you sure you want to go back (decrease) the count?",
   "cancel": "Cancel",
   "go_back": "Go Back",
+  "logout": "Log Out",
+  "logout_confirmation": "Please confirm your current count is saved, otherwise your data will be lost.\n\nAre you sure you want to log out?",
   "count_saved": "Count {count} saved successfully!",
   "count_saved_note": "Count {count} for \"{note}\" saved!",
   "intentions": "Intentions",
