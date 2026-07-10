@@ -31,7 +31,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # IMPORTANT: versionCode MUST be higher than previous release
 # Play Store will reject if versionCode is same or lower
 #
-version: 2.17.0+17
+version: 2.18.0+18
 
 environment:
   sdk: ^3.11.0
