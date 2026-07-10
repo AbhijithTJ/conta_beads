@@ -259,5 +259,16 @@
   "choose_reading_mode": "Choose Reading Mode",
   "how_would_you_like_to_read": "How would you like to read this prayer?",
   "book_type": "Book Type",
-  "scroll_type": "Scroll Type"
+  "scroll_type": "Scroll Type",
+  "reset_password": "RESET PASSWORD",
+  "enter_email_and_phone": "Enter your email and phone number",
+  "email": "EMAIL",
+  "enter_your_email": "Enter your email",
+  "submit": "SUBMIT",
+  "success": "Success!",
+  "password_reset_success_msg": "Your password has been reset successfully. Here is your new auto-generated password:",
+  "password_copied": "Password copied to clipboard",
+  "change_password_note": "To change this password later, go to your Profile > Account Security. You will need to use this auto-generated password as your \"Current Password\".",
+  "back_to_login": "BACK TO LOGIN",
+  "important_warning": "Important: Once you close this pop-up, you will not be able to retrieve this password again. Please copy and save it securely!"
 }

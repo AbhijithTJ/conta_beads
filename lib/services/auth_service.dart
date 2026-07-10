@@ -59,6 +59,26 @@ class AuthService {
     return loginResponse;
   }
 
+  // ── Forgot Password ────────────────────────────────────────────────────────────
+  Future<String> forgotPassword({
+    required String email,
+    required String phone,
+  }) async {
+    final res = await ApiClient.instance.post(
+      AppConfig.forgotPasswordPath,
+      body: {
+        'email': email,
+        'phone': phone,
+      },
+      auth: false,
+    );
+    final data = res.data['data'];
+    if (data != null && data['password'] != null) {
+      return data['password'].toString();
+    }
+    throw const ApiException(message: 'Failed to parse the new password from the server response.');
+  }
+
   // ── Logout ────────────────────────────────────────────────────────────────────
   /// Calls POST /api/logout on the backend to invalidate the server-side token,
   /// then clears the local session regardless of the API result so the user

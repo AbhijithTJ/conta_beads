@@ -16,6 +16,7 @@ import '../services/language_id_service.dart';
 import '../services/localization_service.dart';
 import '../theme/theme_notifier.dart';
 import 'register_screen.dart';
+import 'forgot_password_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -636,12 +637,19 @@ class _LoginScreenState extends State<LoginScreen> {
         const SizedBox(height: 10),
         Align(
           alignment: Alignment.centerRight,
-          child: Text(loc.tr('forgot_password'),
-              style: GoogleFonts.poppins(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.goldDark.withOpacity(0.85),
-                  letterSpacing: 0.2)),
+          child: GestureDetector(
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const ForgotPasswordScreen()),
+              );
+            },
+            child: Text(loc.tr('forgot_password'),
+                style: GoogleFonts.poppins(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.goldDark.withOpacity(0.85),
+                    letterSpacing: 0.2)),
+          ),
         ),
         const SizedBox(height: 28),
         _buildLoginButton(isLoading),

@@ -10,7 +10,7 @@ class AppConfig {
   static const AppEnvironment environment = AppEnvironment.production;
 
   // ── Base URLs ───────────────────────────────────────────────────────────────
-  static const String _stagingBaseUrl = 'https://upperroom.co.in/staging';
+  static const String _stagingBaseUrl = 'https://stage.upperroom.co.in';
   static const String _productionBaseUrl = 'https://upperroom.co.in';
 
   /// The active base URL, chosen by [environment].
@@ -59,6 +59,7 @@ class AppConfig {
   // ── API paths ───────────────────────────────────────────────────────────────
   static const String loginPath          = '/api/login';
   static const String registerPath       = '/api/register';
+  static const String forgotPasswordPath = '/api/forgot-password';
   static const String userPath           = '/api/user';
   static const String updateProfilePath  = '/api/user/update-proile';
   static const String changePasswordPath = '/api/user/change-password';

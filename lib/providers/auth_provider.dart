@@ -111,6 +111,30 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
+  // ── Forgot Password ────────────────────────────────────────────────────────────
+  Future<String?> forgotPassword({
+    required String email,
+    required String phone,
+  }) async {
+    _setLoading();
+    try {
+      final password = await AuthService.instance.forgotPassword(
+        email: email,
+        phone: phone,
+      );
+      _status = AuthStatus.unauthenticated;
+      _errorMessage = null;
+      notifyListeners();
+      return password;
+    } on ApiException catch (e) {
+      _setError(e.message);
+      return null;
+    } catch (_) {
+      _setError('An unexpected error occurred. Please try again.');
+      return null;
+    }
+  }
+
   // ── Logout ────────────────────────────────────────────────────────────────────
   Future<void> logout() async {
     await AuthService.instance.logout();
