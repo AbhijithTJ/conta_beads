@@ -1,27 +1,18 @@
-/// Defines the available build environments.
-enum AppEnvironment { staging, production }
-
 /// Central configuration for the app.
-/// Switch [environment] before building to target a different backend.
+/// Switch [useProduction] before building to target a different backend.
 class AppConfig {
   AppConfig._();
 
-  // ── Change this to [AppEnvironment.production] for release builds ──────────
-  static const AppEnvironment environment = AppEnvironment.production;
+  // ── Change this to true for production, false for staging ──────────
+  static const bool useProduction = true;
+  //static const bool useProduction = false;
 
   // ── Base URLs ───────────────────────────────────────────────────────────────
   static const String _stagingBaseUrl = 'https://stage.upperroom.co.in';
   static const String _productionBaseUrl = 'https://upperroom.co.in';
 
-  /// The active base URL, chosen by [environment].
-  static String get baseUrl {
-    switch (environment) {
-      case AppEnvironment.staging:
-        return _stagingBaseUrl;
-      case AppEnvironment.production:
-        return _productionBaseUrl;
-    }
-  }
+  /// The active base URL.
+  static String get baseUrl => useProduction ? _productionBaseUrl : _stagingBaseUrl;
 
   // ── WebSocket / Reverb Configuration ────────────────────────────────────────
   /// Pusher Channels app key (from Laravel Reverb config)
@@ -81,6 +72,6 @@ class AppConfig {
   static const Duration receiveTimeout = Duration(seconds: 30);
 
   // ── Helpers ─────────────────────────────────────────────────────────────────
-  static bool get isStaging => environment == AppEnvironment.staging;
-  static bool get isProduction => environment == AppEnvironment.production;
+  static bool get isStaging => !useProduction;
+  static bool get isProduction => useProduction;
 }
