@@ -75,8 +75,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   void _handleRegister() async {
     final name = _nameController.text.trim();
-    final email = _emailController.text.trim();
-    final phone = _phoneNumber.trim();
+    final email = _emailController.text.trim().toLowerCase();
+    String phone = _phoneNumber.trim();
+    if (phone.startsWith(_countryCode)) {
+      phone = phone.substring(_countryCode.length).trim();
+    }
     final password = _passwordController.text;
     final confirmPassword = _confirmPasswordController.text;
 
@@ -141,8 +144,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
       // Registration succeeded — send to login so the user signs in properly.
       // This ensures biometric setup is offered on first login.
       await auth.logout(); // clear the auto-session created by register API
-      // Save only the phone number (no country code) so login screen pre-fills it cleanly.
-      await SessionService.instance.saveContact(_phoneNumber);
+      // Save only the sanitized phone number (no country code) so login screen pre-fills it cleanly.
+      await SessionService.instance.saveContact(phone);
       if (!mounted) return;
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (_) => const LoginScreen()),
@@ -470,6 +473,28 @@ class _RegisterScreenState extends State<RegisterScreen> {
             color: const Color(0xFF624294).withOpacity(0.80),
             letterSpacing: 0.4,
           ),
+        ),
+        const SizedBox(height: 8),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(
+              Icons.info_outline_rounded,
+              size: 14,
+              color: isDark ? Colors.redAccent.shade100 : Colors.red.shade700,
+            ),
+            const SizedBox(width: 4),
+            Expanded(
+              child: Text(
+                loc.tr('do_not_enter_country_code'),
+                style: GoogleFonts.poppins(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                  color: isDark ? Colors.redAccent.shade100 : Colors.red.shade700,
+                ),
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 8),
         ClipRRect(

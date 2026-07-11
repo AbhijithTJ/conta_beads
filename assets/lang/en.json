@@ -270,5 +270,6 @@
   "password_copied": "Password copied to clipboard",
   "change_password_note": "To change this password later, go to your Profile > Account Security. You will need to use this auto-generated password as your \"Current Password\".",
   "back_to_login": "BACK TO LOGIN",
-  "important_warning": "Important: Once you close this pop-up, you will not be able to retrieve this password again. Please copy and save it securely!"
+  "important_warning": "Important: Once you close this pop-up, you will not be able to retrieve this password again. Please copy and save it securely!",
+  "do_not_enter_country_code": "Country code is selected from the dropdown. Please do not include it in your phone number."
 }
