@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
+import 'package:intl_phone_field/countries.dart' as intl_countries;
 import 'package:provider/provider.dart';
 import '../colors/colors.dart';
 import '../providers/auth_provider.dart';
@@ -36,9 +37,25 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
 
+  late List<intl_countries.Country> _customCountries;
+
   @override
   void initState() {
     super.initState();
+    _customCountries = intl_countries.countries.map((c) {
+      if (c.code == 'IT') {
+        return intl_countries.Country(
+          name: c.name,
+          nameTranslations: c.nameTranslations,
+          flag: c.flag,
+          code: c.code,
+          dialCode: '39',
+          minLength: 9,
+          maxLength: 11,
+        );
+      }
+      return c;
+    }).toList();
     _nameController = TextEditingController();
     _emailController = TextEditingController();
     _phoneController = TextEditingController();
@@ -468,6 +485,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: isDark ? 8 : 0, sigmaY: isDark ? 8 : 0),
             child: IntlPhoneField(
+              countries: _customCountries,
               controller: _phoneController,
               initialCountryCode: 'IN',
               // Disable ALL built-in inline validation — we validate on submit only.
