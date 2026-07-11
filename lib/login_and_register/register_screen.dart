@@ -84,14 +84,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
       _showError('Please fill in all fields');
       return;
     }
-    if (!_isPhoneValid) {
-      final digits = _phoneNumber.length;
-      _showError(
-        'Phone number for $_selectedCountryName ($_countryCode) is invalid'
-        '${digits > 0 ? ' — you entered $digits digit${digits == 1 ? '' : 's'}' : ''}.',
-      );
-      return;
-    }
     if (!email.contains('@')) {
       _showError('Please enter a valid email');
       return;
