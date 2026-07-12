@@ -437,9 +437,9 @@ class _CountingScreenState extends State<CountingScreen>
                   builder: (context) {
                     final homeProvider = Provider.of<HomeProvider>(context);
                     final sections = homeProvider.data?.sections ?? [];
-                    final targetId = _isRosary ? 1 : 2; // Assuming 1=Rosary Bank, 2=Chaplet based on API
+                    final targetRoute = _isRosary ? '/rosary_prayer' : '/chaplet_prayer';
                     final section = sections.firstWhere(
-                      (s) => s.id == targetId, 
+                      (s) => s.route == targetRoute, 
                       orElse: () => HomeSection(id: -1, title: '', description: '', image: '', route: '', icon: '', type: '', order: 0)
                     );
                     
