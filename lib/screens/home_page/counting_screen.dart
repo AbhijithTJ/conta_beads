@@ -967,6 +967,11 @@ class _CountingScreenState extends State<CountingScreen>
 
   Widget _buildCountCard() {
     final isDark = themeNotifier.isDark;
+    final globalCounts = context.watch<GlobalCountsProvider>();
+    final todayCount = _isRosary 
+        ? (globalCounts.rosaryData?.yourToday ?? 0) 
+        : (globalCounts.divineMercyData?.yourToday ?? 0);
+
     return SizedBox(
       width: 200,
       height: 200,
@@ -1034,6 +1039,26 @@ class _CountingScreenState extends State<CountingScreen>
                         fontWeight: FontWeight.w500,
                         color: isDark ? Colors.white.withOpacity(0.65) : const Color(0xFF624294).withOpacity(0.60),
                         letterSpacing: 0.5,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: isDark ? Colors.amber.withOpacity(0.15) : Colors.amber.shade100,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: isDark ? Colors.amber.withOpacity(0.3) : Colors.amber.shade300,
+                        width: 1,
+                      ),
+                    ),
+                    child: Text(
+                      '${loc.tr('today_prefix')}: $todayCount',
+                      style: GoogleFonts.poppins(
+                        fontSize: 9,
+                        fontWeight: FontWeight.w700,
+                        color: isDark ? Colors.amber.shade300 : Colors.orange.shade900,
                       ),
                     ),
                   ),
