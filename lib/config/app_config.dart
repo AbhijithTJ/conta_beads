@@ -4,7 +4,7 @@ class AppConfig {
   AppConfig._();
 
   // ── Change this to true for production, false for staging ──────────
-  static const bool useProduction = false;
+  static const bool useProduction = true;
   //static const bool useProduction = false;
 
   // ── Base URLs ───────────────────────────────────────────────────────────────
