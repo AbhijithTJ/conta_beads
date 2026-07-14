@@ -516,7 +516,7 @@ class LeaderRow extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                '$count',
+                '$todayCount',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w900,
@@ -525,7 +525,7 @@ class LeaderRow extends StatelessWidget {
                 ),
               ),
               Text(
-                'today: $todayCount',
+                'total: $count',
                 style: GoogleFonts.poppins(
                   fontSize: 9,
                   fontWeight: FontWeight.w600,

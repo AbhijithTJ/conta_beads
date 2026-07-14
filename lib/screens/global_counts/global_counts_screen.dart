@@ -803,12 +803,12 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(entry.totalCount.toString(),
+              Text(entry.todayCount.toString(),
                   style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.w900,
                       color: isYou ? AppColors.goldDark : AppColors.authBgBottom)),
-              Text('${loc.tr('today_count_prefix')}: ${entry.todayCount}',
+              Text('${loc.tr('total_stat').toLowerCase()}: ${entry.totalCount}',
                   style: GoogleFonts.poppins(
                       fontSize: 10,
                       color: isYou
