@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'dart:io';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
@@ -329,7 +330,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
         const SizedBox(height: 28),
         _buildGlassField(controller: _nameController, label: loc.tr('full_name'), hint: loc.tr('enter_name'), icon: Icons.person_outline_rounded, isDark: isDark),
         const SizedBox(height: 18),
-        _buildGlassField(controller: _emailController, label: loc.tr('email_address_label'), hint: loc.tr('enter_email'), icon: Icons.email_outlined, isDark: isDark),
+        _buildGlassField(
+          controller: _emailController, 
+          label: loc.tr('email_address_label'), 
+          hint: loc.tr('enter_email'), 
+          icon: Icons.email_outlined, 
+          isDark: isDark,
+          keyboardType: TextInputType.emailAddress,
+          inputFormatters: [
+            FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9@._-]')),
+          ],
+        ),
         const SizedBox(height: 18),
         _buildPhoneField(isDark),
         const SizedBox(height: 18),
@@ -387,6 +398,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
     bool isPassword = false,
     bool obscure = false,
     bool isDark = true,
+    TextInputType? keyboardType,
+    List<TextInputFormatter>? inputFormatters,
     VoidCallback? onToggle,
   }) {
     return Column(
@@ -409,6 +422,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
             child: TextField(
               controller: controller,
               obscureText: isPassword ? obscure : false,
+              keyboardType: keyboardType,
+              inputFormatters: inputFormatters,
               style: GoogleFonts.poppins(
                 color: const Color(0xFF624294),
                 fontWeight: FontWeight.w500,
