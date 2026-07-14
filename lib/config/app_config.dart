@@ -4,7 +4,7 @@ class AppConfig {
   AppConfig._();
 
   // ── Change this to true for production, false for staging ──────────
-  static const bool useProduction = true;
+  static const bool useProduction = false;
   //static const bool useProduction = false;
 
   // ── Base URLs ───────────────────────────────────────────────────────────────
@@ -22,7 +22,7 @@ class AppConfig {
   static const String reverbCluster = 'upperroom';
   
   /// Reverb host (your domain or IP)
-  static const String reverbHost = 'upperroom.co.in';
+  static String get reverbHost => useProduction ? 'upperroom.co.in' : 'stage.upperroom.co.in';
   
   /// Reverb port (usually 6001 for WebSocket, 443 for HTTPS)
   static const int reverbPort = 443;
@@ -31,7 +31,7 @@ class AppConfig {
   static const bool reverbUseTLS = true;
   
   /// WebSocket channel name
-  static const String reverbChannel = 'dashboard';
+  static String get reverbChannel => useProduction ? 'dashboard' : 'stage_dashboard';
   
   /// WebSocket event name
   static const String reverbEvent = 'count.updated';

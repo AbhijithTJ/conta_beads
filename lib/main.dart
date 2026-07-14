@@ -118,10 +118,10 @@ class _AppViewState extends State<_AppView> {
       debugPrint('[App] Reverb connected');
 
       // Subscribe to dashboard channel (will wait for connection if needed)
-      await reverbProvider.subscribe('dashboard');
+      await reverbProvider.subscribe(AppConfig.reverbChannel);
       
       if (!mounted) return;
-      debugPrint('[App] Subscribed to dashboard');
+      debugPrint('[App] Subscribed to ${AppConfig.reverbChannel}');
 
       // Setup WebSocket listeners in GlobalCountsProvider
       final globalCountsProvider = context.read<GlobalCountsProvider>();

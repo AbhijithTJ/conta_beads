@@ -54,6 +54,10 @@ class GlobalCountsData {
   final int communityTodayTotal;
   final int yourPosition;
   final double yourContributionPercent;
+  final String? goalText;
+  final int? goal;
+  final double? communityPrayerPercentage;
+  final double? yourPrayerPercentage;
   final List<LeaderboardEntry> leaderboard;
   final int prayerTypeId;
   final String? prayerTypeName;
@@ -65,6 +69,10 @@ class GlobalCountsData {
     required this.communityTodayTotal,
     required this.yourPosition,
     required this.yourContributionPercent,
+    this.goalText,
+    this.goal,
+    this.communityPrayerPercentage,
+    this.yourPrayerPercentage,
     required this.leaderboard,
     required this.prayerTypeId,
     this.prayerTypeName,
@@ -73,14 +81,18 @@ class GlobalCountsData {
   factory GlobalCountsData.fromJson(Map<String, dynamic> json) {
     final rawList = json['leaderboard'] as List<dynamic>? ?? [];
     return GlobalCountsData(
-      yourTotal:               json['your_total']               as int,
-      yourToday:               json['your_today']               as int,
-      communityTotal:          json['community_total']          as int,
-      communityTodayTotal:     json['community_today_total']    as int,
-      yourPosition:            json['your_position']            as int,
-      yourContributionPercent: (json['your_contribution_percent'] as num).toDouble(),
+      yourTotal:               (json['your_total'] ?? 0)               as int,
+      yourToday:               (json['your_today'] ?? 0)               as int,
+      communityTotal:          (json['community_total'] ?? 0)          as int,
+      communityTodayTotal:     (json['community_today_total'] ?? 0)    as int,
+      yourPosition:            (json['your_position'] ?? 0)            as int,
+      yourContributionPercent: (json['your_contribution_percent'] as num?)?.toDouble() ?? 0.0,
+      goalText:                json['goal_text'] as String?,
+      goal:                    json['goal'] as int?,
+      communityPrayerPercentage: (json['community_prayer_percentage'] as num?)?.toDouble(),
+      yourPrayerPercentage:    (json['your_prayer_percentage'] as num?)?.toDouble(),
       leaderboard:             rawList.map((e) => LeaderboardEntry.fromJson(e as Map<String, dynamic>)).toList(),
-      prayerTypeId:            int.parse(json['prayer_type_id'].toString()),
+      prayerTypeId:            int.parse((json['prayer_type_id'] ?? 0).toString()),
       prayerTypeName:          json['prayer_type_name'] as String?,
     );
   }
@@ -93,6 +105,10 @@ class GlobalCountsData {
     communityTodayTotal: 0,
     yourPosition: 0,
     yourContributionPercent: 0,
+    goalText: null,
+    goal: null,
+    communityPrayerPercentage: null,
+    yourPrayerPercentage: null,
     leaderboard: [],
     prayerTypeId: prayerTypeId,
     prayerTypeName: null,
@@ -106,6 +122,10 @@ class GlobalCountsData {
     int? communityTodayTotal,
     int? yourPosition,
     double? yourContributionPercent,
+    String? goalText,
+    int? goal,
+    double? communityPrayerPercentage,
+    double? yourPrayerPercentage,
     List<LeaderboardEntry>? leaderboard,
     int? prayerTypeId,
     String? prayerTypeName,
@@ -117,6 +137,10 @@ class GlobalCountsData {
       communityTodayTotal: communityTodayTotal ?? this.communityTodayTotal,
       yourPosition: yourPosition ?? this.yourPosition,
       yourContributionPercent: yourContributionPercent ?? this.yourContributionPercent,
+      goalText: goalText ?? this.goalText,
+      goal: goal ?? this.goal,
+      communityPrayerPercentage: communityPrayerPercentage ?? this.communityPrayerPercentage,
+      yourPrayerPercentage: yourPrayerPercentage ?? this.yourPrayerPercentage,
       leaderboard: leaderboard ?? this.leaderboard,
       prayerTypeId: prayerTypeId ?? this.prayerTypeId,
       prayerTypeName: prayerTypeName ?? this.prayerTypeName,

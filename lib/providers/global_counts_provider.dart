@@ -287,7 +287,9 @@ class GlobalCountsProvider extends ChangeNotifier {
       notifyListeners();
     } on ApiException catch (e) {
       _setError(e.message);
-    } catch (e) {
+    } catch (e, stackTrace) {
+      debugPrint('[GlobalCountsProvider] ❌ Unexpected error in fetchAll: $e');
+      debugPrint('[GlobalCountsProvider] ❌ Stack trace: $stackTrace');
       _setError('Failed to load global counts.');
     }
   }
@@ -315,7 +317,9 @@ class GlobalCountsProvider extends ChangeNotifier {
       notifyListeners();
     } on ApiException catch (e) {
       _setError(e.message);
-    } catch (e) {
+    } catch (e, stackTrace) {
+      debugPrint('[GlobalCountsProvider] ❌ Unexpected error in fetchOne: $e');
+      debugPrint('[GlobalCountsProvider] ❌ Stack trace: $stackTrace');
       _setError('Failed to load global counts.');
     }
   }
@@ -332,6 +336,12 @@ class GlobalCountsProvider extends ChangeNotifier {
     // The API returns nested structure: { rosary: {...}, chaplet: {...} }
     // Extract the appropriate prayer type data
     final prayerTypeKey = prayerTypeId == PrayerType.rosary ? 'rosary' : 'chaplet';
+    
+    if (!response.data.containsKey(prayerTypeKey) || response.data[prayerTypeKey] == null) {
+      debugPrint('[GlobalCountsProvider] ❌ Missing $prayerTypeKey in response: ${response.data}');
+      throw ApiException(message: 'Invalid data format from server.');
+    }
+    
     final prayerData = response.data[prayerTypeKey] as Map<String, dynamic>;
     
     // DEBUG: Log extracted prayer data

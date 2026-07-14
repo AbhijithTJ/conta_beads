@@ -378,9 +378,16 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
 
   Widget _buildGlobalCountCard(GlobalCountsProvider provider, bool isDark) {
     final data        = provider.dataFor(_isRosaryMode ? PrayerType.rosary : PrayerType.divineMercy);
-    final goal        = _isRosaryMode ? rosaryGoal : divineMercyGoal;
+    
+    // Fallback to hardcoded goals only if API doesn't provide them yet
+    final defaultGoal = _isRosaryMode ? rosaryGoal : divineMercyGoal;
+    final goal        = data.goal ?? defaultGoal;
+    final goalText    = data.goalText ?? _formatNumber(goal);
     final total       = data.communityTotal;
-    final percentage  = goal > 0 ? (total / goal) * 100 : 0.0;
+    
+    // Use API provided percentage, or calculate it if missing
+    final percentage  = data.communityPrayerPercentage ?? (goal > 0 ? (total / goal) * 100 : 0.0);
+    
     final countLabel  = _isRosaryMode
         ? loc.tr('rosaries_prayed_worldwide')
         : loc.tr('divine_mercy_chaplets_offered');
@@ -415,7 +422,7 @@ class _GlobalCountsScreenState extends State<GlobalCountsScreen>
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('${loc.tr('goal')}: ${_formatNumber(goal)}',
+              Text('${loc.tr('goal')}: $goalText',
                   style: GoogleFonts.poppins(
                       fontSize: 12,
                       color: AppColors.authBgMid.withOpacity(0.5),
